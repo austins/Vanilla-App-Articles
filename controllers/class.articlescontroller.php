@@ -41,7 +41,10 @@ class ArticlesController extends Gdn_Controller {
     * The main method of this controller.
     */
    public function Index() {
-      $this->Title(T('Articles'));
+      if(Gdn::Router()->GetDestination('DefaultController') != 'articles')
+         $this->Title(T('Articles'));
+
+      // TODO: Set title appropriately if not first page of index.
 
       // Set required permission.
       $this->Permission('Articles.Articles.View');
@@ -80,6 +83,9 @@ class ArticlesController extends Gdn_Controller {
          throw NotFoundException('Article category');
 
       $this->SetData('Category', $Category);
+
+      // Set the title.
+      $this->Title($Category->Name);
 
       // Get published articles.
       $Offset = 0;

@@ -61,6 +61,9 @@ class ArticleController extends Gdn_Controller {
             || ($ArticleYear != $DateInsertedYear))
          throw NotFoundException('Article');
 
+      // Set the title.
+      $this->Title($Article->Name);
+
       $this->View = 'index';
       $this->Render();
    }

@@ -60,7 +60,7 @@ class ComposeController extends Gdn_Controller {
    }
 
    public function Article() {
-      $this->Title(T('Post Article'));
+      $this->Title(T('New Article'));
 
       // Set allowed permissions.
       // The user only needs one of the specified permissions.
