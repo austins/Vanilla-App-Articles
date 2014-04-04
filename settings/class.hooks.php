@@ -60,10 +60,10 @@ class ArticlesHooks extends Gdn_Plugin {
       $ConfigModule = new ConfigurationModule($Sender);
 
       $ConfigModule->Initialize(array(
-               //'Example.Example.Enabled' => array(
-               //   'LabelCode' => 'Use Example',
-               //   'Control'   => 'Checkbox'
-               //)
+                //'Example.Example.Enabled' => array(
+                //   'LabelCode' => 'Use Example',
+                //   'Control'   => 'Checkbox'
+                //)
             )
          );
 

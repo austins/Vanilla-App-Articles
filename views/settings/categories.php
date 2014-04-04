@@ -22,9 +22,9 @@ $Categories = $this->Data('Categories')->Result();
       echo Wrap('<table>
             <tr>
               <td>
-                <strong>' . htmlspecialchars($Category->Name) . '</strong>
-                ' . Anchor(htmlspecialchars(rawurldecode($CategoryUrl)), $CategoryUrl) . '
-                ' . Wrap($Category->Description, 'blockquote') . '
+                 <strong>' . htmlspecialchars($Category->Name) . '</strong>
+                 ' . Anchor(htmlspecialchars(rawurldecode($CategoryUrl)), $CategoryUrl) . '
+                 ' . Wrap($Category->Description, 'blockquote') . '
               </td>
               <td class="Buttons">'
          . Anchor(T('Edit'), '/settings/articles/editcategory/' . $Category->CategoryID .'/', 'SmallButton')

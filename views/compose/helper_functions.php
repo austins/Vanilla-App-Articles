@@ -14,7 +14,7 @@ if(!function_exists('ShowArticlesDashboardMenu')) {
 
             $WrapAttributes = array();
             if(strtolower($RequestMethod) == $MethodName)
-               $WrapAttributes['class'] = 'Active';
+                $WrapAttributes['class'] = 'Active';
 
             echo Wrap(Anchor($Link['Text'], $Link['Destination'], $LinkCssClass), 'li', $WrapAttributes);
          }
