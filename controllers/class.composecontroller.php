@@ -52,7 +52,7 @@ class ComposeController extends Gdn_Controller {
       // Get recently published articles.
       $RecentlyPublishedOffset = 0;
       $RecentlyPublishedLimit = 5;
-      $RecentlyPublished = $this->ArticleModel->Get($RecentlyPublishedOffset, $RecentlyPublishedLimit)->Result();
+      $RecentlyPublished = $this->ArticleModel->Get($RecentlyPublishedOffset, $RecentlyPublishedLimit);
       $this->SetData('RecentlyPublished', $RecentlyPublished);
 
       $this->View = 'index';

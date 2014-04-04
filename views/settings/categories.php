@@ -1,5 +1,4 @@
-<?php if(!defined('APPLICATION'))
-   exit();
+<?php if(!defined('APPLICATION')) exit();
 
 $Categories = $this->Data('Categories')->Result();
 ?>
@@ -7,14 +6,14 @@ $Categories = $this->Data('Categories')->Result();
 
 <div class="Info">
    <?php echo T('Article categories are used to help organize articles.',
-      'Article categories are used to help organize articles. Drag &amp; drop the categories to sort and nest them.'); ?>
+      'Categories are used to help organize articles.'); ?>
 </div>
 
 <div class="FilterMenu">
    <?php echo Anchor(T('Add Category'), '/settings/articles/addcategory/', 'SmallButton'); ?>
 </div>
 
-<h1><?php echo T('Organize Article Categories'); ?></h1>
+<h1><?php echo T('Organize Categories'); ?></h1>
 <ol class="Sortable">
    <?php
    foreach($Categories as $Category) {

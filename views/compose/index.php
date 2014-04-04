@@ -11,7 +11,7 @@ ShowArticlesDashboardMenu($this->RequestMethod);
       <ul>
          <?php
          // Render the recently published column.
-         $RecentlyPublished = $this->Data('RecentlyPublished');
+         $RecentlyPublished = $this->Data('RecentlyPublished')->Result();
 
          foreach($RecentlyPublished as $Article) {
             $Author = Gdn::UserModel()->GetID($Article->InsertUserID);

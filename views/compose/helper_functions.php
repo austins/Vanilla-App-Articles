@@ -3,8 +3,8 @@
 if(!function_exists('ShowArticlesDashboardMenu')) {
    function ShowArticlesDashboardMenu($RequestMethod = '') {
       $MenuLinks = array(
-            'dashboard' => array('Text' => 'Dashboard', 'Destination' => '/compose/'),
-            'post' => array('Text' => 'New Article', 'Destination' => '/compose/article/')
+            'index' => array('Text' => 'Dashboard', 'Destination' => '/compose/'),
+            'article' => array('Text' => 'New Article', 'Destination' => '/compose/article/')
          );
 
       echo '<div id="ArticlesDashboardMenu">';

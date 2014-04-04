@@ -98,6 +98,33 @@ class ArticlesHooks extends Gdn_Plugin {
    }
 
    /**
+    * The Categories method of the Articles setting page.
+    */
+   public function Controller_AddCategory($Sender) {
+      $Sender->Title('Add Article Category');
+
+      // Set required permission.
+      $Sender->Permission('Garden.Settings.Manage');
+
+      // Add asset.
+      $Sender->AddJsFile('articles.js', 'articles');
+
+      // Set up the article category model.
+      $Sender->Form = new Gdn_Form();
+      $ArticleCategoryModel = new ArticleCategoryModel();
+      $Sender->Form->SetModel($ArticleCategoryModel);
+
+      // Handle the form.
+      if($Sender->Form->IsPostBack() == FALSE) {
+         $Sender->Form->AddHidden('CodeIsDefined', '0');
+      }
+
+      $Sender->AddSideMenu('/settings/articles/addcategory/');
+      $Sender->View = $Sender->FetchViewLocation('addcategory', 'settings', 'articles');
+      $Sender->Render();
+   }
+
+   /**
     * Add links for the setting pages to the dashboard sidebar.
     */
    public function Base_GetAppSettingsMenuItems_Handler($Sender) {
