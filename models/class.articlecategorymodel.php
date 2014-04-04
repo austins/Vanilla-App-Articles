@@ -3,7 +3,7 @@
 /**
  * Handles data for articles.
  */
-class ArticleCategoryModel extends ArticlesModel {
+class ArticleCategoryModel extends Gdn_Model {
    /**
     * Class constructor. Defines the related database table name.
     */
