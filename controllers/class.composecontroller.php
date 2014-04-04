@@ -38,7 +38,7 @@ class ComposeController extends Gdn_Controller {
    }
 
    /**
-   * Handles the dashboard method of this controller.
+   * This handles the articles dashboard.
    * Only visible to users that have permission.
    */
    public function Index() {
