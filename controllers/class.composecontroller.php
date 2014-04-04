@@ -5,15 +5,15 @@
  */
 class ComposeController extends Gdn_Controller {
    /**
-   * Models to include.
-   */
+    * Models to include.
+    */
    public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'Form');
 
    /**
-   * Include JS, CSS, and modules used by all methods.
-   * Extended by all other controllers in this application.
-   * Always called by dispatcher before controller's requested method.
-   */
+    * Include JS, CSS, and modules used by all methods.
+    * Extended by all other controllers in this application.
+    * Always called by dispatcher before controller's requested method.
+    */
    public function Initialize() {
       // Set up head.
       $this->Head = new HeadModule($this);
@@ -38,9 +38,9 @@ class ComposeController extends Gdn_Controller {
    }
 
    /**
-   * This handles the articles dashboard.
-   * Only visible to users that have permission.
-   */
+    * This handles the articles dashboard.
+    * Only visible to users that have permission.
+    */
    public function Index() {
       $this->Title(T('Articles Dashboard'));
 
