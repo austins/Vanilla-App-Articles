@@ -136,9 +136,11 @@ class ArticlesHooks extends Gdn_Plugin {
          $Sender->Title(T('Edit Article Category'));
 
       // Handle the form.
-      if(($Sender->Form->AuthenticatedPostBack() == FALSE)) {
+      if(!$Sender->Form->AuthenticatedPostBack()) {
          if(!$Category)
-            $Sender->Form->AddHidden('CodeIsDefined', '0');
+            $Sender->Form->AddHidden('UrlCodeIsDefined', '0');
+         else
+            $Sender->Form->AddHidden('UrlCodeIsDefined', '1');
       } else { // The form was saved.
          // Define some validation rules for the fields being saved.
          $Sender->Form->ValidateRule('Name', 'function:ValidateRequired');
@@ -149,7 +151,16 @@ class ArticlesHooks extends Gdn_Plugin {
 
          if($Category)
             $FormValues['CategoryID'] = $CategoryID;
+         
+         // Format URL code before saving.
+         $FormValues['UrlCode'] = Gdn_Format::Url($FormValues['UrlCode']);
 
+         // Check if URL code is in use by another category.
+         $CategoryWithNewUrlCode = (bool)$ArticleCategoryModel->GetByUrlCode($FormValues['UrlCode']);
+         if((!$Category && $CategoryWithNewUrlCode)
+               || ($Category && $CategoryWithNewUrlCode && ($Category->UrlCode != $FormValues['UrlCode'])))
+            $Sender->Form->AddError('The specified URL code is already in use by another category.', 'UrlCode');
+         
          // If there are no errors, then save the category.
          if($Sender->Form->ErrorCount() == 0) {
             if($ArticleCategoryModel->Save($FormValues))
