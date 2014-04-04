@@ -1,5 +1,5 @@
 <?php if(!defined('APPLICATION')) exit(); ?>
-<h1><?php echo T('Add Article Category'); ?></h1>
+<h1><?php echo $this->Title(); ?></h1>
 <?php
 echo $this->Form->Open();
 echo $this->Form->Errors();

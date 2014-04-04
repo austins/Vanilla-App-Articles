@@ -101,8 +101,6 @@ class ArticlesHooks extends Gdn_Plugin {
     * The Categories method of the Articles setting page.
     */
    public function Controller_AddCategory($Sender) {
-      $Sender->Title('Add Article Category');
-
       // Set required permission.
       $Sender->Permission('Garden.Settings.Manage');
 
@@ -114,14 +112,58 @@ class ArticlesHooks extends Gdn_Plugin {
       $ArticleCategoryModel = new ArticleCategoryModel();
       $Sender->Form->SetModel($ArticleCategoryModel);
 
+      // If editing a category, then set the data in the form.
+      $Category = FALSE;
+      if($Sender->RequestArgs[0] === 'editcategory') {
+         $CategoryID = (int)$Sender->RequestArgs[1];
+
+         if(is_numeric($CategoryID)) {
+            $Category = $ArticleCategoryModel->GetByID($CategoryID);
+
+            if($Category)
+               $Sender->Form->SetData($Category);
+            else
+               throw NotFoundException(T('Article category'));
+         } else {
+            throw NotFoundException(T('Article category'));
+         }
+      }
+
+      // Set the title of the page.
+      if(!$Category)
+         $Sender->Title(T('Add Article Category'));
+      else
+         $Sender->Title(T('Edit Article Category'));
+
       // Handle the form.
-      if($Sender->Form->IsPostBack() == FALSE) {
-         $Sender->Form->AddHidden('CodeIsDefined', '0');
+      if(($Sender->Form->AuthenticatedPostBack() == FALSE)) {
+         if(!$Category)
+            $Sender->Form->AddHidden('CodeIsDefined', '0');
+      } else { // The form was saved.
+         // Define some validation rules for the fields being saved.
+         $Sender->Form->ValidateRule('Name', 'function:ValidateRequired');
+         $Sender->Form->ValidateRule('UrlCode', 'function:ValidateRequired', T('URL code is required.'));
+
+         // Manually validate certain fields.
+         $FormValues = $Sender->Form->FormValues();
+
+         if($Category)
+            $FormValues['CategoryID'] = $CategoryID;
+
+         // If there are no errors, then save the category.
+         if($Sender->Form->ErrorCount() == 0) {
+            if($ArticleCategoryModel->Save($FormValues))
+               $Sender->InformMessage(T('The article category has been saved successfully.'));
+         }
       }
 
       $Sender->AddSideMenu('/settings/articles/addcategory/');
       $Sender->View = $Sender->FetchViewLocation('addcategory', 'settings', 'articles');
       $Sender->Render();
+   }
+
+   public function Controller_EditCategory($Sender) {
+      $this->Controller_AddCategory($Sender);
    }
 
    /**
