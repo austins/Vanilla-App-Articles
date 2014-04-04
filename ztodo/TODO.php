@@ -14,6 +14,7 @@
  * TODO guest comments
  * TODO meta tag "keywords" input field instead of tags
  * TODO media uploading. (images, thumbnails, media browser)
+ * TODO RSS feed for each category.
  */
 
 /**
