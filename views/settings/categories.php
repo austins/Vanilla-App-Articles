@@ -18,7 +18,7 @@ $Categories = $this->Data('Categories')->Result();
    <?php
    foreach($Categories as $Category) {
       echo '<li id="Category_' . $Category->CategoryID . '">';
-      echo Wrap('<table>
+      echo '<table>
             <tr>
               <td>
                  <strong>' . htmlspecialchars($Category->Name) . '</strong>
@@ -30,7 +30,7 @@ $Categories = $this->Data('Categories')->Result();
          . Anchor(T('Delete'), '/settings/articles/deletecategory/' . $Category->CategoryID . '/', 'SmallButton')
          . '</td>
             </tr>
-         </table>', 'div');
+         </table>';
       echo '</li>';
    }
    ?>
