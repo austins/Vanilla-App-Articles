@@ -80,14 +80,14 @@ body.Articles.Compose #Content {
    margin: 0 auto;
 }
 
-body.Articles.index .Article .Options > .ToggleFlyout {
+body.Articles.index .Article .Options > .ToggleFlyout,
+body.Articles.category .Article .Options > .ToggleFlyout {
    display: none;
 }
 
-body.Articles.index .Article:hover .Options > .ToggleFlyout {
-   display: block;
-}
-
-body.Articles.index .Article .Options > .ToggleFlyout.Open {
+body.Articles.index .Article:hover .Options > .ToggleFlyout,
+body.Articles.index .Article .Options > .ToggleFlyout.Open,
+body.Articles.category .Article:hover .Options > .ToggleFlyout,
+body.Articles.category .Article .Options > .ToggleFlyout.Open {
    display: block;
 }
