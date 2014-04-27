@@ -9,6 +9,9 @@ class ComposeController extends Gdn_Controller {
     */
    public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'Form');
 
+   protected $Article = FALSE;
+   protected $Category = FALSE;
+
    /**
     * Include JS, CSS, and modules used by all methods.
     * Extended by all other controllers in this application.
@@ -60,15 +63,31 @@ class ComposeController extends Gdn_Controller {
    }
 
    public function Article() {
-      $this->Title(T('New Article'));
+      // If not editing...
+      if(!$this->Article) {
+         $this->Title(T('Add Article'));
 
-      // Set allowed permissions.
-      // The user only needs one of the specified permissions.
-      $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
-      $this->Permission($PermissionsAllowed, FALSE);
+         // Set allowed permission.
+         $this->Permission('Articles.Articles.Add');
+      }
 
       // Set the model on the form.
       $this->Form->SetModel($this->ArticleModel);
+
+      // Get categories.
+      $Categories = $this->ArticleCategoryModel->Get();
+      $this->SetData('Categories', $Categories, TRUE);
+
+      // If editing...
+      if($this->Article) {
+         $this->Form->SetData($this->Article);
+      }
+
+      // The form has been submitted.
+      if($this->Form->AuthenticatedPostBack())
+      {
+
+      }
 
       $this->View = 'article';
       $this->Render();
@@ -87,8 +106,25 @@ class ComposeController extends Gdn_Controller {
       $this->Render();
    }
 
-   public function EditArticle() {
-      // TODO EditArticle()
+   public function EditArticle($ArticleID = FALSE) {
+      $this->Title(T('Edit Article'));
+
+      // Set allowed permission.
+      $this->Permission('Articles.Articles.Edit');
+
+      // Get article.
+      if(is_numeric($ArticleID))
+         $this->Article = $this->ArticleModel->GetByID($ArticleID);
+
+      // If the article doesn't exist, then throw an exception.
+      if(!$this->Article)
+         throw NotFoundException('Article');
+
+      // Get category.
+      $this->Category = $this->ArticleCategoryModel->GetByID($this->Article->CategoryID);
+
+      $this->View = 'article';
+      $this->Article();
    }
 
    public function CloseArticle() {
