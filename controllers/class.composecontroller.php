@@ -86,4 +86,16 @@ class ComposeController extends Gdn_Controller {
       $this->View = 'comment';
       $this->Render();
    }
+
+   public function EditArticle() {
+      // TODO EditArticle()
+   }
+
+   public function CloseArticle() {
+      // TODO CloseArticle()
+   }
+
+   public function DeleteArticle() {
+      // TODO DeleteArticle()
+   }
 }

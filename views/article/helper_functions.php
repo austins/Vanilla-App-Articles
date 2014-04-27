@@ -10,11 +10,26 @@ if(!function_exists('ShowArticleOptions')) {
       $Session = Gdn::Session();
       $Options = array();
 
+      // Can the user edit?
+      if($Session->CheckPermission('Articles.Articles.Edit'))
+         $Options['EditArticle'] = array(
+            'Label' => T('Edit'),
+            'Url' => '/compose/editarticle/' . $Article->ArticleID . '/');
+
+      // Can the user close?
+      if($Session->CheckPermission('Articles.Articles.Close')) {
+         $NewClosed = (int)!$Article->Closed;
+         $Options['CloseArticle'] = array(
+            'Label' => T($Article->Closed ? 'Reopen' : 'Close'),
+            'Url' => "/compose/closearticle?articleid={$Article->ArticleID}&close={$NewClosed}",
+            'Class' => 'Hijack');
+      }
+
       // Can the user delete?
       if($Session->CheckPermission('Articles.Articles.Delete'))
          $Options['DeleteArticle'] = array(
             'Label' => T('Delete'),
-            'Url' => '/article/delete/' . $Article->ArticleID . '/',
+            'Url' => '/compose/deletearticle/' . $Article->ArticleID . '/',
             'Class' => 'Popup');
 
       // Render the article options menu.
