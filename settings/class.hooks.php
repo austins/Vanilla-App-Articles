@@ -163,12 +163,17 @@ class ArticlesHooks extends Gdn_Plugin {
 
          // If there are no errors, then save the category.
          if($Sender->Form->ErrorCount() == 0) {
-            if($ArticleCategoryModel->Save($FormValues))
+            if($Sender->Form->Save($FormValues))
             {
-               $Sender->InformMessage(T('The article category has been saved successfully.'));
-
-               if(!$Category && ($Sender->DeliveryType() == DELIVERY_TYPE_ALL))
-                  Redirect('/settings/articles/categories/');
+               if(!$Category)
+               {
+                  // Inserting.
+                  $Sender->RedirectUrl = Url('/settings/articles/categories/');
+                  $Sender->InformMessage(T('New article category added successfully.'));
+               } else {
+                  // Editing.
+                  $Sender->InformMessage(T('The article category has been saved successfully.'));
+               }
             }
          }
       }
@@ -189,6 +194,7 @@ class ArticlesHooks extends Gdn_Plugin {
       // Set up head.
       $Sender->Title(T('Delete Article Category'));
       $Sender->AddSideMenu('/settings/articles/categories/');
+      $Sender->AddJsFile('articles.js', 'articles');
 
       // Get category ID.
       $CategoryID = FALSE;

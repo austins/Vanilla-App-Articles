@@ -65,4 +65,64 @@ class ArticleCategoryModel extends Gdn_Model {
 
       return $Category;
    }
+
+   /**
+    * Delete a single category and assign its articles to another.
+    *
+    * @return void
+    * @throws Exception // TODO update comment.
+    * @param object $Category
+    * @param int $ReplacementCategoryID Unique ID of category all discussion are being move to.
+    */
+   public function Delete($Category, $ReplacementCategoryID) {
+      // Don't do anything if the required category object & properties are not defined.
+      if(!is_object($Category)
+            || !property_exists($Category, 'CategoryID')
+            || !property_exists($Category, 'Name')
+            || $Category->CategoryID <= 0) {
+         throw new Exception(T('Invalid category for deletion.'));
+      } else {
+         // If there is a replacement category...
+         if($ReplacementCategoryID > 0) {
+            // Update articles.
+            $this->SQL
+               ->Update('Article')
+               ->Set('CategoryID', $ReplacementCategoryID)
+               ->Where('CategoryID', $Category->CategoryID)
+               ->Put();
+
+            // Update the article count.
+            $Count = $this->SQL
+               ->Select('ArticleID', 'count', 'ArticleCount')
+               ->From('Article')
+               ->Where('CategoryID', $ReplacementCategoryID)
+               ->Get()
+               ->FirstRow()
+               ->ArticleCount;
+
+            if(!is_numeric($Count))
+               $Count = 0;
+
+            $this->SQL
+               ->Update('ArticleCategory')->Set('CountArticles', $Count)
+               ->Where('CategoryID', $ReplacementCategoryID)
+               ->Put();
+         } else {
+            // Delete comments in this category.
+            /* TODO: uncomment this code after adding comments feature.
+            $this->SQL
+               ->From('ArticleComment ac')
+               ->Join('Article a', 'ac.ArticleID = a.ArticleID')
+               ->Where('a.ArticleID', $Category->CategoryID)
+               ->Delete();
+            */
+
+            // Delete articles in this category
+            $this->SQL->Delete('Article', array('CategoryID' => $Category->CategoryID));
+         }
+
+         // Delete the category
+         $this->SQL->Delete('ArticleCategory', array('CategoryID' => $Category->CategoryID));
+      }
+   }
 }

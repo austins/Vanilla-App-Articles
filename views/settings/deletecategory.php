@@ -6,9 +6,9 @@ $OtherCategories = $this->Data('OtherCategories');
 echo $this->Form->Open();
 echo $this->Form->Errors();
 
-if (is_object($OtherCategories)) {
+if(is_object($OtherCategories)) {
    ?>
-   <h1><?php echo T('Delete Category'); ?></h1>
+   <h1><?php echo T('Delete Article Category'); ?></h1>
    <ul>
    <?php
    if($OtherCategories->NumRows() == 0) {
@@ -17,20 +17,13 @@ if (is_object($OtherCategories)) {
    <?php
    } else {
       // Only show the delete articles checkbox if we're deleting a non-parent category.
-      if ($Category->AllowArticles == '1') {
-         ?>
-         <li>
-            <?php
-            echo $this->Form->CheckBox('DeleteArticles', "Move articles in this category to a replacement category.", array('value' => '1'));
-            ?>
-         </li>
-      <?php }
-      if ($Category->AllowArticles == '1') {
-         ?>
-         <li id="ReplacementWarning"><p class="Warning"><?php echo T('<strong>Heads Up!</strong> Moving articles into a replacement category can result in articles vanishing (or appearing) if the replacement category has different permissions than the category being deleted.'); ?></p></li>
-      <?php
-      }
       ?>
+      <li>
+         <?php
+         echo $this->Form->CheckBox('DeleteArticles', "Move articles in this category to a replacement category.", array('value' => '1'));
+         ?>
+      </li>
+      <li id="ReplacementWarning"><p class="Warning"><?php echo T('<strong>Heads Up!</strong> Moving articles into a replacement category can result in articles vanishing (or appearing) if the replacement category has different permissions than the category being deleted.'); ?></p></li>
       <li id="ReplacementCategory">
          <?php
          echo $this->Form->Label('Replacement Category', 'ReplacementCategoryID');
