@@ -160,21 +160,89 @@ class ArticlesHooks extends Gdn_Plugin {
          if((!$Category && $CategoryWithNewUrlCode)
                || ($Category && $CategoryWithNewUrlCode && ($Category->UrlCode != $FormValues['UrlCode'])))
             $Sender->Form->AddError('The specified URL code is already in use by another category.', 'UrlCode');
-         
+
          // If there are no errors, then save the category.
          if($Sender->Form->ErrorCount() == 0) {
             if($ArticleCategoryModel->Save($FormValues))
+            {
                $Sender->InformMessage(T('The article category has been saved successfully.'));
+
+               if(!$Category && ($Sender->DeliveryType() == DELIVERY_TYPE_ALL))
+                  Redirect('/settings/articles/categories/');
+            }
          }
       }
 
-      $Sender->AddSideMenu('/settings/articles/addcategory/');
+      $Sender->AddSideMenu('/settings/articles/categories/');
       $Sender->View = $Sender->FetchViewLocation('addcategory', 'settings', 'articles');
       $Sender->Render();
    }
 
    public function Controller_EditCategory($Sender) {
       $this->Controller_AddCategory($Sender);
+   }
+
+   public function Controller_DeleteCategory($Sender) {
+      // Check permission.
+      $Sender->Permission('Garden.Settings.Manage');
+
+      // Set up head.
+      $Sender->Title(T('Delete Article Category'));
+      $Sender->AddSideMenu('/settings/articles/categories/');
+
+      // Get category ID.
+      $CategoryID = FALSE;
+      if(isset($Sender->RequestArgs[1]) && is_numeric($Sender->RequestArgs[1]))
+         $CategoryID = $Sender->RequestArgs[1];
+
+      // Get category data.
+      $Sender->Form = new Gdn_Form();
+      $ArticleCategoryModel = new ArticleCategoryModel();
+      $Category = $ArticleCategoryModel->GetByID($CategoryID);
+      $Sender->SetData('Category', $Category, TRUE);
+
+      if(!$Category) {
+         $Sender->Form->AddError('The specified article category could not be found.');
+      } else {
+         // Make sure the form knows which item we are deleting.
+         $Sender->Form->AddHidden('CategoryID', $CategoryID);
+
+         // Get a list of categories other than this one that can act as a replacement.
+         $OtherCategories = $ArticleCategoryModel->Get(array(
+            'CategoryID <>' => $CategoryID,
+            'CategoryID >' => 0
+         ));
+         $Sender->SetData('OtherCategories', $OtherCategories, TRUE);
+
+         if(!$Sender->Form->AuthenticatedPostBack()) {
+            $Sender->Form->SetFormValue('DeleteArticles', '1'); // Checked by default
+         } else {
+            $ReplacementCategoryID = $Sender->Form->GetValue('ReplacementCategoryID');
+            $ReplacementCategory = $ArticleCategoryModel->GetByID($ReplacementCategoryID);
+            // Error if:
+            // 1. The category being deleted is the last remaining category.
+            if($OtherCategories->NumRows() == 0)
+               $Sender->Form->AddError('You cannot remove the only remaining category.');
+
+            if($Sender->Form->ErrorCount() == 0) {
+               // Go ahead and delete the category.
+               try {
+                  $ArticleCategoryModel->Delete($Category, $Sender->Form->GetValue('ReplacementCategoryID'));
+               } catch (Exception $ex) {
+                  $Sender->Form->AddError($ex);
+               }
+
+               if ($Sender->Form->ErrorCount() == 0) {
+                  $Sender->RedirectUrl = Url('/settings/articles/categories/');
+                  $Sender->InformMessage(T('Deleting article category...'));
+               }
+            }
+         }
+      }
+
+      // Render default view.
+      $Sender->View = $Sender->FetchViewLocation('deletecategory', 'settings', 'articles');
+      $Sender->Render();
    }
 
    /**
