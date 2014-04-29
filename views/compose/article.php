@@ -35,6 +35,12 @@ echo $this->Form->Errors();
    <li>
       <?php echo $this->Form->BodyBox('Body', array('Table' => 'Article')); ?>
    </li>
+   <li>
+      <?php
+      echo $this->Form->Label('Author', 'AuthorUserName');
+      echo Wrap($this->Form->TextBox('AuthorUserName', array('MultiLine' => TRUE, 'class' => 'MultiComplete')), 'div', array('class' => 'TextBoxWrapper'));
+      ?>
+   </li>
 </ul>
 <div class="Buttons">
    <?php

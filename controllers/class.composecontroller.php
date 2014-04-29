@@ -27,7 +27,10 @@ class ComposeController extends Gdn_Controller {
       $this->AddJsFile('jquery.form.js');
       $this->AddJsFile('jquery.popup.js');
       $this->AddJsFile('jquery.gardenhandleajaxform.js');
+      $this->AddJsFile('jquery.autogrow.js');
+      $this->AddJsFile('jquery.autocomplete.js');
       $this->AddJsFile('global.js');
+      $this->AddJsFile('articles.js');
 
       // Add CSS files.
       $this->AddCssFile('style.css');
@@ -78,15 +81,53 @@ class ComposeController extends Gdn_Controller {
       $Categories = $this->ArticleCategoryModel->Get();
       $this->SetData('Categories', $Categories, TRUE);
 
-      // If editing...
-      if($this->Article) {
-         $this->Form->SetData($this->Article);
-      }
+      $UserModel = new UserModel();
 
-      // The form has been submitted.
-      if($this->Form->AuthenticatedPostBack())
-      {
+      // The form has not been submitted yet.
+      if(!$this->Form->AuthenticatedPostBack()) {
+         // If editing...
+         if($this->Article) {
+            $this->Form->SetData($this->Article);
 
+            // Set author field.
+            $Author = $UserModel->GetID($this->Article->AuthorUserID);
+
+            // If the user with AuthorUserID doesn't exist.
+            if(!$Author)
+               $Author = $UserModel->GetID($this->Article->InsertUserID);
+
+            // If the user with InsertUserID doesn't exist.
+            if(!$Author)
+               $Author = $UserModel->GetID(Gdn::UserModel()->GetSystemUserID());
+
+            $this->Form->SetValue('AuthorUserName', $Author->Name);
+         }
+      } else { // The form has been submitted.
+         // Manually validate certain fields.
+         $FormValues = $this->Form->FormValues();
+
+         // If editing, make sure the ArticleID is passed to the form save method.
+         if($this->Article) {
+            $this->Form->SetFormValue('ArticleID', (int)$this->Article->ArticleID);
+         }
+
+         // Retrieve author user ID.
+         $Author = $UserModel->GetByUsername($FormValues['AuthorUserName']);
+
+         // If editing and the user with AuthorUserID doesn't exist.
+         if($this->Article && !$Author)
+            $Author = $UserModel->GetID($this->Article->InsertUserID);
+
+         // If the user with InsertUserID doesn't exist.
+         if(!$Author)
+            $Author = $UserModel->GetID(Gdn::UserModel()->GetSystemUserID());
+
+         $this->Form->SetFormValue('AuthorUserID', (int)$Author->UserID);
+
+         if($this->Form->ErrorCount() == 0)
+            $this->Form->Save($FormValues);
+
+         // TODO add/edit article validation and more fields.
       }
 
       $this->View = 'article';

@@ -6,7 +6,7 @@ if(!function_exists('ShowArticleOptions'))
 $Article = $this->Data('Article');
 
 $ArticleUrl = ArticleUrl($Article);
-$Author = Gdn::UserModel()->GetID($Article->InsertUserID);
+$Author = Gdn::UserModel()->GetID($Article->AuthorUserID);
 
 $Category = $this->Data('Category');
 
