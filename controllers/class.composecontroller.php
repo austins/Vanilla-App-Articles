@@ -4,175 +4,175 @@
  * The controller for the composing of articles.
  */
 class ComposeController extends Gdn_Controller {
-   /**
-    * Models to include.
-    */
-   public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'Form');
+    /**
+     * Models to include.
+     */
+    public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'Form');
 
-   protected $Article = FALSE;
-   protected $Category = FALSE;
+    protected $Article = false;
+    protected $Category = false;
 
-   /**
-    * Include JS, CSS, and modules used by all methods.
-    * Extended by all other controllers in this application.
-    * Always called by dispatcher before controller's requested method.
-    */
-   public function Initialize() {
-      // Set up head.
-      $this->Head = new HeadModule($this);
+    /**
+     * Include JS, CSS, and modules used by all methods.
+     * Extended by all other controllers in this application.
+     * Always called by dispatcher before controller's requested method.
+     */
+    public function Initialize() {
+        // Set up head.
+        $this->Head = new HeadModule($this);
 
-      // Add JS files.
-      $this->AddJsFile('jquery.js');
-      $this->AddJsFile('jquery.livequery.js');
-      $this->AddJsFile('jquery.form.js');
-      $this->AddJsFile('jquery.popup.js');
-      $this->AddJsFile('jquery.gardenhandleajaxform.js');
-      $this->AddJsFile('jquery.autogrow.js');
-      $this->AddJsFile('jquery.autocomplete.js');
-      $this->AddJsFile('global.js');
-      $this->AddJsFile('articles.js');
+        // Add JS files.
+        $this->AddJsFile('jquery.js');
+        $this->AddJsFile('jquery.livequery.js');
+        $this->AddJsFile('jquery.form.js');
+        $this->AddJsFile('jquery.popup.js');
+        $this->AddJsFile('jquery.gardenhandleajaxform.js');
+        $this->AddJsFile('jquery.autogrow.js');
+        $this->AddJsFile('jquery.autocomplete.js');
+        $this->AddJsFile('global.js');
+        $this->AddJsFile('articles.js');
 
-      // Add CSS files.
-      $this->AddCssFile('style.css');
-      $this->AddCssFile('articles.css');
+        // Add CSS files.
+        $this->AddCssFile('style.css');
+        $this->AddCssFile('articles.css');
 
-      // Add modules.
-      $this->AddModule('GuestModule');
-      $this->AddModule('SignedInModule');
+        // Add modules.
+        $this->AddModule('GuestModule');
+        $this->AddModule('SignedInModule');
 
-      parent::Initialize();
-   }
+        parent::Initialize();
+    }
 
-   /**
-    * This handles the articles dashboard.
-    * Only visible to users that have permission.
-    */
-   public function Index() {
-      $this->Title(T('Articles Dashboard'));
+    /**
+     * This handles the articles dashboard.
+     * Only visible to users that have permission.
+     */
+    public function Index() {
+        $this->Title(T('Articles Dashboard'));
 
-      // Set allowed permissions.
-      // The user only needs one of the specified permissions.
-      $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
-      $this->Permission($PermissionsAllowed, FALSE);
+        // Set allowed permissions.
+        // The user only needs one of the specified permissions.
+        $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
+        $this->Permission($PermissionsAllowed, false);
 
-      // Get recently published articles.
-      $RecentlyPublishedOffset = 0;
-      $RecentlyPublishedLimit = 5;
-      $RecentlyPublished = $this->ArticleModel->Get($RecentlyPublishedOffset, $RecentlyPublishedLimit);
-      $this->SetData('RecentlyPublished', $RecentlyPublished);
+        // Get recently published articles.
+        $RecentlyPublishedOffset = 0;
+        $RecentlyPublishedLimit = 5;
+        $RecentlyPublished = $this->ArticleModel->Get($RecentlyPublishedOffset, $RecentlyPublishedLimit);
+        $this->SetData('RecentlyPublished', $RecentlyPublished);
 
-      $this->View = 'index';
-      $this->Render();
-   }
+        $this->View = 'index';
+        $this->Render();
+    }
 
-   public function Article() {
-      // If not editing...
-      if(!$this->Article) {
-         $this->Title(T('Add Article'));
+    public function Article() {
+        // If not editing...
+        if(!$this->Article) {
+            $this->Title(T('Add Article'));
 
-         // Set allowed permission.
-         $this->Permission('Articles.Articles.Add');
-      }
+            // Set allowed permission.
+            $this->Permission('Articles.Articles.Add');
+        }
 
-      // Set the model on the form.
-      $this->Form->SetModel($this->ArticleModel);
+        // Set the model on the form.
+        $this->Form->SetModel($this->ArticleModel);
 
-      // Get categories.
-      $Categories = $this->ArticleCategoryModel->Get();
-      $this->SetData('Categories', $Categories, TRUE);
+        // Get categories.
+        $Categories = $this->ArticleCategoryModel->Get();
+        $this->SetData('Categories', $Categories, true);
 
-      $UserModel = new UserModel();
+        $UserModel = new UserModel();
 
-      // The form has not been submitted yet.
-      if(!$this->Form->AuthenticatedPostBack()) {
-         // If editing...
-         if($this->Article) {
-            $this->Form->SetData($this->Article);
+        // The form has not been submitted yet.
+        if(!$this->Form->AuthenticatedPostBack()) {
+            // If editing...
+            if($this->Article) {
+                $this->Form->SetData($this->Article);
 
-            // Set author field.
-            $Author = $UserModel->GetID($this->Article->AuthorUserID);
+                // Set author field.
+                $Author = $UserModel->GetID($this->Article->AuthorUserID);
 
-            // If the user with AuthorUserID doesn't exist.
-            if(!$Author)
-               $Author = $UserModel->GetID($this->Article->InsertUserID);
+                // If the user with AuthorUserID doesn't exist.
+                if(!$Author)
+                    $Author = $UserModel->GetID($this->Article->InsertUserID);
+
+                // If the user with InsertUserID doesn't exist.
+                if(!$Author)
+                    $Author = $UserModel->GetID(Gdn::UserModel()->GetSystemUserID());
+
+                $this->Form->SetValue('AuthorUserName', $Author->Name);
+            }
+        } else { // The form has been submitted.
+            // Manually validate certain fields.
+            $FormValues = $this->Form->FormValues();
+
+            // If editing, make sure the ArticleID is passed to the form save method.
+            if($this->Article) {
+                $this->Form->SetFormValue('ArticleID', (int)$this->Article->ArticleID);
+            }
+
+            // Retrieve author user ID.
+            $Author = $UserModel->GetByUsername($FormValues['AuthorUserName']);
+
+            // If editing and the user with AuthorUserID doesn't exist.
+            if($this->Article && !$Author)
+                $Author = $UserModel->GetID($this->Article->InsertUserID);
 
             // If the user with InsertUserID doesn't exist.
             if(!$Author)
-               $Author = $UserModel->GetID(Gdn::UserModel()->GetSystemUserID());
+                $Author = $UserModel->GetID(Gdn::UserModel()->GetSystemUserID());
 
-            $this->Form->SetValue('AuthorUserName', $Author->Name);
-         }
-      } else { // The form has been submitted.
-         // Manually validate certain fields.
-         $FormValues = $this->Form->FormValues();
+            $this->Form->SetFormValue('AuthorUserID', (int)$Author->UserID);
 
-         // If editing, make sure the ArticleID is passed to the form save method.
-         if($this->Article) {
-            $this->Form->SetFormValue('ArticleID', (int)$this->Article->ArticleID);
-         }
+            if($this->Form->ErrorCount() == 0)
+                $this->Form->Save($FormValues);
 
-         // Retrieve author user ID.
-         $Author = $UserModel->GetByUsername($FormValues['AuthorUserName']);
+            // TODO add/edit article validation and more fields.
+        }
 
-         // If editing and the user with AuthorUserID doesn't exist.
-         if($this->Article && !$Author)
-            $Author = $UserModel->GetID($this->Article->InsertUserID);
+        $this->View = 'article';
+        $this->Render();
+    }
 
-         // If the user with InsertUserID doesn't exist.
-         if(!$Author)
-            $Author = $UserModel->GetID(Gdn::UserModel()->GetSystemUserID());
+    public function Comment() {
+        $this->Title(T('Post Article Comment'));
 
-         $this->Form->SetFormValue('AuthorUserID', (int)$Author->UserID);
+        // Set required permission.
+        $this->Permission('Articles.Comments.Add');
 
-         if($this->Form->ErrorCount() == 0)
-            $this->Form->Save($FormValues);
+        // Set the model on the form.
+        $this->Form->SetModel($this->ArticleModel);
 
-         // TODO add/edit article validation and more fields.
-      }
+        $this->View = 'comment';
+        $this->Render();
+    }
 
-      $this->View = 'article';
-      $this->Render();
-   }
+    public function EditArticle($ArticleID = FALSE) {
+        $this->Title(T('Edit Article'));
 
-   public function Comment() {
-      $this->Title(T('Post Article Comment'));
+        // Set allowed permission.
+        $this->Permission('Articles.Articles.Edit');
 
-      // Set required permission.
-      $this->Permission('Articles.Comments.Add');
+        // Get article.
+        if(is_numeric($ArticleID))
+            $this->Article = $this->ArticleModel->GetByID($ArticleID);
 
-      // Set the model on the form.
-      $this->Form->SetModel($this->ArticleModel);
+        // If the article doesn't exist, then throw an exception.
+        if(!$this->Article)
+            throw NotFoundException('Article');
 
-      $this->View = 'comment';
-      $this->Render();
-   }
+        // Get category.
+        $this->Category = $this->ArticleCategoryModel->GetByID($this->Article->CategoryID);
 
-   public function EditArticle($ArticleID = FALSE) {
-      $this->Title(T('Edit Article'));
+        $this->View = 'article';
+        $this->Article();
+    }
 
-      // Set allowed permission.
-      $this->Permission('Articles.Articles.Edit');
+    public function CloseArticle() {
+        // TODO CloseArticle()
+    }
 
-      // Get article.
-      if(is_numeric($ArticleID))
-         $this->Article = $this->ArticleModel->GetByID($ArticleID);
-
-      // If the article doesn't exist, then throw an exception.
-      if(!$this->Article)
-         throw NotFoundException('Article');
-
-      // Get category.
-      $this->Category = $this->ArticleCategoryModel->GetByID($this->Article->CategoryID);
-
-      $this->View = 'article';
-      $this->Article();
-   }
-
-   public function CloseArticle() {
-      // TODO CloseArticle()
-   }
-
-   public function DeleteArticle() {
-      // TODO DeleteArticle()
-   }
+    public function DeleteArticle() {
+        // TODO DeleteArticle()
+    }
 }
