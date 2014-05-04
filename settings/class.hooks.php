@@ -182,11 +182,11 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->Render();
     }
 
-    public function Controller_EditCategory($Sender) {
+    public function Controller_EditCategory(SettingsController $Sender) {
         $this->Controller_AddCategory($Sender);
     }
 
-    public function Controller_DeleteCategory($Sender) {
+    public function Controller_DeleteCategory(SettingsController $Sender) {
         // Check permission.
         $Sender->Permission('Garden.Settings.Manage');
 
