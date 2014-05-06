@@ -82,7 +82,7 @@ class ComposeController extends Gdn_Controller {
         $this->SetData('Categories', $Categories, true);
 
         $UserModel = new UserModel();
-
+        
         // The form has not been submitted yet.
         if(!$this->Form->AuthenticatedPostBack()) {
             // If editing...
