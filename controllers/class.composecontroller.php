@@ -82,7 +82,7 @@ class ComposeController extends Gdn_Controller {
         $this->SetData('Categories', $Categories, true);
 
         $UserModel = new UserModel();
-        
+
         // The form has not been submitted yet.
         if(!$this->Form->AuthenticatedPostBack()) {
             // If editing...
@@ -95,13 +95,13 @@ class ComposeController extends Gdn_Controller {
                 // If the user with AuthorUserID doesn't exist.
                 if(!$Author)
                     $Author = $UserModel->GetID($this->Article->InsertUserID);
-
-                // If the user with InsertUserID doesn't exist.
-                if(!$Author)
-                    $Author = $UserModel->GetID(Gdn::UserModel()->GetSystemUserID());
-
-                $this->Form->SetValue('AuthorUserName', $Author->Name);
             }
+
+            // If the user with InsertUserID doesn't exist.
+            if(!$Author)
+                $Author = Gdn::Session()->User;
+
+            $this->Form->SetValue('AuthorUserName', $Author->Name);
         } else { // The form has been submitted.
             // Manually validate certain fields.
             $FormValues = $this->Form->FormValues();
@@ -114,13 +114,9 @@ class ComposeController extends Gdn_Controller {
             // Retrieve author user ID.
             $Author = $UserModel->GetByUsername($FormValues['AuthorUserName']);
 
-            // If editing and the user with AuthorUserID doesn't exist.
-            if($this->Article && !$Author)
-                $Author = $UserModel->GetID($this->Article->InsertUserID);
-
-            // If the user with InsertUserID doesn't exist.
+            // If the inputted author doesn't exist.
             if(!$Author)
-                $Author = $UserModel->GetID(Gdn::UserModel()->GetSystemUserID());
+                $this->Form->AddError('The user for the author field does not exist.', 'AuthorUserName');
 
             $this->Form->SetFormValue('AuthorUserID', (int)$Author->UserID);
 
