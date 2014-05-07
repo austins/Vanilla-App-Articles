@@ -55,6 +55,11 @@ jQuery(document).ready(function($) {
                 scrollHeight: 220,
                 selectFirst: true
             }
-        ).autogrow();
+        );
     });
+
+    if($.autogrow)
+        $('textarea.TextBox').livequery(function() {
+            $(this).autogrow();
+        });
 });
