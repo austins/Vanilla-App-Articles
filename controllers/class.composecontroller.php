@@ -65,6 +65,16 @@ class ComposeController extends Gdn_Controller {
         $this->Render();
     }
 
+    private function GetArticleStatusOptions() {
+        $StatusOptions = array(
+            0 => T('Draft'),
+            1 => T('Pending Review'),
+            2 => T('Published')
+        );
+
+        return $StatusOptions;
+    }
+
     public function Article() {
         // If not editing...
         if(!$this->Article) {
@@ -80,6 +90,9 @@ class ComposeController extends Gdn_Controller {
         // Get categories.
         $Categories = $this->ArticleCategoryModel->Get();
         $this->SetData('Categories', $Categories, true);
+
+        // Set status options.
+        $this->SetData('StatusOptions', $this->GetArticleStatusOptions(), true);
 
         $UserModel = new UserModel();
 
@@ -115,13 +128,29 @@ class ComposeController extends Gdn_Controller {
             $Author = $UserModel->GetByUsername($FormValues['AuthorUserName']);
 
             // If the inputted author doesn't exist.
-            if(!$Author)
-                $this->Form->AddError('The user for the author field does not exist.', 'AuthorUserName');
+            if(!$Author) {
+                if($FormValues['AuthorUserName'] === "")
+                    $this->Form->AddError('Author is required.', 'AuthorUserName');
+                else
+                    $this->Form->AddError('The user for the author field does not exist.', 'AuthorUserName');
+            }
 
             $this->Form->SetFormValue('AuthorUserID', (int)$Author->UserID);
 
-            if($this->Form->ErrorCount() == 0)
-                $this->Form->Save($FormValues);
+            if($this->Form->ErrorCount() == 0) {
+                $ArticleID = $this->Form->Save($FormValues);
+
+                // If the article was saved successfully.
+                if($ArticleID) {
+                    $Article = $this->ArticleModel->GetByID($ArticleID);
+
+                    // Redirect to the article.
+                    if($this->_DeliveryType == DELIVERY_TYPE_ALL)
+                        Redirect(ArticleUrl($Article));
+                    else
+                        $this->RedirectUrl = ArticleUrl($Article, '', TRUE);
+                }
+            }
 
             // TODO add/edit article validation and more fields.
         }
