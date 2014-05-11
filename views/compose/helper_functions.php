@@ -4,6 +4,7 @@ if(!function_exists('ShowArticlesDashboardMenu')) {
     function ShowArticlesDashboardMenu($RequestMethod = '') {
         $MenuLinks = array(
             'index' => array('Text' => 'Dashboard', 'Destination' => '/compose/'),
+            'posts' => array('Text' => 'Posts', 'Destination' => '/compose/posts/'),
             'article' => array('Text' => 'New Article', 'Destination' => '/compose/article/')
         );
 

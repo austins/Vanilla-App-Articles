@@ -58,19 +58,34 @@ class ComposeController extends Gdn_Controller {
         // Get recently published articles.
         $RecentlyPublishedOffset = 0;
         $RecentlyPublishedLimit = 5;
-        $RecentlyPublished = $this->ArticleModel->Get($RecentlyPublishedOffset, $RecentlyPublishedLimit);
+        $RecentlyPublishedWheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED);
+        $RecentlyPublished = $this->ArticleModel->Get($RecentlyPublishedOffset, $RecentlyPublishedLimit, $RecentlyPublishedWheres);
         $this->SetData('RecentlyPublished', $RecentlyPublished);
 
         // Get recent articles pending review.
         if(Gdn::Session()->CheckPermission('Articles.Articles.Edit')) {
             $PendingArticlesOffset = 0;
             $PendingArticlesLimit = 5;
-            $PendingArticlesWheres = array('a.Status' => 1);
+            $PendingArticlesWheres = array('a.Status' => ArticleModel::STATUS_PENDING);
             $PendingArticles = $this->ArticleModel->Get($PendingArticlesOffset, $PendingArticlesLimit, $PendingArticlesWheres);
             $this->SetData('PendingArticles', $PendingArticles);
         }
 
         $this->View = 'index';
+        $this->Render();
+    }
+
+    public function Posts($Page = '') {
+        $this->Title(T('Article Posts'));
+
+        // Set allowed permissions.
+        // The user only needs one of the specified permissions.
+        $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
+        $this->Permission($PermissionsAllowed, false);
+
+        // TODO: articles listing for dashboard
+
+        $this->View = 'posts';
         $this->Render();
     }
 
