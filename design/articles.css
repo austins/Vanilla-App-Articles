@@ -11,11 +11,11 @@ body.Articles.Compose #Content {
    float: left;
 }
 
-#articles_compose_index #FirstColumn {
+#articles_compose_index .FirstColumn {
    width: 480px;
 }
 
-#articles_compose_index #SecondColumn {
+#articles_compose_index .SecondColumn {
    margin-left: 10px;
    width: 470px;
 }
