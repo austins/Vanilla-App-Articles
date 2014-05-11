@@ -41,15 +41,23 @@ class ArticleController extends Gdn_Controller {
      * The main method of this controller.
      */
     public function Index($ArticleYear, $ArticleUrlCode) {
-        // Set required permission.
-        $this->Permission('Articles.Articles.View');
-
         // Add module.
         $this->AddModule('ArticlesDashboardModule');
 
         // Get the article.
         $Article = $this->ArticleModel->GetByUrlCode($ArticleUrlCode);
         $this->SetData('Article', $Article);
+
+        // Set required permission.
+        $UserModel = new UserModel();
+        if($Article->Status != ArticleModel::STATUS_PUBLISHED)
+            if(($Article->AuthorUserID == Gdn::Session()->UserID)
+                    && !$UserModel->CheckPermission($Article->AuthorUserID, 'Articles.Articles.Edit'))
+                $this->Permission('Articles.Articles.View');
+            else
+                $this->Permission('Articles.Articles.Edit');
+        else
+            $this->Permission('Articles.Articles.View');
 
         // Get the category.
         $Category = $this->ArticleCategoryModel->GetByID($Article->CategoryID);

@@ -44,12 +44,14 @@ echo $this->Form->Errors();
             echo $this->Form->BodyBox('Excerpt', array('Table' => 'Article'));
             ?>
         </div>
-        <div class="P">
-            <?php
-            echo $this->Form->Label('Author', 'AuthorUserName');
-            echo Wrap($this->Form->TextBox('AuthorUserName', array('class' => 'InputBox BigInput MultiComplete')), 'div', array('class' => 'TextBoxWrapper'));
-            ?>
-        </div>
+        <?php if(Gdn::Session()->CheckPermission('Articles.Articles.Edit')): ?>
+            <div class="P">
+                <?php
+                echo $this->Form->Label('Author', 'AuthorUserName');
+                echo Wrap($this->Form->TextBox('AuthorUserName', array('class' => 'InputBox BigInput MultiComplete')), 'div', array('class' => 'TextBoxWrapper'));
+                ?>
+            </div>
+        <?php endif; ?>
         <div class="P">
            <?php
            echo $this->Form->Label('Status', 'Status');

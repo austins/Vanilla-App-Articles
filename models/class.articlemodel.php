@@ -11,6 +11,10 @@ class ArticleModel extends Gdn_Model {
         parent::__construct('Article');
     }
 
+    const STATUS_DRAFT = 0;
+    const STATUS_PENDING = 1;
+    const STATUS_PUBLISHED = 2;
+
     /**
      * Gets the data for multiple articles based on given criteria.
      *

@@ -76,13 +76,13 @@ class ComposeController extends Gdn_Controller {
 
     private function GetArticleStatusOptions() {
         $StatusOptions = array(
-            0 => T('Draft'),
-            1 => T('Pending Review'),
+            ArticleModel::STATUS_DRAFT => T('Draft'),
+            ArticleModel::STATUS_PENDING => T('Pending Review'),
         );
 
         if(Gdn::Session()->CheckPermission('Articles.Articles.Edit')
                 || ($this->Article && ((int)$this->Article->Status == 2)))
-            $StatusOptions[2] = T('Published');
+            $StatusOptions[ArticleModel::STATUS_PUBLISHED] = T('Published');
 
         return $StatusOptions;
     }

@@ -55,7 +55,7 @@ class ArticlesController extends Gdn_Controller {
         // Get published articles.
         $Offset = 0;
         $Limit = false;
-        $Wheres = array('a.Status' => 'published');
+        $Wheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED);
         $Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result();
         $this->SetData('Articles', $Articles);
 
@@ -91,7 +91,7 @@ class ArticlesController extends Gdn_Controller {
         $Offset = 0;
         $Limit = false;
         $Wheres = array(
-            'a.Status' => 'published',
+            'a.Status' => ArticleModel::STATUS_PUBLISHED,
             'a.CategoryID' => $Category->CategoryID
         );
         $Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result();
