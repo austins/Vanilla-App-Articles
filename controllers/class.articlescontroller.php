@@ -59,11 +59,8 @@ class ArticlesController extends Gdn_Controller {
 
         // We want to limit the number of pages on large databases because requesting a super-high page can kill the db.
         $MaxPages = C('Vanilla.Discussions.MaxPages');
-        if ($MaxPages && $Page > $MaxPages) {
+        if ($MaxPages && $Page > $MaxPages)
             throw NotFoundException();
-        }
-
-        $this->AddModule('ArticlesDashboardModule');
         
         // Get total article count.
         $CountArticles = $this->ArticleModel->GetCount();
