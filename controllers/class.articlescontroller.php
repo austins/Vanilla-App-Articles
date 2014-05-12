@@ -50,8 +50,9 @@ class ArticlesController extends Gdn_Controller {
         $this->Permission('Articles.Articles.View');
 
         // Add module.
+        $this->AddModule('ArticlesDashboardModule');
         
-      // Determine offset from $Page
+        // Determine offset from $Page
         list($Offset, $Limit) = OffsetLimit($Page, C('Vanilla.Discussions.PerPage', 30));
         $Page = PageNumber($Offset, $Limit);
         $this->CanonicalUrl(Url(ConcatSep('/', 'discussions', PageNumber($Offset, $Limit, TRUE, FALSE)), TRUE));
