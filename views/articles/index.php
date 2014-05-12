@@ -15,16 +15,7 @@ if(count($Articles) == 0) {
         echo Wrap(T('No articles have been published in this category.'), 'div');
     else
         echo Wrap(T('No articles have been published yet.'), 'div');
-} else {
-    // Set up pager.
-    $PagerOptions = array('Wrapper' => '<span class="PagerNub">&#160;</span><div %1$s>%2$s</div>', 'RecordCount' => $this->Data('CountArticles'), 'CurrentRecords' => $this->Data('Articles')->NumRows());
-    if ($this->Data('_PagerUrl'))
-        $PagerOptions['Url'] = $this->Data('_PagerUrl');
-
-    echo '<div class="PageControls Top">';
-        PagerModule::Write($PagerOptions);
-    echo '</div>';
-    
+} else {    
     foreach($Articles as $Article):
         $ArticleUrl = ArticleUrl($Article);
         $Author = Gdn::UserModel()->GetID($Article->AuthorUserID);
@@ -57,6 +48,11 @@ if(count($Articles) == 0) {
         </article>
 <?php
     endforeach;
+    
+    // Set up pager.
+    $PagerOptions = array('Wrapper' => '<span class="PagerNub">&#160;</span><div %1$s>%2$s</div>', 'RecordCount' => $this->Data('CountArticles'), 'CurrentRecords' => $this->Data('Articles')->NumRows());
+    if ($this->Data('_PagerUrl'))
+        $PagerOptions['Url'] = $this->Data('_PagerUrl');
     
     echo '<div class="PageControls Bottom">';
         PagerModule::Write($PagerOptions);

@@ -94,6 +94,7 @@ class ArticlesController extends Gdn_Controller {
         // Get published articles.
         $Wheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED);
         $Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres);
+        
         $this->SetData('Articles', $Articles);
         
         $this->View = 'index';
