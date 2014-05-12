@@ -165,13 +165,18 @@ class ComposeController extends Gdn_Controller {
             // If editing...
             if($this->Article) {
                 $this->Form->SetData($this->Article);
-
+                
+                $this->Form->AddHidden('UrlCodeIsDefined', '1');
+                
                 // Set author field.
                 $Author = $UserModel->GetID($this->Article->AuthorUserID);
 
                 // If the user with AuthorUserID doesn't exist.
                 if(!$Author)
                     $Author = $UserModel->GetID($this->Article->InsertUserID);
+            } else {
+                // If not editing...
+                $this->Form->AddHidden('UrlCodeIsDefined', '0');
             }
 
             // If the user with InsertUserID doesn't exist.
@@ -183,10 +188,39 @@ class ComposeController extends Gdn_Controller {
             // Manually validate certain fields.
             $FormValues = $this->Form->FormValues();
 
+            // Validate the URL code.
+            // Set UrlCode to name of article if it's not defined.
+            if ($FormValues['UrlCode'] == '')
+                $FormValues['UrlCode'] = $FormValues['Name'];
+            
+            // Format the UrlCode.
+            $FormValues['UrlCode'] = Gdn_Format::Url($FormValues['UrlCode']);
+            $this->Form->SetFormValue('UrlCode', $FormValues['UrlCode']);
+            
             // If editing, make sure the ArticleID is passed to the form save method.
+            $SQL = Gdn::Database()->SQL();
             if($this->Article) {
                 $this->Form->SetFormValue('ArticleID', (int)$this->Article->ArticleID);
+                
+                $ValidUrlCode = $SQL
+                   ->Select('a.UrlCode')
+                   ->From('Article a')
+                   ->Where('a.ArticleID', $this->Article->ArticleID)
+                   ->Get()
+                   ->FirstRow();
             }
+            
+            // Make sure that the UrlCode is unique among articles.
+            $UrlCodeExists = $SQL
+                    ->Select('a.ArticleID')
+                    ->From('Article a')
+                    ->Where('a.UrlCode', $FormValues['UrlCode'])
+                    ->Get()
+                    ->NumRows();
+            
+            if ((isset($this->Article) && $UrlCodeExists && ($ValidUrlCode->UrlCode != $FormValues['UrlCode']))
+                    || ((!isset($this->Article) && $UrlCodeExists)))
+                $this->Form->AddError('The specified URL code is already in use by another article.', 'UrlCode');
 
             // Retrieve author user ID.
             $Author = $UserModel->GetByUsername($FormValues['AuthorUserName']);

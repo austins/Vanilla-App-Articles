@@ -32,6 +32,15 @@ echo $this->Form->Errors();
             echo Wrap($this->Form->TextBox('Name', array('maxlength' => 100, 'class' => 'InputBox BigInput')), 'div', array('class' => 'TextBoxWrapper'));
             ?>
         </div>
+        <div id="UrlCode">
+            <?php
+            echo Wrap('URL Code', 'strong') . ': ';
+            echo Wrap(htmlspecialchars($this->Form->GetValue('UrlCode')));
+            echo $this->Form->TextBox('UrlCode');
+            echo Anchor(T('edit'), '#', 'Edit');
+            echo Anchor(T('OK'), '#', 'Save SmallButton');
+            ?>
+        </div>
         <div class="P">
             <?php
             echo $this->Form->Label('Body', 'Body');
