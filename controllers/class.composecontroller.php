@@ -75,15 +75,52 @@ class ComposeController extends Gdn_Controller {
         $this->Render();
     }
 
-    public function Posts($Page = '') {
+    public function Posts($Page = false) {
         $this->Title(T('Article Posts'));
 
         // Set allowed permissions.
         // The user only needs one of the specified permissions.
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
         $this->Permission($PermissionsAllowed, false);
+        
+        // Get total article count.
+        $CountArticles = $this->ArticleModel->GetCount();
+        $this->SetData('CountArticles', $CountArticles);
 
-        // TODO: articles listing for dashboard
+        // Determine offset from $Page.
+        list($Offset, $Limit) = OffsetLimit($Page, C('Articles.Articles.PerPage', 12));
+        $Page = PageNumber($Offset, $Limit);
+        $this->CanonicalUrl(Url(ConcatSep('/', 'articles', PageNumber($Offset, $Limit, TRUE, FALSE)), TRUE));
+
+        // Have a way to limit the number of pages on large databases
+        // because requesting a super-high page can kill the db.
+        $MaxPages = C('Articles.Articles.MaxPages', false);
+        if($MaxPages && $Page > $MaxPages) {
+            throw NotFoundException();
+        }
+        
+        // Build a pager
+        $PagerFactory = new Gdn_PagerFactory();
+        $this->EventArguments['PagerType'] = 'Pager';
+        $this->FireEvent('BeforeBuildPager');
+        $this->Pager = $PagerFactory->GetPager($this->EventArguments['PagerType'], $this);
+        $this->Pager->ClientID = 'Pager';
+        $this->Pager->Configure( $Offset, $Limit, $CountArticles, 'articles/%1$s');
+        if (!$this->Data('_PagerUrl'))
+            $this->SetData('_PagerUrl', 'articles/{Page}');
+        $this->SetData('_Page', $Page);
+        $this->SetData('_Limit', $Limit);
+        $this->FireEvent('AfterBuildPager');
+        
+        // If the user is not an article editor, then only show their own articles.
+        $Session = Gdn::Session();
+        $Wheres = false;
+        if(!$Session->CheckPermission('Articles.Articles.Edit'))
+            $Wheres = array('a.AuthorUserID' => $Session->UserID);
+        
+        // Get the articles.
+        $Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres);
+        $this->SetData('Articles', $Articles);
 
         $this->View = 'posts';
         $this->Render();

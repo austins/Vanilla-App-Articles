@@ -49,3 +49,20 @@ if(!function_exists('ShowArticleOptions')) {
         }
     }
 }
+
+if (!function_exists('ArticleTag')) {
+    function ArticleTag($Article, $Column, $Code, $CssClass = FALSE) {
+        if (is_array($Article))
+            $Article = (object)$Article;
+
+        if (is_numeric($Article->$Column) && !$Article->$Column)
+            return '';
+        if (!is_numeric($Article->$Column) && strcasecmp($Article->$Column, $Code) != 0)
+            return;
+
+        if (!$CssClass)
+            $CssClass = "Tag-$Code";
+
+        return ' <span class="Tag ' . $CssClass . '" title="' . htmlspecialchars(T($Code)) . '">' . T($Code) . '</span> ';
+    }
+}

@@ -40,7 +40,7 @@ class ArticlesController extends Gdn_Controller {
     /**
      * The main method of this controller.
      */
-    public function Index() {
+    public function Index($Page = false) {
         if(Gdn::Router()->GetDestination('DefaultController') !== 'articles')
             $this->Title(T('Articles'));
 
@@ -50,15 +50,54 @@ class ArticlesController extends Gdn_Controller {
         $this->Permission('Articles.Articles.View');
 
         // Add module.
+        
+      // Determine offset from $Page
+        list($Offset, $Limit) = OffsetLimit($Page, C('Vanilla.Discussions.PerPage', 30));
+        $Page = PageNumber($Offset, $Limit);
+        $this->CanonicalUrl(Url(ConcatSep('/', 'discussions', PageNumber($Offset, $Limit, TRUE, FALSE)), TRUE));
+
+        // We want to limit the number of pages on large databases because requesting a super-high page can kill the db.
+        $MaxPages = C('Vanilla.Discussions.MaxPages');
+        if ($MaxPages && $Page > $MaxPages) {
+            throw NotFoundException();
+        }
+
         $this->AddModule('ArticlesDashboardModule');
+        
+        // Get total article count.
+        $CountArticles = $this->ArticleModel->GetCount();
+        $this->SetData('CountArticles', $CountArticles);
+
+        // Determine offset from $Page.
+        list($Offset, $Limit) = OffsetLimit($Page, C('Articles.Articles.PerPage', 12));
+        $Page = PageNumber($Offset, $Limit);
+        $this->CanonicalUrl(Url(ConcatSep('/', 'articles', PageNumber($Offset, $Limit, TRUE, FALSE)), TRUE));
+
+        // Have a way to limit the number of pages on large databases
+        // because requesting a super-high page can kill the db.
+        $MaxPages = C('Articles.Articles.MaxPages', false);
+        if($MaxPages && $Page > $MaxPages) {
+            throw NotFoundException();
+        }
+        
+        // Build a pager
+        $PagerFactory = new Gdn_PagerFactory();
+        $this->EventArguments['PagerType'] = 'Pager';
+        $this->FireEvent('BeforeBuildPager');
+        $this->Pager = $PagerFactory->GetPager($this->EventArguments['PagerType'], $this);
+        $this->Pager->ClientID = 'Pager';
+        $this->Pager->Configure( $Offset, $Limit, $CountArticles, 'articles/%1$s');
+        if (!$this->Data('_PagerUrl'))
+            $this->SetData('_PagerUrl', 'articles/{Page}');
+        $this->SetData('_Page', $Page);
+        $this->SetData('_Limit', $Limit);
+        $this->FireEvent('AfterBuildPager');
 
         // Get published articles.
-        $Offset = 0;
-        $Limit = false;
         $Wheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED);
-        $Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result();
+        $Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres);
         $this->SetData('Articles', $Articles);
-
+        
         $this->View = 'index';
         $this->Render();
     }
