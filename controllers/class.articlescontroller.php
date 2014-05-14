@@ -52,16 +52,6 @@ class ArticlesController extends Gdn_Controller {
         // Add module.
         $this->AddModule('ArticlesDashboardModule');
         
-        // Determine offset from $Page
-        list($Offset, $Limit) = OffsetLimit($Page, C('Vanilla.Discussions.PerPage', 30));
-        $Page = PageNumber($Offset, $Limit);
-        $this->CanonicalUrl(Url(ConcatSep('/', 'discussions', PageNumber($Offset, $Limit, TRUE, FALSE)), TRUE));
-
-        // We want to limit the number of pages on large databases because requesting a super-high page can kill the db.
-        $MaxPages = C('Vanilla.Discussions.MaxPages');
-        if ($MaxPages && $Page > $MaxPages)
-            throw NotFoundException();
-        
         // Get total article count.
         $CountArticles = $this->ArticleModel->GetCount();
         $this->SetData('CountArticles', $CountArticles);
