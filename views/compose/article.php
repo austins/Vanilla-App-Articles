@@ -64,7 +64,7 @@ echo $this->Form->Errors();
         <div class="P">
            <?php
            echo $this->Form->Label('Status', 'Status');
-           echo $this->Form->RadioList('Status', $this->Data('StatusOptions'));
+           echo $this->Form->RadioList('Status', $this->Data('StatusOptions'), array('Default' => ArticleModel::STATUS_DRAFT));
            ?>
         </div>
     </div>

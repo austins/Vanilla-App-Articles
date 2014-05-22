@@ -12,7 +12,7 @@ $Px = $Construct->DatabasePrefix();
 $Construct->Table('ArticleCategory');
 $Construct->PrimaryKey('CategoryID')
     ->Column('Name', 'varchar(255)')
-    ->Column('UrlCode', 'varchar(255)', true)
+    ->Column('UrlCode', 'varchar(255)', false, 'unique')
     ->Column('Description', 'varchar(500)', true)
     ->Column('DateInserted', 'datetime')
     ->Column('DateUpdated', 'datetime', true)
@@ -30,7 +30,7 @@ $Construct->Table('Article');
 $Construct->PrimaryKey('ArticleID')
     ->Column('CategoryID', 'int', false, array('key', 'index.CategoryPages'))
     ->Column('Name', 'varchar(100)', false, 'fulltext')
-    ->Column('UrlCode', 'varchar(255)', true)
+    ->Column('UrlCode', 'varchar(255)', false, 'unique')
     ->Column('Body', 'longtext', false, 'fulltext')
     ->Column('Excerpt', 'text', true)
     ->Column('Format', 'varchar(20)', true)
