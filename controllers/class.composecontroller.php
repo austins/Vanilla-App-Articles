@@ -315,7 +315,7 @@ class ComposeController extends Gdn_Controller {
      * comments added to them.
      *
      * @param int $ArticleID Unique article ID.
-     * @param bool $Close Whether or not to close the discussion.
+     * @param bool $Close Whether or not to close the article.
      */
     public function Close($ArticleID, $Close = true, $From = 'list') {
         // Make sure we are posting back.
@@ -329,7 +329,7 @@ class ComposeController extends Gdn_Controller {
         if (!$Article)
             throw NotFoundException('Article');
 
-        // Close the discussion.
+        // Close the article.
         $this->ArticleModel->SetField($ArticleID, 'Closed', $Close);
         $Article->Closed = $Close;
 

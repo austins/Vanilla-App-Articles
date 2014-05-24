@@ -271,7 +271,7 @@ class ArticlesHooks extends Gdn_Plugin {
         if (is_object($Sender->User) && ($Sender->User->UserID > 0)) {
             $UserID = $Sender->User->UserID;
 
-            // Add the discussion tab
+            // Add the article tab
             $ArticlesLabel = Sprite('SpArticles') . ' ' . T('Articles');
 
             if (C('Articles.Profile.ShowCounts', true))
