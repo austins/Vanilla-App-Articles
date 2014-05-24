@@ -55,10 +55,10 @@ if (!function_exists('ArticleTag')) {
         if (is_array($Article))
             $Article = (object)$Article;
 
-        if (is_numeric($Article->$Column) && !$Article->$Column)
+        if ((is_numeric($Article->$Column) && !$Article->$Column)
+            || (!is_numeric($Article->$Column) && strcasecmp($Article->$Column, $Code) != 0)
+        )
             return '';
-        if (!is_numeric($Article->$Column) && strcasecmp($Article->$Column, $Code) != 0)
-            return;
 
         if (!$CssClass)
             $CssClass = "Tag-$Code";

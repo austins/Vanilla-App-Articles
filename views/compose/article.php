@@ -30,7 +30,8 @@ echo $this->Form->Errors();
         <div class="P">
             <?php
             echo $this->Form->Label('Article Name', 'Name');
-            echo Wrap($this->Form->TextBox('Name', array('maxlength' => 100, 'class' => 'InputBox BigInput')), 'div', array('class' => 'TextBoxWrapper'));
+            echo Wrap($this->Form->TextBox('Name', array('maxlength' => 100, 'class' => 'InputBox BigInput')), 'div',
+                array('class' => 'TextBoxWrapper'));
             ?>
         </div>
         <div id="UrlCode">
@@ -58,21 +59,24 @@ echo $this->Form->Errors();
             <div class="P">
                 <?php
                 echo $this->Form->Label('Author', 'AuthorUserName');
-                echo Wrap($this->Form->TextBox('AuthorUserName', array('class' => 'InputBox BigInput MultiComplete')), 'div', array('class' => 'TextBoxWrapper'));
+                echo Wrap($this->Form->TextBox('AuthorUserName', array('class' => 'InputBox BigInput MultiComplete')),
+                    'div', array('class' => 'TextBoxWrapper'));
                 ?>
             </div>
         <?php endif; ?>
         <div class="P">
             <?php
             echo $this->Form->Label('Status', 'Status');
-            echo $this->Form->RadioList('Status', $this->Data('StatusOptions'), array('Default' => ArticleModel::STATUS_DRAFT));
+            echo $this->Form->RadioList('Status', $this->Data('StatusOptions'),
+                array('Default' => ArticleModel::STATUS_DRAFT));
             ?>
         </div>
     </div>
 
     <div class="Buttons">
         <?php
-        echo $this->Form->Button((property_exists($this, 'Article')) ? 'Save' : 'Post Article', array('class' => 'Button Primary ArticleButton'));
+        echo $this->Form->Button((property_exists($this, 'Article')) ? 'Save' : 'Post Article',
+            array('class' => 'Button Primary ArticleButton'));
         ?>
     </div>
 <?php

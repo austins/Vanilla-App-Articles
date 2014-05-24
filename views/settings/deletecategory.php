@@ -21,7 +21,8 @@ if (is_object($OtherCategories)) {
         ?>
         <li>
             <?php
-            echo $this->Form->CheckBox('DeleteArticles', "Move articles in this category to a replacement category.", array('value' => '1'));
+            echo $this->Form->CheckBox('DeleteArticles', "Move articles in this category to a replacement category.",
+                array('value' => '1'));
             ?>
         </li>
         <li id="ReplacementWarning"><p

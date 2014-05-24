@@ -24,7 +24,8 @@ ShowArticlesDashboardMenu($this->RequestMethod);
                     echo Wrap(Anchor($Article->Name, ArticleUrl($Article)), 'div', array('class' => 'ArticleTitle'));
 
                     echo '<div class="ArticleMeta">';
-                    echo '<span class="ArticleDate">' . Gdn_Format::Date($Article->DateInserted, '%e %B %Y - %l:%M %p') . '</span>';
+                    echo '<span class="ArticleDate">' . Gdn_Format::Date($Article->DateInserted,
+                            '%e %B %Y - %l:%M %p') . '</span>';
                     echo '<span class="ArticleAuthor">' . UserAnchor($Author) . '</span>';
                     echo '</div>';
                     echo '</li>';
@@ -59,10 +60,12 @@ ShowArticlesDashboardMenu($this->RequestMethod);
                         $Author = Gdn::UserModel()->GetID($Article->InsertUserID);
 
                         echo '<li class="PendingArticle">';
-                        echo Wrap(Anchor($Article->Name, ArticleUrl($Article)), 'div', array('class' => 'ArticleTitle'));
+                        echo Wrap(Anchor($Article->Name, ArticleUrl($Article)), 'div',
+                            array('class' => 'ArticleTitle'));
 
                         echo '<div class="ArticleMeta">';
-                        echo '<span class="ArticleDate">' . Gdn_Format::Date($Article->DateInserted, '%e %B %Y - %l:%M %p') . '</span>';
+                        echo '<span class="ArticleDate">' . Gdn_Format::Date($Article->DateInserted,
+                                '%e %B %Y - %l:%M %p') . '</span>';
                         echo '<span class="ArticleAuthor">' . UserAnchor($Author) . '</span>';
                         echo '</div>';
                         echo '</li>';

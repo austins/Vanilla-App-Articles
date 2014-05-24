@@ -60,7 +60,8 @@ class ComposeController extends Gdn_Controller {
         $RecentlyPublishedOffset = 0;
         $RecentlyPublishedLimit = 5;
         $RecentlyPublishedWheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED);
-        $RecentlyPublished = $this->ArticleModel->Get($RecentlyPublishedOffset, $RecentlyPublishedLimit, $RecentlyPublishedWheres);
+        $RecentlyPublished = $this->ArticleModel->Get($RecentlyPublishedOffset, $RecentlyPublishedLimit,
+            $RecentlyPublishedWheres);
         $this->SetData('RecentlyPublished', $RecentlyPublished);
 
         // Get recent articles pending review.
@@ -68,7 +69,8 @@ class ComposeController extends Gdn_Controller {
             $PendingArticlesOffset = 0;
             $PendingArticlesLimit = 5;
             $PendingArticlesWheres = array('a.Status' => ArticleModel::STATUS_PENDING);
-            $PendingArticles = $this->ArticleModel->Get($PendingArticlesOffset, $PendingArticlesLimit, $PendingArticlesWheres);
+            $PendingArticles = $this->ArticleModel->Get($PendingArticlesOffset, $PendingArticlesLimit,
+                $PendingArticlesWheres);
             $this->SetData('PendingArticles', $PendingArticles);
         }
 

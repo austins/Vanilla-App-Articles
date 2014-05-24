@@ -25,7 +25,8 @@ else
         <div class="ArticleMeta">
             <span class="ArticleCategory"><?php echo Anchor($Category->Name, ArticleCategoryUrl($Category)); ?></span>
             <span
-                class="ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted, '%e %B %Y - %l:%M %p'); ?></span>
+                class="ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
+                    '%e %B %Y - %l:%M %p'); ?></span>
             <span class="ArticleAuthor"><?php echo UserAnchor($Author); ?></span>
             <span class="ArticleComments"><?php echo Anchor($CommentCount, $ArticleUrl . '#comments'); ?></span>
         </div>

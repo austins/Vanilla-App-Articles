@@ -34,9 +34,11 @@ if (count($Articles) == 0) {
 
                 <div class="ArticleMeta">
                     <span
-                        class="ArticleCategory"><?php echo Anchor($Category->Name, ArticleCategoryUrl($Category)); ?></span>
+                        class="ArticleCategory"><?php echo Anchor($Category->Name,
+                            ArticleCategoryUrl($Category)); ?></span>
                     <span
-                        class="ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted, '%e %B %Y - %l:%M %p'); ?></span>
+                        class="ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
+                            '%e %B %Y - %l:%M %p'); ?></span>
                     <span class="ArticleAuthor"><?php echo UserAnchor($Author); ?></span>
                     <span class="ArticleComments"><?php echo Anchor($CommentCount, $ArticleUrl . '#comments'); ?></span>
                 </div>
@@ -53,7 +55,8 @@ if (count($Articles) == 0) {
     endforeach;
 
     // Set up pager.
-    $PagerOptions = array('Wrapper' => '<span class="PagerNub">&#160;</span><div %1$s>%2$s</div>', 'RecordCount' => $this->Data('CountArticles'), 'CurrentRecords' => $this->Data('Articles')->NumRows());
+    $PagerOptions = array('Wrapper' => '<span class="PagerNub">&#160;</span><div %1$s>%2$s</div>',
+        'RecordCount' => $this->Data('CountArticles'), 'CurrentRecords' => $this->Data('Articles')->NumRows());
     if ($this->Data('_PagerUrl'))
         $PagerOptions['Url'] = $this->Data('_PagerUrl');
 
