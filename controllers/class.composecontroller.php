@@ -207,25 +207,16 @@ class ComposeController extends Gdn_Controller {
                 $this->Form->SetFormValue('ArticleID', (int)$this->Article->ArticleID);
 
             // Make sure that the UrlCode is unique among articles.
-            if($this->Article) {
-                $UrlCodeExists = $SQL
-                    ->Select('a.ArticleID')
-                    ->From('Article a')
-                    ->Where('a.UrlCode', $FormValues['UrlCode'])
-                    ->Where('a.ArticleID <>', $this->Article->ArticleID)
-                    ->Get()
-                    ->FirstRow();
-            } else {
-                $UrlCodeExists = $SQL
-                    ->Select('a.ArticleID')
-                    ->From('Article a')
-                    ->Where('a.UrlCode', $FormValues['UrlCode'])
-                    ->Get()
-                    ->FirstRow();
-            }
-            
-            $UrlCodeExists = isset($UrlCodeExists->ArticleID);
-            if($UrlCodeExists)
+            $SQL->Select('a.ArticleID')
+                ->From('Article a')
+                ->Where('a.UrlCode', $FormValues['UrlCode']);
+
+            if ($this->Article)
+                $SQL->Where('a.ArticleID <>', $this->Article->ArticleID);
+
+            $UrlCodeExists = isset($SQL->Get()->FirstRow()->ArticleID);
+
+            if ($UrlCodeExists)
                 $this->Form->AddError('The specified URL code is already in use by another article.', 'UrlCode');
 
             // Retrieve author user ID.

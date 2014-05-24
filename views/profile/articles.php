@@ -1,6 +1,7 @@
-<?php if (!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 
-echo '<h2 class="H">'.T('Articles').'</h2>';
+echo '<h2 class="H">' . T('Articles') . '</h2>';
 
 if (!is_object($this->ArticleData) || $this->ArticleData->NumRows() <= 0) {
     echo Wrap(T("This user has not published any articles yet."), 'div', array('Class' => 'Empty'));

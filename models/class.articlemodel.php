@@ -96,7 +96,7 @@ class ArticleModel extends Gdn_Model {
     }
 
     public function GetByUser($UserID, $Offset = 0, $Limit = false, $Wheres = null) {
-        if(!$Wheres)
+        if (!$Wheres)
             $Wheres = array();
 
         $Wheres['AuthorUserID'] = $UserID;

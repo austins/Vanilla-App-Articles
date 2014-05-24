@@ -321,7 +321,8 @@ class ArticlesHooks extends Gdn_Plugin {
         list($Offset, $Limit) = OffsetLimit($Page, Gdn::Config('Articles.Articles.PerPage', 12));
 
         $ArticleModel = new ArticleModel();
-        $Articles = $ArticleModel->GetByUser($Sender->User->UserID, $Offset, $Limit, array('Status' => ArticleModel::STATUS_PUBLISHED));
+        $Articles = $ArticleModel->GetByUser($Sender->User->UserID, $Offset, $Limit,
+            array('Status' => ArticleModel::STATUS_PUBLISHED));
         $CountArticles = $Offset + $ArticleModel->LastArticleCount + 1;
         $Sender->ArticleData = $Sender->SetData('Articles', $Articles);
 
