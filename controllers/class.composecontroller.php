@@ -300,7 +300,29 @@ class ComposeController extends Gdn_Controller {
         // TODO CloseArticle()
     }
 
-    public function DeleteArticle() {
-        // TODO DeleteArticle()
+    public function DeleteArticle($ArticleID, $Target = '') {
+        $this->Permission('Articles.Articles.Delete');
+
+        $Article = $this->ArticleModel->GetID($ArticleID);
+        if (!$Article)
+            throw NotFoundException('Article');
+
+        if ($this->Form->AuthenticatedPostBack()) {
+            if (!$this->ArticleModel->Delete($ArticleID))
+                $this->Form->AddError('Failed to delete article.');
+
+            if ($this->Form->ErrorCount() == 0) {
+                if ($this->_DeliveryType === DELIVERY_TYPE_ALL)
+                    SafeRedirect($Target);
+
+                if ($Target)
+                    $this->RedirectUrl = Url($Target);
+
+                $this->JsonTarget(".Section-ArticleList #Article_{$ArticleID}", NULL, 'SlideUp');
+            }
+        }
+
+        $this->SetData('Title', T('Delete Article'));
+        $this->Render();
     }
 }

@@ -81,4 +81,17 @@ class ArticleModel extends Gdn_Model {
 
         return $Article;
     }
+
+    // TODO: Update delete method to recalculate counts, remove related article material, etc.
+    public function Delete($Where = '', $Limit = false, $ResetData = false) {
+        if (is_numeric($Where))
+            $Where = array($this->PrimaryKey => $Where);
+
+        if ($ResetData)
+            $Result = $this->SQL->Delete($this->Name, $Where, $Limit);
+        else
+            $Result = $this->SQL->NoReset()->Delete($this->Name, $Where, $Limit);
+
+        return $Result;
+    }
 }
