@@ -1,6 +1,7 @@
-<?php if(!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 
-if(!function_exists('ShowArticlesDashboardMenu'))
+if (!function_exists('ShowArticlesDashboardMenu'))
     include($this->FetchViewLocation('helper_functions', 'compose', 'articles'));
 
 ShowArticlesDashboardMenu($this->RequestMethod);
@@ -13,20 +14,19 @@ ShowArticlesDashboardMenu($this->RequestMethod);
             // Render the recently published column.
             $RecentlyPublished = $this->Data('RecentlyPublished')->Result();
 
-            if(count($RecentlyPublished) == 0)
+            if (count($RecentlyPublished) == 0)
                 echo 'None.';
-            else
-            {
-                foreach($RecentlyPublished as $Article) {
+            else {
+                foreach ($RecentlyPublished as $Article) {
                     $Author = Gdn::UserModel()->GetID($Article->InsertUserID);
 
                     echo '<li class="RecentlyPublishedArticle">';
-                        echo Wrap(Anchor($Article->Name, ArticleUrl($Article)), 'div', array('class' => 'ArticleTitle'));
+                    echo Wrap(Anchor($Article->Name, ArticleUrl($Article)), 'div', array('class' => 'ArticleTitle'));
 
-                        echo '<div class="ArticleMeta">';
-                            echo '<span class="ArticleDate">' . Gdn_Format::Date($Article->DateInserted, '%e %B %Y - %l:%M %p') . '</span>';
-                            echo '<span class="ArticleAuthor">' . UserAnchor($Author) . '</span>';
-                        echo '</div>';
+                    echo '<div class="ArticleMeta">';
+                    echo '<span class="ArticleDate">' . Gdn_Format::Date($Article->DateInserted, '%e %B %Y - %l:%M %p') . '</span>';
+                    echo '<span class="ArticleAuthor">' . UserAnchor($Author) . '</span>';
+                    echo '</div>';
                     echo '</li>';
                 }
             }
@@ -36,6 +36,7 @@ ShowArticlesDashboardMenu($this->RequestMethod);
 
     <div class="ArticlesDashboardColumn SecondColumn">
         <h2>Recent Comments</h2>
+
         <div>
             None.
         </div>
@@ -43,7 +44,7 @@ ShowArticlesDashboardMenu($this->RequestMethod);
 
     <div class="ClearFix"></div>
 
-    <?php if(Gdn::Session()->CheckPermission('Articles.Articles.Edit')): ?>
+    <?php if (Gdn::Session()->CheckPermission('Articles.Articles.Edit')): ?>
         <div class="ArticlesDashboardColumn FirstColumn">
             <h2>Pending Articles</h2>
             <ul>
@@ -51,11 +52,10 @@ ShowArticlesDashboardMenu($this->RequestMethod);
                 // Render the recently published column.
                 $PendingArticles = $this->Data('PendingArticles')->Result();
 
-                if(count($PendingArticles) == 0)
+                if (count($PendingArticles) == 0)
                     echo 'None.';
-                else
-                {
-                    foreach($PendingArticles as $Article) {
+                else {
+                    foreach ($PendingArticles as $Article) {
                         $Author = Gdn::UserModel()->GetID($Article->InsertUserID);
 
                         echo '<li class="PendingArticle">';

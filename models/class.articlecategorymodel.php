@@ -1,4 +1,5 @@
-<?php if(!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 
 /**
  * Handles data for articles.
@@ -18,15 +19,15 @@ class ArticleCategoryModel extends Gdn_Model {
      *
      * @return Gdn_DataSet SQL result.
      */
-    public function Get($Wheres = NULL) {
+    public function Get($Wheres = null) {
         // Set up selection query.
         $this->SQL->Select('ac.*')->From('ArticleCategory ac');
 
         // Handle SQL conditions for wheres.
-        $this->EventArguments['Wheres'] = &$Wheres;
+        $this->EventArguments['Wheres'] = & $Wheres;
         $this->FireEvent('BeforeGet');
 
-        if(is_array($Wheres))
+        if (is_array($Wheres))
             $this->SQL->Where($Wheres);
 
         // Set order of data.
@@ -76,14 +77,15 @@ class ArticleCategoryModel extends Gdn_Model {
      */
     public function Delete($Category, $ReplacementCategoryID) {
         // Don't do anything if the required category object & properties are not defined.
-        if(!is_object($Category)
+        if (!is_object($Category)
             || !property_exists($Category, 'CategoryID')
             || !property_exists($Category, 'Name')
-            || $Category->CategoryID <= 0) {
+            || $Category->CategoryID <= 0
+        ) {
             throw new Exception(T('Invalid category for deletion.'));
         } else {
             // If there is a replacement category...
-            if($ReplacementCategoryID > 0) {
+            if ($ReplacementCategoryID > 0) {
                 // Update articles.
                 $this->SQL
                     ->Update('Article')
@@ -100,7 +102,7 @@ class ArticleCategoryModel extends Gdn_Model {
                     ->FirstRow()
                     ->ArticleCount;
 
-                if(!is_numeric($Count))
+                if (!is_numeric($Count))
                     $Count = 0;
 
                 $this->SQL

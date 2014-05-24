@@ -1,4 +1,5 @@
-<?php if(!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 
 /**
  * Handles data for articles.
@@ -24,24 +25,24 @@ class ArticleModel extends Gdn_Model {
      *
      * @return Gdn_DataSet SQL result.
      */
-    public function Get($Offset = 0, $Limit = FALSE, $Wheres = NULL) {
+    public function Get($Offset = 0, $Limit = false, $Wheres = null) {
         // Set up selection query.
         $this->SQL->Select('a.*')->From('Article a');
 
         // Assign up limits and offsets.
-        if(!$Limit)
+        if (!$Limit)
             $Limit = Gdn::Config('Articles.Articles.PerPage', 12);
 
         $Offset = !is_numeric($Offset) || ($Offset < 0 ? 0 : $Offset);
 
-        if(($Offset !== FALSE) && ($Limit !== FALSE))
+        if (($Offset !== false) && ($Limit !== false))
             $this->SQL->Limit($Limit, $Offset);
 
         // Handle SQL conditions for wheres.
-        $this->EventArguments['Wheres'] = &$Wheres;
+        $this->EventArguments['Wheres'] = & $Wheres;
         $this->FireEvent('BeforeGet');
 
-        if(is_array($Wheres))
+        if (is_array($Wheres))
             $this->SQL->Where($Wheres);
 
         // Set order of data.

@@ -1,4 +1,5 @@
-<?php if(!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 
 /**
  * The controller for an article.
@@ -50,9 +51,10 @@ class ArticleController extends Gdn_Controller {
 
         // Set required permission.
         $UserModel = new UserModel();
-        if($Article->Status != ArticleModel::STATUS_PUBLISHED)
-            if(($Article->AuthorUserID == Gdn::Session()->UserID)
-                    && !$UserModel->CheckPermission($Article->AuthorUserID, 'Articles.Articles.Edit'))
+        if ($Article->Status != ArticleModel::STATUS_PUBLISHED)
+            if (($Article->AuthorUserID == Gdn::Session()->UserID)
+                && !$UserModel->CheckPermission($Article->AuthorUserID, 'Articles.Articles.Edit')
+            )
                 $this->Permission('Articles.Articles.View');
             else
                 $this->Permission('Articles.Articles.Edit');
@@ -64,9 +66,10 @@ class ArticleController extends Gdn_Controller {
         $this->SetData('Category', $Category);
 
         $DateInsertedYear = Gdn_Format::Date($Article->DateInserted, '%Y');
-        if((count($this->RequestArgs) < 2) || !is_numeric($ArticleYear)
+        if ((count($this->RequestArgs) < 2) || !is_numeric($ArticleYear)
             || ($ArticleUrlCode == '') || !$Article
-            || ($ArticleYear != $DateInsertedYear))
+            || ($ArticleYear != $DateInsertedYear)
+        )
             throw NotFoundException('Article');
 
         // Set the title.

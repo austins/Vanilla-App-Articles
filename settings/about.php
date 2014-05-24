@@ -1,4 +1,5 @@
-<?php if(!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 
 // An associative array of information about this application.
 $ApplicationInfo['Articles'] = array(

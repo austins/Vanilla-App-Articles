@@ -1,4 +1,5 @@
-<?php if(!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 /**
  * Articles stub content for first installation.
  *
@@ -8,7 +9,7 @@
  */
 
 // Only do this once, ever.
-if(!$Drop)
+if (!$Drop)
     return;
 
 // Prep content meta data.

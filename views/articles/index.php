@@ -1,22 +1,23 @@
-<?php if(!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 
-if(!function_exists('ShowArticleOptions'))
+if (!function_exists('ShowArticleOptions'))
     include($this->FetchViewLocation('helper_functions', 'article', 'articles'));
 
 $Articles = $this->Data('Articles')->Result();
 
-$Category = isset($this->Data('Category')->CategoryID) ? $this->Data('Category') : NULL;
+$Category = isset($this->Data('Category')->CategoryID) ? $this->Data('Category') : null;
 
-if($Category)
+if ($Category)
     echo Wrap($Category->Name, 'h1', array('class' => 'H'));
 
-if(count($Articles) == 0) {
-    if($Category)
+if (count($Articles) == 0) {
+    if ($Category)
         echo Wrap(T('No articles have been published in this category.'), 'div');
     else
         echo Wrap(T('No articles have been published yet.'), 'div');
-} else {    
-    foreach($Articles as $Article):
+} else {
+    foreach ($Articles as $Article):
         $ArticleUrl = ArticleUrl($Article);
         $Author = Gdn::UserModel()->GetID($Article->AuthorUserID);
 
@@ -32,8 +33,10 @@ if(count($Articles) == 0) {
                 <h2 class="ArticleTitle"><?php echo Anchor($Article->Name, $ArticleUrl); ?></h2>
 
                 <div class="ArticleMeta">
-                    <span class="ArticleCategory"><?php echo Anchor($Category->Name, ArticleCategoryUrl($Category)); ?></span>
-                    <span class="ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted, '%e %B %Y - %l:%M %p'); ?></span>
+                    <span
+                        class="ArticleCategory"><?php echo Anchor($Category->Name, ArticleCategoryUrl($Category)); ?></span>
+                    <span
+                        class="ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted, '%e %B %Y - %l:%M %p'); ?></span>
                     <span class="ArticleAuthor"><?php echo UserAnchor($Author); ?></span>
                     <span class="ArticleComments"><?php echo Anchor($CommentCount, $ArticleUrl . '#comments'); ?></span>
                 </div>
@@ -46,16 +49,16 @@ if(count($Articles) == 0) {
                 ?>
             </div>
         </article>
-<?php
+    <?php
     endforeach;
-    
+
     // Set up pager.
     $PagerOptions = array('Wrapper' => '<span class="PagerNub">&#160;</span><div %1$s>%2$s</div>', 'RecordCount' => $this->Data('CountArticles'), 'CurrentRecords' => $this->Data('Articles')->NumRows());
     if ($this->Data('_PagerUrl'))
         $PagerOptions['Url'] = $this->Data('_PagerUrl');
-    
+
     echo '<div class="PageControls Bottom">';
-        PagerModule::Write($PagerOptions);
+    PagerModule::Write($PagerOptions);
     echo '</div>';
 }
 ?>

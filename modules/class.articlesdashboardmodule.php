@@ -1,4 +1,5 @@
-<?php if(!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 
 /**
  * Renders the "Articles Dashboard" button.
@@ -16,11 +17,11 @@ class ArticlesDashboardModule extends Gdn_Module {
         $Controller = Gdn::Controller();
         $Session = Gdn::Session();
 
-        $Controller->EventArguments['ArticlesDashboardModule'] = &$this;
+        $Controller->EventArguments['ArticlesDashboardModule'] = & $this;
         $Controller->FireEvent('BeforeArticlesDashboardModuleButton');
 
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
-        if(!$Session->CheckPermission($PermissionsAllowed, false))
+        if (!$Session->CheckPermission($PermissionsAllowed, false))
             return '';
 
         return parent::ToString();

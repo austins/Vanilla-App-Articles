@@ -1,4 +1,5 @@
-<?php if(!defined('APPLICATION')) exit(); ?>
+<?php if (!defined('APPLICATION'))
+    exit(); ?>
     <h1><?php echo $this->Title(); ?></h1>
 <?php
 echo $this->Form->Open();
@@ -14,7 +15,7 @@ echo $this->Form->Errors();
         <li id="UrlCode">
             <?php
             echo Wrap(T('Category URL:'), 'strong');
-            echo ' ' . Gdn::Request()->Url('/articles/category/', TRUE);
+            echo ' ' . Gdn::Request()->Url('/articles/category/', true);
             echo Wrap(htmlspecialchars($this->Form->GetValue('UrlCode')));
             echo $this->Form->TextBox('UrlCode') . '/';
             echo Anchor(T('edit'), '#', 'Edit');
@@ -24,7 +25,7 @@ echo $this->Form->Errors();
         <li>
             <?php
             echo $this->Form->Label('Description', 'Description');
-            echo $this->Form->TextBox('Description', array('MultiLine' => TRUE));
+            echo $this->Form->TextBox('Description', array('MultiLine' => true));
             ?>
         </li>
     </ul>

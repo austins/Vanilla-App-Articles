@@ -1,4 +1,5 @@
-<?php if(!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 
 /**
  * The class.hooks.php file is essentially a giant plugin container for an app
@@ -11,7 +12,7 @@ class ArticlesHooks extends Gdn_Plugin {
      * @param $Sender
      */
     public function Base_Render_Before($Sender) {
-        if($Sender->Menu)
+        if ($Sender->Menu)
             $Sender->Menu->AddLink('Articles', T('Articles'), '/articles/');
     }
 
@@ -33,7 +34,7 @@ class ArticlesHooks extends Gdn_Plugin {
         $ApplicationInfo = array();
         include(PATH_APPLICATIONS . DS . 'articles' . DS . 'settings' . DS . 'about.php');
         $Version = ArrayValue('Version', $ApplicationInfo['Articles'], false);
-        if($Version) {
+        if ($Version) {
             $Save = array('Articles.Version' => $Version);
             SaveToConfig($Save);
         }
@@ -60,10 +61,10 @@ class ArticlesHooks extends Gdn_Plugin {
         $ConfigModule = new ConfigurationModule($Sender);
 
         $ConfigModule->Initialize(array(
-                //'Example.Example.Enabled' => array(
-                //   'LabelCode' => 'Use Example',
-                //   'Control'   => 'Checkbox'
-                //)
+            //'Example.Example.Enabled' => array(
+            //   'LabelCode' => 'Use Example',
+            //   'Control'   => 'Checkbox'
+            //)
         ));
 
         $Sender->ConfigurationModule = $ConfigModule;
@@ -112,14 +113,14 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->Form->SetModel($ArticleCategoryModel);
 
         // If editing a category, then set the data in the form.
-        $Category = FALSE;
-        if($Sender->RequestArgs[0] === 'editcategory') {
+        $Category = false;
+        if ($Sender->RequestArgs[0] === 'editcategory') {
             $CategoryID = (int)$Sender->RequestArgs[1];
 
-            if(is_numeric($CategoryID)) {
+            if (is_numeric($CategoryID)) {
                 $Category = $ArticleCategoryModel->GetByID($CategoryID);
 
-                if($Category)
+                if ($Category)
                     $Sender->Form->SetData($Category);
                 else
                     throw NotFoundException(T('Article category'));
@@ -129,14 +130,14 @@ class ArticlesHooks extends Gdn_Plugin {
         }
 
         // Set the title of the page.
-        if(!$Category)
+        if (!$Category)
             $Sender->Title(T('Add Article Category'));
         else
             $Sender->Title(T('Edit Article Category'));
 
         // Handle the form.
-        if(!$Sender->Form->AuthenticatedPostBack()) {
-            if(!$Category)
+        if (!$Sender->Form->AuthenticatedPostBack()) {
+            if (!$Category)
                 $Sender->Form->AddHidden('UrlCodeIsDefined', '0');
             else
                 $Sender->Form->AddHidden('UrlCodeIsDefined', '1');
@@ -148,7 +149,7 @@ class ArticlesHooks extends Gdn_Plugin {
             // Manually validate certain fields.
             $FormValues = $Sender->Form->FormValues();
 
-            if($Category)
+            if ($Category)
                 $FormValues['CategoryID'] = $CategoryID;
 
             // Format URL code before saving.
@@ -156,16 +157,15 @@ class ArticlesHooks extends Gdn_Plugin {
 
             // Check if URL code is in use by another category.
             $CategoryWithNewUrlCode = (bool)$ArticleCategoryModel->GetByUrlCode($FormValues['UrlCode']);
-            if((!$Category && $CategoryWithNewUrlCode)
-                || ($Category && $CategoryWithNewUrlCode && ($Category->UrlCode != $FormValues['UrlCode'])))
+            if ((!$Category && $CategoryWithNewUrlCode)
+                || ($Category && $CategoryWithNewUrlCode && ($Category->UrlCode != $FormValues['UrlCode']))
+            )
                 $Sender->Form->AddError('The specified URL code is already in use by another category.', 'UrlCode');
 
             // If there are no errors, then save the category.
-            if($Sender->Form->ErrorCount() == 0) {
-                if($Sender->Form->Save($FormValues))
-                {
-                    if(!$Category)
-                    {
+            if ($Sender->Form->ErrorCount() == 0) {
+                if ($Sender->Form->Save($FormValues)) {
+                    if (!$Category) {
                         // Inserting.
                         $Sender->RedirectUrl = Url('/settings/articles/categories/');
                         $Sender->InformMessage(T('New article category added successfully.'));
@@ -196,17 +196,17 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->AddJsFile('articles.js', 'articles');
 
         // Get category ID.
-        $CategoryID = FALSE;
-        if(isset($Sender->RequestArgs[1]) && is_numeric($Sender->RequestArgs[1]))
+        $CategoryID = false;
+        if (isset($Sender->RequestArgs[1]) && is_numeric($Sender->RequestArgs[1]))
             $CategoryID = $Sender->RequestArgs[1];
 
         // Get category data.
         $Sender->Form = new Gdn_Form();
         $ArticleCategoryModel = new ArticleCategoryModel();
         $Category = $ArticleCategoryModel->GetByID($CategoryID);
-        $Sender->SetData('Category', $Category, TRUE);
+        $Sender->SetData('Category', $Category, true);
 
-        if(!$Category) {
+        if (!$Category) {
             $Sender->Form->AddError('The specified article category could not be found.');
         } else {
             // Make sure the form knows which item we are deleting.
@@ -217,19 +217,19 @@ class ArticlesHooks extends Gdn_Plugin {
                 'CategoryID <>' => $CategoryID,
                 'CategoryID >' => 0
             ));
-            $Sender->SetData('OtherCategories', $OtherCategories, TRUE);
+            $Sender->SetData('OtherCategories', $OtherCategories, true);
 
-            if(!$Sender->Form->AuthenticatedPostBack()) {
+            if (!$Sender->Form->AuthenticatedPostBack()) {
                 $Sender->Form->SetFormValue('DeleteArticles', '1'); // Checked by default
             } else {
                 $ReplacementCategoryID = $Sender->Form->GetValue('ReplacementCategoryID');
                 $ReplacementCategory = $ArticleCategoryModel->GetByID($ReplacementCategoryID);
                 // Error if:
                 // 1. The category being deleted is the last remaining category.
-                if($OtherCategories->NumRows() == 0)
+                if ($OtherCategories->NumRows() == 0)
                     $Sender->Form->AddError('You cannot remove the only remaining category.');
 
-                if($Sender->Form->ErrorCount() == 0) {
+                if ($Sender->Form->ErrorCount() == 0) {
                     // Go ahead and delete the category.
                     try {
                         $ArticleCategoryModel->Delete($Category, $Sender->Form->GetValue('ReplacementCategoryID'));
@@ -255,9 +255,9 @@ class ArticlesHooks extends Gdn_Plugin {
      */
     public function Base_GetAppSettingsMenuItems_Handler($Sender) {
         $GroupName = 'Articles';
-        $Menu = &$Sender->EventArguments['SideMenu'];
+        $Menu = & $Sender->EventArguments['SideMenu'];
 
-        $Menu->AddItem($GroupName, $GroupName, FALSE, array('class' => $GroupName));
+        $Menu->AddItem($GroupName, $GroupName, false, array('class' => $GroupName));
         $Menu->AddLink($GroupName, T('Settings'), '/settings/articles/', 'Garden.Settings.Manage');
         $Menu->AddLink($GroupName, T('Categories'), '/settings/articles/categories/', 'Garden.Settings.Manage');
     }

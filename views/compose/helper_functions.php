@@ -1,6 +1,7 @@
-<?php if(!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 
-if(!function_exists('ShowArticlesDashboardMenu')) {
+if (!function_exists('ShowArticlesDashboardMenu')) {
     function ShowArticlesDashboardMenu($RequestMethod = '') {
         $MenuLinks = array(
             'index' => array('Text' => 'Dashboard', 'Destination' => '/compose/'),
@@ -10,11 +11,11 @@ if(!function_exists('ShowArticlesDashboardMenu')) {
 
         echo '<div id="ArticlesDashboardMenu">';
         echo '<ul>';
-        foreach($MenuLinks as $MethodName => $Link) {
+        foreach ($MenuLinks as $MethodName => $Link) {
             $LinkCssClass = $Link['Text'];
 
             $WrapAttributes = array();
-            if(strtolower($RequestMethod) == $MethodName)
+            if (strtolower($RequestMethod) == $MethodName)
                 $WrapAttributes['class'] = 'Active';
 
             echo Wrap(Anchor($Link['Text'], $Link['Destination'], $LinkCssClass), 'li', $WrapAttributes);

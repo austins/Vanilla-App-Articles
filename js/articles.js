@@ -1,6 +1,6 @@
-jQuery(document).ready(function($) {
+jQuery(document).ready(function ($) {
     // Map plain text category to url code
-    $("#Form_Name").keyup(function(event) {
+    $("#Form_Name").keyup(function (event) {
         if ($('#Form_UrlCodeIsDefined').val() == '0') {
             $('#UrlCode').show();
             var val = $(this).val().replace(/[ \/\\&.?;,<>'"]+/g, '-')
@@ -11,13 +11,13 @@ jQuery(document).ready(function($) {
     });
     // Make sure not to override any values set by the user.
     $('#UrlCode span').text($('#UrlCode input').val());
-    $("#Form_UrlCode").focus(function() {
+    $("#Form_UrlCode").focus(function () {
         $('#Form_UrlCodeIsDefined').val('1')
     });
     $('#UrlCode input, #UrlCode a.Save').hide();
 
     // Reveal input when "change" button is clicked
-    $('#UrlCode a, #UrlCode span').click(function() {
+    $('#UrlCode a, #UrlCode span').click(function () {
         $('#UrlCode').find('input,span,a').toggle();
         $('#UrlCode span').text($('#UrlCode input').val());
         $('#UrlCode input').focus();
@@ -26,8 +26,8 @@ jQuery(document).ready(function($) {
 
     // /settings/articles/deletecategory/
     // Hide/reveal the delete options when the DeleteArticles checkbox is un/checked.
-    $('[name$=DeleteArticles]').click(function() {
-        if($(this).attr('checked')) {
+    $('[name$=DeleteArticles]').click(function () {
+        if ($(this).attr('checked')) {
             $('#ReplacementCategory,#ReplacementWarning').slideDown('fast');
             $('#DeleteArticles').slideUp('fast');
         } else {
@@ -37,7 +37,7 @@ jQuery(document).ready(function($) {
     });
     // /settings/articles/deletecategory/
     // Hide onload if unchecked
-    if(!$('[name$=DeleteArticles]').attr('checked')) {
+    if (!$('[name$=DeleteArticles]').attr('checked')) {
         $('#ReplacementCategory,#ReplacementWarning').hide();
         $('#DeleteArticles').show();
     } else {
@@ -46,7 +46,7 @@ jQuery(document).ready(function($) {
     }
 
     // Enable multicomplete on selected inputs
-    $('.MultiComplete').livequery(function() {
+    $('.MultiComplete').livequery(function () {
         $(this).autocomplete(
             gdn.url('/dashboard/user/autocomplete/'),
             {
@@ -58,8 +58,8 @@ jQuery(document).ready(function($) {
         );
     });
 
-    if($.autogrow)
-        $('textarea.TextBox').livequery(function() {
+    if ($.autogrow)
+        $('textarea.TextBox').livequery(function () {
             $(this).autogrow();
         });
 });

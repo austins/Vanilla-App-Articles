@@ -1,4 +1,5 @@
-<?php if(!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 
 /**
  * The controller for the composing of articles.
@@ -63,7 +64,7 @@ class ComposeController extends Gdn_Controller {
         $this->SetData('RecentlyPublished', $RecentlyPublished);
 
         // Get recent articles pending review.
-        if(Gdn::Session()->CheckPermission('Articles.Articles.Edit')) {
+        if (Gdn::Session()->CheckPermission('Articles.Articles.Edit')) {
             $PendingArticlesOffset = 0;
             $PendingArticlesLimit = 5;
             $PendingArticlesWheres = array('a.Status' => ArticleModel::STATUS_PENDING);
@@ -82,7 +83,7 @@ class ComposeController extends Gdn_Controller {
         // The user only needs one of the specified permissions.
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
         $this->Permission($PermissionsAllowed, false);
-        
+
         // Get total article count.
         $CountArticles = $this->ArticleModel->GetCount();
         $this->SetData('CountArticles', $CountArticles);
@@ -90,34 +91,34 @@ class ComposeController extends Gdn_Controller {
         // Determine offset from $Page.
         list($Offset, $Limit) = OffsetLimit($Page, C('Articles.Articles.PerPage', 12));
         $Page = PageNumber($Offset, $Limit);
-        $this->CanonicalUrl(Url(ConcatSep('/', 'articles', PageNumber($Offset, $Limit, TRUE, FALSE)), TRUE));
+        $this->CanonicalUrl(Url(ConcatSep('/', 'articles', PageNumber($Offset, $Limit, true, false)), true));
 
         // Have a way to limit the number of pages on large databases
         // because requesting a super-high page can kill the db.
         $MaxPages = C('Articles.Articles.MaxPages', false);
-        if($MaxPages && $Page > $MaxPages) {
+        if ($MaxPages && $Page > $MaxPages) {
             throw NotFoundException();
         }
-        
+
         // Build a pager
         $PagerFactory = new Gdn_PagerFactory();
         $this->EventArguments['PagerType'] = 'Pager';
         $this->FireEvent('BeforeBuildPager');
         $this->Pager = $PagerFactory->GetPager($this->EventArguments['PagerType'], $this);
         $this->Pager->ClientID = 'Pager';
-        $this->Pager->Configure( $Offset, $Limit, $CountArticles, 'articles/%1$s');
+        $this->Pager->Configure($Offset, $Limit, $CountArticles, 'articles/%1$s');
         if (!$this->Data('_PagerUrl'))
             $this->SetData('_PagerUrl', 'articles/{Page}');
         $this->SetData('_Page', $Page);
         $this->SetData('_Limit', $Limit);
         $this->FireEvent('AfterBuildPager');
-        
+
         // If the user is not an article editor, then only show their own articles.
         $Session = Gdn::Session();
         $Wheres = false;
-        if(!$Session->CheckPermission('Articles.Articles.Edit'))
+        if (!$Session->CheckPermission('Articles.Articles.Edit'))
             $Wheres = array('a.AuthorUserID' => $Session->UserID);
-        
+
         // Get the articles.
         $Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres);
         $this->SetData('Articles', $Articles);
@@ -132,8 +133,9 @@ class ComposeController extends Gdn_Controller {
             ArticleModel::STATUS_PENDING => T('Pending Review'),
         );
 
-        if(Gdn::Session()->CheckPermission('Articles.Articles.Edit')
-                || ($this->Article && ((int)$this->Article->Status == 2)))
+        if (Gdn::Session()->CheckPermission('Articles.Articles.Edit')
+            || ($this->Article && ((int)$this->Article->Status == 2))
+        )
             $StatusOptions[ArticleModel::STATUS_PUBLISHED] = T('Published');
 
         return $StatusOptions;
@@ -141,7 +143,7 @@ class ComposeController extends Gdn_Controller {
 
     public function Article() {
         // If not editing...
-        if(!$this->Article) {
+        if (!$this->Article) {
             $this->Title(T('Add Article'));
 
             // Set allowed permission.
@@ -161,18 +163,18 @@ class ComposeController extends Gdn_Controller {
         $UserModel = new UserModel();
 
         // The form has not been submitted yet.
-        if(!$this->Form->AuthenticatedPostBack()) {
+        if (!$this->Form->AuthenticatedPostBack()) {
             // If editing...
-            if($this->Article) {
+            if ($this->Article) {
                 $this->Form->SetData($this->Article);
-                
+
                 $this->Form->AddHidden('UrlCodeIsDefined', '1');
-                
+
                 // Set author field.
                 $Author = $UserModel->GetID($this->Article->AuthorUserID);
 
                 // If the user with AuthorUserID doesn't exist.
-                if(!$Author)
+                if (!$Author)
                     $Author = $UserModel->GetID($this->Article->InsertUserID);
             } else {
                 // If not editing...
@@ -180,7 +182,7 @@ class ComposeController extends Gdn_Controller {
             }
 
             // If the user with InsertUserID doesn't exist.
-            if(!$Author)
+            if (!$Author)
                 $Author = Gdn::Session()->User;
 
             $this->Form->SetValue('AuthorUserName', $Author->Name);
@@ -192,42 +194,43 @@ class ComposeController extends Gdn_Controller {
             // Set UrlCode to name of article if it's not defined.
             if ($FormValues['UrlCode'] == '')
                 $FormValues['UrlCode'] = $FormValues['Name'];
-            
+
             // Format the UrlCode.
             $FormValues['UrlCode'] = Gdn_Format::Url($FormValues['UrlCode']);
             $this->Form->SetFormValue('UrlCode', $FormValues['UrlCode']);
-            
+
             // If editing, make sure the ArticleID is passed to the form save method.
             $SQL = Gdn::Database()->SQL();
-            if($this->Article) {
+            if ($this->Article) {
                 $this->Form->SetFormValue('ArticleID', (int)$this->Article->ArticleID);
-                
+
                 $ValidUrlCode = $SQL
-                   ->Select('a.UrlCode')
-                   ->From('Article a')
-                   ->Where('a.ArticleID', $this->Article->ArticleID)
-                   ->Get()
-                   ->FirstRow();
+                    ->Select('a.UrlCode')
+                    ->From('Article a')
+                    ->Where('a.ArticleID', $this->Article->ArticleID)
+                    ->Get()
+                    ->FirstRow();
             }
-            
+
             // Make sure that the UrlCode is unique among articles.
             $UrlCodeExists = $SQL
-                    ->Select('a.ArticleID')
-                    ->From('Article a')
-                    ->Where('a.UrlCode', $FormValues['UrlCode'])
-                    ->Get()
-                    ->NumRows();
-            
+                ->Select('a.ArticleID')
+                ->From('Article a')
+                ->Where('a.UrlCode', $FormValues['UrlCode'])
+                ->Get()
+                ->NumRows();
+
             if ((isset($this->Article) && $UrlCodeExists && ($ValidUrlCode->UrlCode != $FormValues['UrlCode']))
-                    || ((!isset($this->Article) && $UrlCodeExists)))
+                || ((!isset($this->Article) && $UrlCodeExists))
+            )
                 $this->Form->AddError('The specified URL code is already in use by another article.', 'UrlCode');
 
             // Retrieve author user ID.
             $Author = $UserModel->GetByUsername($FormValues['AuthorUserName']);
 
             // If the inputted author doesn't exist.
-            if(!$Author) {
-                if($FormValues['AuthorUserName'] === "")
+            if (!$Author) {
+                if ($FormValues['AuthorUserName'] === "")
                     $this->Form->AddError('Author is required.', 'AuthorUserName');
                 else
                     $this->Form->AddError('The user for the author field does not exist.', 'AuthorUserName');
@@ -235,18 +238,18 @@ class ComposeController extends Gdn_Controller {
 
             $this->Form->SetFormValue('AuthorUserID', (int)$Author->UserID);
 
-            if($this->Form->ErrorCount() == 0) {
+            if ($this->Form->ErrorCount() == 0) {
                 $ArticleID = $this->Form->Save($FormValues);
 
                 // If the article was saved successfully.
-                if($ArticleID) {
+                if ($ArticleID) {
                     $Article = $this->ArticleModel->GetByID($ArticleID);
 
                     // Redirect to the article.
-                    if($this->_DeliveryType == DELIVERY_TYPE_ALL)
+                    if ($this->_DeliveryType == DELIVERY_TYPE_ALL)
                         Redirect(ArticleUrl($Article));
                     else
-                        $this->RedirectUrl = ArticleUrl($Article, '', TRUE);
+                        $this->RedirectUrl = ArticleUrl($Article, '', true);
                 }
             }
 
@@ -270,18 +273,18 @@ class ComposeController extends Gdn_Controller {
         $this->Render();
     }
 
-    public function EditArticle($ArticleID = FALSE) {
+    public function EditArticle($ArticleID = false) {
         $this->Title(T('Edit Article'));
 
         // Set allowed permission.
         $this->Permission('Articles.Articles.Edit');
 
         // Get article.
-        if(is_numeric($ArticleID))
+        if (is_numeric($ArticleID))
             $this->Article = $this->ArticleModel->GetByID($ArticleID);
 
         // If the article doesn't exist, then throw an exception.
-        if(!$this->Article)
+        if (!$this->Article)
             throw NotFoundException('Article');
 
         // Get category.

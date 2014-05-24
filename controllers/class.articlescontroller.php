@@ -1,4 +1,5 @@
-<?php if(!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 
 /**
  * Master application controller for Articles.
@@ -41,7 +42,7 @@ class ArticlesController extends Gdn_Controller {
      * The main method of this controller.
      */
     public function Index($Page = false) {
-        if(Gdn::Router()->GetDestination('DefaultController') !== 'articles')
+        if (Gdn::Router()->GetDestination('DefaultController') !== 'articles')
             $this->Title(T('Articles'));
 
         // TODO: Set title appropriately if not first page of index.
@@ -51,7 +52,7 @@ class ArticlesController extends Gdn_Controller {
 
         // Add module.
         $this->AddModule('ArticlesDashboardModule');
-        
+
         // Get total article count.
         $CountArticles = $this->ArticleModel->GetCount();
         $this->SetData('CountArticles', $CountArticles);
@@ -59,22 +60,22 @@ class ArticlesController extends Gdn_Controller {
         // Determine offset from $Page.
         list($Offset, $Limit) = OffsetLimit($Page, C('Articles.Articles.PerPage', 12));
         $Page = PageNumber($Offset, $Limit);
-        $this->CanonicalUrl(Url(ConcatSep('/', 'articles', PageNumber($Offset, $Limit, TRUE, FALSE)), TRUE));
+        $this->CanonicalUrl(Url(ConcatSep('/', 'articles', PageNumber($Offset, $Limit, true, false)), true));
 
         // Have a way to limit the number of pages on large databases
         // because requesting a super-high page can kill the db.
         $MaxPages = C('Articles.Articles.MaxPages', false);
-        if($MaxPages && $Page > $MaxPages) {
+        if ($MaxPages && $Page > $MaxPages) {
             throw NotFoundException();
         }
-        
+
         // Build a pager
         $PagerFactory = new Gdn_PagerFactory();
         $this->EventArguments['PagerType'] = 'Pager';
         $this->FireEvent('BeforeBuildPager');
         $this->Pager = $PagerFactory->GetPager($this->EventArguments['PagerType'], $this);
         $this->Pager->ClientID = 'Pager';
-        $this->Pager->Configure( $Offset, $Limit, $CountArticles, 'articles/%1$s');
+        $this->Pager->Configure($Offset, $Limit, $CountArticles, 'articles/%1$s');
         if (!$this->Data('_PagerUrl'))
             $this->SetData('_PagerUrl', 'articles/{Page}');
         $this->SetData('_Page', $Page);
@@ -84,9 +85,9 @@ class ArticlesController extends Gdn_Controller {
         // Get published articles.
         $Wheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED);
         $Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres);
-        
+
         $this->SetData('Articles', $Articles);
-        
+
         $this->View = 'index';
         $this->Render();
     }
@@ -104,10 +105,10 @@ class ArticlesController extends Gdn_Controller {
         // Get the category.
         $Category = null;
 
-        if($UrlCode != '')
+        if ($UrlCode != '')
             $Category = $this->ArticleCategoryModel->GetByUrlCode($UrlCode);
 
-        if(!$Category)
+        if (!$Category)
             throw NotFoundException('Article category');
 
         $this->SetData('Category', $Category);

@@ -1,4 +1,5 @@
-<?php if(!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 
 $Categories = $this->Data('Categories')->Result();
 ?>
@@ -16,7 +17,7 @@ $Categories = $this->Data('Categories')->Result();
 <h1><?php echo T('Organize Categories'); ?></h1>
 <ol class="Sortable">
     <?php
-    foreach($Categories as $Category) {
+    foreach ($Categories as $Category) {
         echo '<li id="Category_' . $Category->CategoryID . '">';
         echo '<table>
             <tr>
@@ -26,7 +27,7 @@ $Categories = $this->Data('Categories')->Result();
                  ' . Wrap($Category->Description, 'blockquote') . '
               </td>
               <td class="Buttons">'
-            . Anchor(T('Edit'), '/settings/articles/editcategory/' . $Category->CategoryID .'/', 'SmallButton')
+            . Anchor(T('Edit'), '/settings/articles/editcategory/' . $Category->CategoryID . '/', 'SmallButton')
             . Anchor(T('Delete'), '/settings/articles/deletecategory/' . $Category->CategoryID . '/', 'SmallButton')
             . '</td>
             </tr>

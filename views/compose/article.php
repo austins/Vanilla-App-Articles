@@ -1,4 +1,5 @@
-<?php if (!defined('APPLICATION')) exit();
+<?php if (!defined('APPLICATION'))
+    exit();
 
 if (!function_exists('ShowArticlesDashboardMenu'))
     include($this->FetchViewLocation('helper_functions', 'compose', 'articles'));
@@ -18,7 +19,7 @@ echo $this->Form->Errors();
             echo '<div class="P">';
             echo $this->Form->Label('Category', 'CategoryID'), ' ';
             echo $this->Form->DropDown('CategoryID', $Categories, array(
-                'IncludeNull' => TRUE,
+                'IncludeNull' => true,
                 'ValueField' => 'CategoryID',
                 'TextField' => 'Name',
                 'Value' => GetValue('CategoryID', $this->Category)
@@ -53,7 +54,7 @@ echo $this->Form->Errors();
             echo $this->Form->BodyBox('Excerpt', array('Table' => 'Article'));
             ?>
         </div>
-        <?php if(Gdn::Session()->CheckPermission('Articles.Articles.Edit')): ?>
+        <?php if (Gdn::Session()->CheckPermission('Articles.Articles.Edit')): ?>
             <div class="P">
                 <?php
                 echo $this->Form->Label('Author', 'AuthorUserName');
@@ -62,10 +63,10 @@ echo $this->Form->Errors();
             </div>
         <?php endif; ?>
         <div class="P">
-           <?php
-           echo $this->Form->Label('Status', 'Status');
-           echo $this->Form->RadioList('Status', $this->Data('StatusOptions'), array('Default' => ArticleModel::STATUS_DRAFT));
-           ?>
+            <?php
+            echo $this->Form->Label('Status', 'Status');
+            echo $this->Form->RadioList('Status', $this->Data('StatusOptions'), array('Default' => ArticleModel::STATUS_DRAFT));
+            ?>
         </div>
     </div>
 
