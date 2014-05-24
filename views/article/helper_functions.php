@@ -7,7 +7,7 @@ if (!function_exists('ShowArticleOptions')) {
         if (is_array($Article))
             $Article = (object)$Article;
 
-        //$Sender = Gdn::Controller();
+        $Sender = Gdn::Controller();
         $Session = Gdn::Session();
         $Options = array();
 
@@ -28,10 +28,20 @@ if (!function_exists('ShowArticleOptions')) {
 
         // Can the user delete?
         if ($Session->CheckPermission('Articles.Articles.Delete'))
+        {
+            $ArticleCategoryModel = new ArticleCategoryModel();
+            $Category = $ArticleCategoryModel->GetByID(GetValue('CategoryID', $Article));
+
             $Options['DeleteArticle'] = array(
                 'Label' => T('Delete'),
-                'Url' => '/compose/deletearticle/' . $Article->ArticleID . '/',
-                'Class' => 'Popup');
+                'Url' => '/compose/deletearticle/' . $Article->ArticleID,
+                'Class' => 'DeleteArticle Popup');
+
+            if (strtolower($Sender->ControllerName) === "articlecontroller")
+                $Options['DeleteArticle']['Url'] .= '?&target=' . urlencode(ArticleCategoryUrl($Category));
+            else
+                $Options['DeleteArticle']['Url'] .= '/';
+        }
 
         // Render the article options menu.
         if (!empty($Options)) {
