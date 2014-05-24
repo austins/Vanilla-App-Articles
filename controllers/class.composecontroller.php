@@ -203,28 +203,28 @@ class ComposeController extends Gdn_Controller {
 
             // If editing, make sure the ArticleID is passed to the form save method.
             $SQL = Gdn::Database()->SQL();
-            if ($this->Article) {
+            if ($this->Article)
                 $this->Form->SetFormValue('ArticleID', (int)$this->Article->ArticleID);
 
-                $ValidUrlCode = $SQL
-                    ->Select('a.UrlCode')
+            // Make sure that the UrlCode is unique among articles.
+            if($this->Article) {
+                $UrlCodeExists = $SQL
+                    ->Select('a.ArticleID')
                     ->From('Article a')
-                    ->Where('a.ArticleID', $this->Article->ArticleID)
+                    ->Where('a.UrlCode', $FormValues['UrlCode'])
+                    ->Where('a.ArticleID <>', $this->Article->ArticleID)
+                    ->Get()
+                    ->FirstRow();
+            } else {
+                $UrlCodeExists = $SQL
+                    ->Select('a.ArticleID')
+                    ->From('Article a')
+                    ->Where('a.UrlCode', $FormValues['UrlCode'])
                     ->Get()
                     ->FirstRow();
             }
 
-            // Make sure that the UrlCode is unique among articles.
-            $UrlCodeExists = $SQL
-                ->Select('a.ArticleID')
-                ->From('Article a')
-                ->Where('a.UrlCode', $FormValues['UrlCode'])
-                ->Get()
-                ->NumRows();
-
-            if ((isset($this->Article) && $UrlCodeExists && ($ValidUrlCode->UrlCode != $FormValues['UrlCode']))
-                || ((!isset($this->Article) && $UrlCodeExists))
-            )
+            if(isset($UrlCodeExists->ArticleID))
                 $this->Form->AddError('The specified URL code is already in use by another article.', 'UrlCode');
 
             // Retrieve author user ID.
@@ -254,8 +254,6 @@ class ComposeController extends Gdn_Controller {
                         $this->RedirectUrl = ArticleUrl($Article, '', true);
                 }
             }
-
-            // TODO add/edit article validation and more fields.
         }
 
         $this->View = 'article';
