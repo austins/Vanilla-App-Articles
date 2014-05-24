@@ -223,8 +223,9 @@ class ComposeController extends Gdn_Controller {
                     ->Get()
                     ->FirstRow();
             }
-
-            if(isset($UrlCodeExists->ArticleID))
+            
+            $UrlCodeExists = isset($UrlCodeExists->ArticleID);
+            if($UrlCodeExists)
                 $this->Form->AddError('The specified URL code is already in use by another article.', 'UrlCode');
 
             // Retrieve author user ID.
