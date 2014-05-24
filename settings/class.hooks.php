@@ -43,15 +43,19 @@ class ArticlesHooks extends Gdn_Plugin {
     /**
      * Create the Articles settings page.
      * Runs the Dispatch method which handles methods for the page.
+     *
+     * @param SettingsController $Sender
      */
-    public function SettingsController_Articles_Create(SettingsController $Sender) {
+    public function SettingsController_Articles_Create($Sender) {
         $this->Dispatch($Sender, $Sender->RequestArgs);
     }
 
     /**
      * The Index method of the Articles setting page.
+     *
+     * @param SettingsController $Sender
      */
-    public function Controller_Index(SettingsController $Sender) {
+    public function Controller_Index($Sender) {
         $Sender->Title('Articles Settings');
 
         // Set required permission.
@@ -75,8 +79,10 @@ class ArticlesHooks extends Gdn_Plugin {
 
     /**
      * The Categories method of the Articles setting page.
+     *
+     * @param SettingsController $Sender
      */
-    public function Controller_Categories(SettingsController $Sender) {
+    public function Controller_Categories($Sender) {
         $Sender->Title('Article Categories');
 
         // Set required permission.
@@ -99,8 +105,10 @@ class ArticlesHooks extends Gdn_Plugin {
 
     /**
      * The Categories method of the Articles setting page.
+     *
+     * @param SettingsController $Sender
      */
-    public function Controller_AddCategory(SettingsController $Sender) {
+    public function Controller_AddCategory($Sender) {
         // Set required permission.
         $Sender->Permission('Garden.Settings.Manage');
 
@@ -182,11 +190,17 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->Render();
     }
 
-    public function Controller_EditCategory(SettingsController $Sender) {
+    /**
+     * @param SettingsController $Sender
+     */
+    public function Controller_EditCategory($Sender) {
         $this->Controller_AddCategory($Sender);
     }
 
-    public function Controller_DeleteCategory(SettingsController $Sender) {
+    /**
+     * @param SettingsController $Sender
+     */
+    public function Controller_DeleteCategory($Sender) {
         // Check permission.
         $Sender->Permission('Garden.Settings.Manage');
 
@@ -252,6 +266,8 @@ class ArticlesHooks extends Gdn_Plugin {
 
     /**
      * Add links for the setting pages to the dashboard sidebar.
+     *
+     * @param Gdn_Controller $Sender
      */
     public function Base_GetAppSettingsMenuItems_Handler($Sender) {
         $GroupName = 'Articles';
@@ -265,7 +281,7 @@ class ArticlesHooks extends Gdn_Plugin {
     /**
      * Adds 'Articles' tab to profiles and adds CSS & JS files to their head.
      *
-     * @param object $Sender ProfileController.
+     * @param ProfileController $Sender
      */
     public function ProfileController_AddProfileTabs_Handler($Sender) {
         if (is_object($Sender->User) && ($Sender->User->UserID > 0)) {
@@ -291,7 +307,7 @@ class ArticlesHooks extends Gdn_Plugin {
     /**
      * Creates virtual 'Articles' method in ProfileController.
      *
-     * @param ProfileController $Sender ProfileController.
+     * @param ProfileController $Sender
      */
     public function ProfileController_Articles_Create($Sender, $UserReference = '', $Username = '', $Page = '', $UserID = '') {
         $Sender->EditMode(false);

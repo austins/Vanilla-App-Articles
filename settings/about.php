@@ -9,7 +9,7 @@ $ApplicationInfo['Articles'] = array(
     'AuthorUrl' => 'http://vanillaforums.org/profile/addons/16014/Shadowdare',
     'Url' => 'http://vanillaforums.org/addon/articles-application',
     'License' => 'Do not redistribute, modify, or create derivative works.',
-    'RequiredApplications' => array('Vanilla' => '2.1rc1'),
+    'RequiredApplications' => array('Vanilla' => '2.1'),
     'RegisterPermissions' => false,
     'SetupController' => 'setup',
     'Settings' => '/settings/articles/'
