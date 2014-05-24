@@ -22,13 +22,22 @@ else
     <header>
         <h1 class="ArticleTitle"><?php echo $Article->Name; ?></h1>
 
-        <div class="ArticleMeta">
-            <span class="ArticleCategory"><?php echo Anchor($Category->Name, ArticleCategoryUrl($Category)); ?></span>
+        <div class="Meta Meta-Article">
+            <?php
+            Gdn::Controller()->FireEvent('BeforeArticleMeta');
+
+            echo ArticleTag($Article, 'Closed', 'Closed');
+
+            Gdn::Controller()->FireEvent('AfterArticleLabels');
+            ?>
             <span
-                class="ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
-                    '%e %B %Y - %l:%M %p'); ?></span>
-            <span class="ArticleAuthor"><?php echo UserAnchor($Author); ?></span>
-            <span class="ArticleComments"><?php echo Anchor($CommentCount, $ArticleUrl . '#comments'); ?></span>
+                class="MItem MCount ArticleCategory"><?php echo Anchor($Category->Name,
+                    ArticleCategoryUrl($Category)); ?></span>
+                    <span
+                        class="MItem MCount ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
+                            '%e %B %Y - %l:%M %p'); ?></span>
+            <span class="MItem MCount ArticleAuthor"><?php echo UserAnchor($Author); ?></span>
+            <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCount, $ArticleUrl . '#comments'); ?></span>
         </div>
     </header>
 

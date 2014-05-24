@@ -296,8 +296,63 @@ class ComposeController extends Gdn_Controller {
         $this->Article();
     }
 
-    public function CloseArticle() {
-        // TODO CloseArticle()
+    private function SendOptions($Article) {
+        require_once($this->FetchViewLocation('helper_functions', 'Article', 'Articles'));
+
+        ob_start();
+        ShowArticleOptions($Article);
+        $Options = ob_get_clean();
+
+        $this->JsonTarget("#Article_{$Article->ArticleID} .OptionsMenu,.Section-Article .Article .OptionsMenu", $Options, 'ReplaceWith');
+    }
+
+    /**
+     * Allows user to close or re-open an article.
+     *
+     * If the article isn't closed, this closes it. If it is already
+     * closed, this re-opens it. Closed article may not have new
+     * comments added to them.
+     *
+     * @param int $ArticleID Unique article ID.
+     * @param bool $Close Whether or not to close the discussion.
+     */
+    public function Close($ArticleID, $Close = TRUE, $From = 'list') {
+        // Make sure we are posting back.
+        if (!$this->Request->IsPostBack())
+            throw PermissionException('Javascript');
+
+        $this->Permission('Articles.Articles.Close');
+
+        $Article = $this->ArticleModel->GetID($ArticleID);
+
+        if (!$Article)
+            throw NotFoundException('Article');
+
+        // Close the discussion.
+        $this->ArticleModel->SetField($ArticleID, 'Closed', $Close);
+        $Article->Closed = $Close;
+
+        // Redirect to the front page
+        if ($this->_DeliveryType === DELIVERY_TYPE_ALL) {
+            $Target = GetIncomingValue('Target', 'articles');
+            SafeRedirect($Target);
+        }
+
+        $this->SendOptions($Article);
+
+        if ($Close) {
+            require_once($this->FetchViewLocation('helper_functions', 'Article', 'Articles'));
+            $this->JsonTarget(".Section-ArticleList #Article_$ArticleID .Meta-Article", ArticleTag($Article, 'Closed', 'Closed'), 'Prepend');
+            $this->JsonTarget(".Section-ArticleList #Article_$ArticleID", 'Closed', 'AddClass');
+        } else {
+            $this->JsonTarget(".Section-ArticleList #Article_$ArticleID .Tag-Closed", NULL, 'Remove');
+            $this->JsonTarget(".Section-ArticleList #Article_$ArticleID", 'Closed', 'RemoveClass');
+        }
+
+        $this->JsonTarget("#Article_$ArticleID", NULL, 'Highlight');
+        $this->JsonTarget(".Article #Item_0", NULL, 'Highlight');
+
+        $this->Render('Blank', 'Utility', 'Dashboard');
     }
 
     public function DeleteArticle($ArticleID, $Target = '') {

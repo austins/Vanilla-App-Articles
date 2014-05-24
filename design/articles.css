@@ -61,14 +61,13 @@ body.Articles.Compose #Content {
     margin-bottom: 8px;
 }
 
-.ArticleMeta {
+.Meta-Article {
     color: #666;
     font-size: 11px;
 }
 
-.ArticleMeta > span {
+.Meta-Article > span {
     display: inline-block;
-    margin-right: 12px;
 }
 
 .ArticleBody p {

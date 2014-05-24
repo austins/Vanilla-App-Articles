@@ -88,6 +88,7 @@ class ArticlesController extends Gdn_Controller {
 
         $this->SetData('Articles', $Articles);
 
+        Gdn_Theme::Section('ArticleList');
         $this->View = 'index';
         $this->Render();
     }
@@ -126,6 +127,7 @@ class ArticlesController extends Gdn_Controller {
         $Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result();
         $this->SetData('Articles', $Articles);
 
+        Gdn_Theme::Section('CategoryArticleList');
         $this->View = 'index';
         $this->Render();
     }

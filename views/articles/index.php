@@ -32,15 +32,22 @@ if (count($Articles) == 0) {
             <header>
                 <h2 class="ArticleTitle"><?php echo Anchor($Article->Name, $ArticleUrl); ?></h2>
 
-                <div class="ArticleMeta">
+                <div class="Meta Meta-Article">
+                    <?php
+                    Gdn::Controller()->FireEvent('BeforeArticleMeta');
+
+                    echo ArticleTag($Article, 'Closed', 'Closed');
+
+                    Gdn::Controller()->FireEvent('AfterArticleLabels');
+                    ?>
                     <span
-                        class="ArticleCategory"><?php echo Anchor($Category->Name,
+                        class="MItem MCount ArticleCategory"><?php echo Anchor($Category->Name,
                             ArticleCategoryUrl($Category)); ?></span>
                     <span
-                        class="ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
+                        class="MItem MCount ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
                             '%e %B %Y - %l:%M %p'); ?></span>
-                    <span class="ArticleAuthor"><?php echo UserAnchor($Author); ?></span>
-                    <span class="ArticleComments"><?php echo Anchor($CommentCount, $ArticleUrl . '#comments'); ?></span>
+                    <span class="MItem MCount ArticleAuthor"><?php echo UserAnchor($Author); ?></span>
+                    <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCount, $ArticleUrl . '#comments'); ?></span>
                 </div>
             </header>
 
