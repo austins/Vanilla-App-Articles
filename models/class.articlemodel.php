@@ -94,4 +94,16 @@ class ArticleModel extends Gdn_Model {
 
         return $Result;
     }
+
+    public function GetByUser($UserID, $Offset = 0, $Limit = false, $Wheres = null) {
+        if(!$Wheres)
+            $Wheres = array();
+
+        $Wheres['AuthorUserID'] = $UserID;
+
+        $Articles = $this->Get($Offset, $Limit, $Wheres);
+        $this->LastArticleCount = $Articles->NumRows();
+
+        return $Articles;
+    }
 }

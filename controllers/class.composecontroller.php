@@ -303,7 +303,8 @@ class ComposeController extends Gdn_Controller {
         ShowArticleOptions($Article);
         $Options = ob_get_clean();
 
-        $this->JsonTarget("#Article_{$Article->ArticleID} .OptionsMenu,.Section-Article .Article .OptionsMenu", $Options, 'ReplaceWith');
+        $this->JsonTarget("#Article_{$Article->ArticleID} .OptionsMenu,.Section-Article .Article .OptionsMenu",
+            $Options, 'ReplaceWith');
     }
 
     /**
@@ -316,7 +317,7 @@ class ComposeController extends Gdn_Controller {
      * @param int $ArticleID Unique article ID.
      * @param bool $Close Whether or not to close the discussion.
      */
-    public function Close($ArticleID, $Close = TRUE, $From = 'list') {
+    public function Close($ArticleID, $Close = true, $From = 'list') {
         // Make sure we are posting back.
         if (!$this->Request->IsPostBack())
             throw PermissionException('Javascript');
@@ -342,15 +343,16 @@ class ComposeController extends Gdn_Controller {
 
         if ($Close) {
             require_once($this->FetchViewLocation('helper_functions', 'Article', 'Articles'));
-            $this->JsonTarget(".Section-ArticleList #Article_$ArticleID .Meta-Article", ArticleTag($Article, 'Closed', 'Closed'), 'Prepend');
+            $this->JsonTarget(".Section-ArticleList #Article_$ArticleID .Meta-Article",
+                ArticleTag($Article, 'Closed', 'Closed'), 'Prepend');
             $this->JsonTarget(".Section-ArticleList #Article_$ArticleID", 'Closed', 'AddClass');
         } else {
-            $this->JsonTarget(".Section-ArticleList #Article_$ArticleID .Tag-Closed", NULL, 'Remove');
+            $this->JsonTarget(".Section-ArticleList #Article_$ArticleID .Tag-Closed", null, 'Remove');
             $this->JsonTarget(".Section-ArticleList #Article_$ArticleID", 'Closed', 'RemoveClass');
         }
 
-        $this->JsonTarget("#Article_$ArticleID", NULL, 'Highlight');
-        $this->JsonTarget(".Article #Item_0", NULL, 'Highlight');
+        $this->JsonTarget("#Article_$ArticleID", null, 'Highlight');
+        $this->JsonTarget(".Article #Item_0", null, 'Highlight');
 
         $this->Render('Blank', 'Utility', 'Dashboard');
     }
@@ -373,7 +375,7 @@ class ComposeController extends Gdn_Controller {
                 if ($Target)
                     $this->RedirectUrl = Url($Target);
 
-                $this->JsonTarget(".Section-ArticleList #Article_{$ArticleID}", NULL, 'SlideUp');
+                $this->JsonTarget(".Section-ArticleList #Article_{$ArticleID}", null, 'SlideUp');
             }
         }
 

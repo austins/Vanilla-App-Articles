@@ -47,7 +47,8 @@ if (count($Articles) == 0) {
                         class="MItem MCount ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
                             '%e %B %Y - %l:%M %p'); ?></span>
                     <span class="MItem MCount ArticleAuthor"><?php echo UserAnchor($Author); ?></span>
-                    <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCount, $ArticleUrl . '#comments'); ?></span>
+                    <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCount,
+                            $ArticleUrl . '#comments'); ?></span>
                 </div>
             </header>
 

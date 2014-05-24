@@ -261,4 +261,88 @@ class ArticlesHooks extends Gdn_Plugin {
         $Menu->AddLink($GroupName, T('Settings'), '/settings/articles/', 'Garden.Settings.Manage');
         $Menu->AddLink($GroupName, T('Categories'), '/settings/articles/categories/', 'Garden.Settings.Manage');
     }
+
+    /**
+     * Adds 'Articles' tab to profiles and adds CSS & JS files to their head.
+     *
+     * @param object $Sender ProfileController.
+     */
+    public function ProfileController_AddProfileTabs_Handler($Sender) {
+        if (is_object($Sender->User) && ($Sender->User->UserID > 0)) {
+            $UserID = $Sender->User->UserID;
+
+            // Add the discussion tab
+            $ArticlesLabel = Sprite('SpArticles') . ' ' . T('Articles');
+
+            if (C('Articles.Profile.ShowCounts', true))
+                $ArticlesLabel .= '<span class="Aside">' . CountString(GetValueR('User.CountArticles', $Sender,
+                        null), "/profile/count/articles?userid=$UserID") . '</span>';
+
+            $Sender->AddProfileTab(T('Articles'),
+                'profile/articles/' . $Sender->User->UserID . '/' . rawurlencode($Sender->User->Name), 'Articles',
+                $ArticlesLabel);
+
+            // Add the article tab's CSS and Javascript.
+            $Sender->AddJsFile('jquery.gardenmorepager.js');
+            $Sender->AddJsFile('articles.js');
+        }
+    }
+
+    /**
+     * Creates virtual 'Articles' method in ProfileController.
+     *
+     * @param ProfileController $Sender ProfileController.
+     */
+    public function ProfileController_Articles_Create($Sender, $UserReference = '', $Username = '', $Page = '', $UserID = '') {
+        $Sender->EditMode(false);
+
+        // Tell the ProfileController what tab to load
+        $Sender->GetUserInfo($UserReference, $Username, $UserID);
+        $Sender->_SetBreadcrumbs(T('Articles'), '/profile/articles');
+        $Sender->SetTabView('Articles', 'Articles', 'Profile', 'Articles');
+        $Sender->CountCommentsPerPage = C('Articles.Articles.PerPage', 12);
+
+        list($Offset, $Limit) = OffsetLimit($Page, Gdn::Config('Articles.Articles.PerPage', 12));
+
+        $ArticleModel = new ArticleModel();
+        $Articles = $ArticleModel->GetByUser($Sender->User->UserID, $Offset, $Limit, array('Status' => ArticleModel::STATUS_PUBLISHED));
+        $CountArticles = $Offset + $ArticleModel->LastArticleCount + 1;
+        $Sender->ArticleData = $Sender->SetData('Articles', $Articles);
+
+        $Sender->ArticleCategoryModel = new ArticleCategoryModel();
+
+        // Build a pager
+        $PagerFactory = new Gdn_PagerFactory();
+        $Sender->Pager = $PagerFactory->GetPager('MorePager', $Sender);
+        $Sender->Pager->MoreCode = 'More Articles';
+        $Sender->Pager->LessCode = 'Newer Articles';
+        $Sender->Pager->ClientID = 'Pager';
+        $Sender->Pager->Configure(
+            $Offset,
+            $Limit,
+            $CountArticles,
+            UserUrl($Sender->User, '', 'articles') . '/{Page}'
+        );
+
+        // Deliver JSON data if necessary
+        if ($Sender->DeliveryType() != DELIVERY_TYPE_ALL && $Offset > 0) {
+            $Sender->SetJson('LessRow', $Sender->Pager->ToString('less'));
+            $Sender->SetJson('MoreRow', $Sender->Pager->ToString('more'));
+            $Sender->View = 'articles';
+        }
+
+        // Set the HandlerType back to normal on the profilecontroller so that it fetches it's own views
+        $Sender->HandlerType = HANDLER_TYPE_NORMAL;
+
+        // Do not show article options
+        $Sender->ShowOptions = false;
+
+        if ($Sender->Head) {
+            // These pages offer only duplicate content to search engines and are a bit slow.
+            $Sender->Head->AddTag('meta', array('name' => 'robots', 'content' => 'noindex,noarchive'));
+        }
+
+        // Render the ProfileController
+        $Sender->Render();
+    }
 }

@@ -27,8 +27,7 @@ if (!function_exists('ShowArticleOptions')) {
         }
 
         // Can the user delete?
-        if ($Session->CheckPermission('Articles.Articles.Delete'))
-        {
+        if ($Session->CheckPermission('Articles.Articles.Delete')) {
             $ArticleCategoryModel = new ArticleCategoryModel();
             $Category = $ArticleCategoryModel->GetByID(GetValue('CategoryID', $Article));
 
