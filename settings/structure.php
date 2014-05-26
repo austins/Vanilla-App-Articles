@@ -2,7 +2,7 @@
 if (!defined('APPLICATION'))
     exit();
 
-/**
+/*
  * Set up the Articles database structure.
  *
  * Called by ArticleHooks->Setup() to update database upon enabling app.
@@ -53,7 +53,27 @@ $Construct->PrimaryKey('ArticleID')
     ->Column('LastCommentUserID', 'int', true)
     ->Set($Explicit, $Drop);
 
-// Set up permissions.
+// Construct the ArticleComment table.
+$Construct->Table('ArticleComment');
+$Construct->PrimaryKey('CommentID')
+    ->Column('ArticleID', 'int', false, 'index.1')
+    ->Column('Body', 'text', false, 'fulltext')
+    ->Column('Format', 'varchar(20)', true)
+    ->Column('DateInserted', 'datetime', null, array('index.1', 'index'))
+    ->Column('DateUpdated', 'datetime', true)
+    ->Column('InsertUserID', 'int', true)
+    ->Column('UpdateUserID', 'int', true)
+    ->Column('InsertIPAddress', 'varchar(39)', true)
+    ->Column('UpdateIPAddress', 'varchar(39)', true)
+    ->Column('GuestName', 'varchar(50)', true)
+    ->Column('GuestEmail', 'varchar(200)', true)
+    ->Column('DateDeleted', 'datetime', true)
+    ->Column('DeleteUserID', 'int', true)
+    ->Set($Explicit, $Drop);
+
+/*
+ * Set up permissions.
+ */
 $PermissionModel = Gdn::PermissionModel();
 $PermissionModel->Database = $Database;
 $PermissionModel->SQL = $SQL;
