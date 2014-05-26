@@ -23,10 +23,10 @@ $UncategorizedArticleCategoryID = $SQL->Insert('ArticleCategory', array(
     'UrlCode' => 'uncategorized',
     'Description' => 'Uncategorized articles.',
     'DateInserted' => $Now,
-    'CountArticles' => 1,
-    'LastArticleID' => 1,
-    'InsertUserID' => $SystemUserID,
-    'LastDateInserted' => $Now
+    //'CountArticles' => 1,
+    //'LastArticleID' => 1,
+    'InsertUserID' => $SystemUserID
+    //'LastDateInserted' => $Now
 ));
 
 // Insert first article.
