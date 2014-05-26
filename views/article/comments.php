@@ -2,6 +2,8 @@
 if (!defined('APPLICATION'))
     exit();
 
+$Session = Gdn::Session();
+
 $Comments = $this->Comments->Result();
 
 if ($this->Comments->NumRows() > 0):
@@ -23,7 +25,7 @@ if ($this->Comments->NumRows() > 0):
                                 <?php
                                 echo UserPhoto($Author);
                                 echo UserAnchor($Author, 'Username');
-                                $Sender->FireEvent('AuthorPhoto');
+                                $this->FireEvent('AuthorPhoto');
                                 ?>
                             </span>
                             <span class="AuthorInfo">
@@ -33,7 +35,7 @@ if ($this->Comments->NumRows() > 0):
                                 echo ' ' . WrapIf(htmlspecialchars(GetValue('Location', $Author)), 'span',
                                         array('class' => 'MItem AuthorLocation'));
 
-                                $Sender->FireEvent('AuthorInfo');
+                                $this->FireEvent('AuthorInfo');
                                 ?>
                             </span>
                             </div>

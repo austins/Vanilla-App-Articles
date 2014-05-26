@@ -76,3 +76,43 @@ if (!function_exists('ArticleTag')) {
         return ' <span class="Tag ' . $CssClass . '" title="' . htmlspecialchars(T($Code)) . '">' . T($Code) . '</span> ';
     }
 }
+
+if (!function_exists('ShowCommentForm')) {
+    function ShowCommentForm() {
+        $Session = Gdn::Session();
+        $Controller = Gdn::Controller();
+        $Article = $Controller->Article;
+        $UserCanClose = $Session->CheckPermission('Articles.Articles.Close');
+        $UserCanComment = $Session->CheckPermission('Articles.Comments.Add');
+
+        // Closed notification
+        if ((bool)$Article->Closed) {
+            ?>
+            <div class="Foot Closed">
+                <div class="Note Closed"><?php echo T('This article has been closed.'); ?></div>
+            </div>
+        <?php
+        } else if (!$UserCanComment) {
+            if (!Gdn::Session()->IsValid()) {
+                ?>
+                <div class="Foot Closed">
+                    <div class="Note Closed SignInOrRegister"><?php
+                        $Popup =  (C('Garden.SignIn.Popup')) ? ' class="Popup"' : '';
+                        echo FormatString(
+                            T('Sign In or Register to Comment.', '<a href="{SignInUrl,html}"{Popup}>Sign In</a> or <a href="{RegisterUrl,html}">Register</a> to comment.'),
+                            array(
+                                'SignInUrl' => Url(SignInUrl(Url(''))),
+                                'RegisterUrl' => Url(RegisterUrl(Url(''))),
+                                'Popup' => $Popup
+                            )
+                        ); ?>
+                    </div>
+                </div>
+            <?php
+            }
+        }
+
+        if ((($Article->Closed == '1') && $UserCanClose) || (($Article->Closed == '0') && $UserCanComment))
+            echo $Controller->FetchView('comment', 'compose', 'Articles');
+    }
+}

@@ -9,7 +9,7 @@ class ComposeController extends Gdn_Controller {
     /**
      * Models to include.
      */
-    public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'Form');
+    public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'ArticleCommentModel', 'Form');
 
     /**
      * Include JS, CSS, and modules used by all methods.
@@ -250,19 +250,6 @@ class ComposeController extends Gdn_Controller {
         $this->Render();
     }
 
-    public function Comment() {
-        $this->Title(T('Post Article Comment'));
-
-        // Set required permission.
-        $this->Permission('Articles.Comments.Add');
-
-        // Set the model on the form.
-        $this->Form->SetModel($this->ArticleModel);
-
-        $this->View = 'comment';
-        $this->Render();
-    }
-
     public function EditArticle($ArticleID = false) {
         $this->Title(T('Edit Article'));
 
@@ -371,6 +358,42 @@ class ComposeController extends Gdn_Controller {
         }
 
         $this->SetData('Title', T('Delete Article'));
+        $this->Render();
+    }
+
+    public function Comment($ArticleID) {
+        $this->Title(T('Post Article Comment'));
+
+        // Set required permission.
+        $this->Permission('Articles.Comments.Add');
+
+        if(!is_numeric($ArticleID))
+            throw NotFoundException('Article');
+
+        // Get the article.
+        $Article = $this->ArticleModel->GetByID($ArticleID);
+
+        // Set the model on the form.
+        $this->Form->SetModel($this->ArticleCommentModel);
+
+        // Validate fields.
+        $FormValues = $this->Form->FormValues();
+
+        // Set article ID.
+        $FormValues['ArticleID'] = $ArticleID;
+        $this->Form->SetFormValue('ArticleID', $FormValues['ArticleID']);
+
+        if ($this->Form->ErrorCount() > 0) {
+            // Return the form errors.
+            $this->ErrorMessage($this->Form->Errors());
+        } else {
+            // There are no form errors.
+            if ($this->Form->Save($FormValues)) {
+                $this->RedirectUrl = ArticleUrl($Article);
+            }
+        }
+
+        $this->View = 'comment';
         $this->Render();
     }
 }

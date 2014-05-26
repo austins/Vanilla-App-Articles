@@ -9,9 +9,9 @@ class ArticleController extends Gdn_Controller {
     /**
      * Models to include.
      */
-    public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'ArticleCommentModel');
+    public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'ArticleCommentModel', 'Form');
 
-    protected $Article = false;
+    public $Article = false;
     protected $Category = false;
     protected $Comments = false;
 
@@ -81,6 +81,11 @@ class ArticleController extends Gdn_Controller {
 
         // Set the title.
         $this->Title($this->Article->Name);
+
+        // Set up comment form.
+        $this->Form->SetModel($this->ArticleCommentModel);
+        $this->Form->Action = Url('/compose/comment/' . $this->Article->ArticleID . '/');
+        $this->Form->AddHidden('ArticleID', $this->Article->ArticleID);
 
         $this->View = 'index';
         $this->Render();

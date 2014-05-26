@@ -325,7 +325,7 @@ class ArticlesHooks extends Gdn_Plugin {
         $Articles = $ArticleModel->GetByUser($Sender->User->UserID, $Offset, $Limit,
             array('Status' => ArticleModel::STATUS_PUBLISHED));
         $CountArticles = $Offset + $ArticleModel->LastArticleCount + 1;
-        $Sender->ArticleData = $Sender->SetData('Articles', $Articles);
+        $Sender->Articles = $Articles;
 
         $Sender->ArticleCategoryModel = new ArticleCategoryModel();
 
