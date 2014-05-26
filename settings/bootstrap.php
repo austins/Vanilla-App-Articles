@@ -1,4 +1,5 @@
-<?php if (!defined('APPLICATION'))
+<?php
+if (!defined('APPLICATION'))
     exit();
 
 // Register library classes and interfaces in the auto-loader.

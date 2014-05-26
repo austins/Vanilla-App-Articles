@@ -1,3 +1,5 @@
-<?php if (!defined('APPLICATION'))
-    exit(); ?>
+<?php
+if (!defined('APPLICATION'))
+    exit();
+?>
 The post comment view.

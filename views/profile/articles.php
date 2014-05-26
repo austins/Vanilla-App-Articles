@@ -1,4 +1,5 @@
-<?php if (!defined('APPLICATION'))
+<?php
+if (!defined('APPLICATION'))
     exit();
 
 echo '<h2 class="H">' . T('Articles') . '</h2>';

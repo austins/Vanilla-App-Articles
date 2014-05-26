@@ -1,5 +1,7 @@
-<?php if (!defined('APPLICATION'))
-    exit(); ?>
+<?php
+if (!defined('APPLICATION'))
+    exit();
+?>
 
 <h1><?php echo $this->Data('Title'); ?></h1>
 
