@@ -9,10 +9,11 @@ class ArticleController extends Gdn_Controller {
     /**
      * Models to include.
      */
-    public $Uses = array('ArticleModel', 'ArticleCategoryModel');
+    public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'ArticleCommentModel');
 
     protected $Article = false;
     protected $Category = false;
+    protected $Comments = false;
 
     /**
      * Include JS, CSS, and modules used by all methods.
@@ -66,8 +67,11 @@ class ArticleController extends Gdn_Controller {
 
         // Get the category.
         $this->Category = $this->ArticleCategoryModel->GetByID($this->Article->CategoryID);
-        $this->SetData('Category', $this->Category);
 
+        // Get the comments.
+        $this->Comments = $this->ArticleCommentModel->GetByArticleID($this->Article->ArticleID);
+
+        // Validate slugs.
         $DateInsertedYear = Gdn_Format::Date($this->Article->DateInserted, '%Y');
         if ((count($this->RequestArgs) < 2) || !is_numeric($ArticleYear)
             || ($ArticleUrlCode == '') || !$this->Article

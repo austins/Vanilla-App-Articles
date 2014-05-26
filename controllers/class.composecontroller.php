@@ -76,6 +76,20 @@ class ComposeController extends Gdn_Controller {
         $this->Render();
     }
 
+    private function GetArticleStatusOptions($Article = false) {
+        $StatusOptions = array(
+            ArticleModel::STATUS_DRAFT => T('Draft'),
+            ArticleModel::STATUS_PENDING => T('Pending Review'),
+        );
+
+        if (Gdn::Session()->CheckPermission('Articles.Articles.Edit')
+            || ($Article && ((int)$Article->Status == 2))
+        )
+            $StatusOptions[ArticleModel::STATUS_PUBLISHED] = T('Published');
+
+        return $StatusOptions;
+    }
+
     public function Posts($Page = false) {
         $this->Title(T('Article Posts'));
 
@@ -125,20 +139,6 @@ class ComposeController extends Gdn_Controller {
 
         $this->View = 'posts';
         $this->Render();
-    }
-
-    private function GetArticleStatusOptions($Article = false) {
-        $StatusOptions = array(
-            ArticleModel::STATUS_DRAFT => T('Draft'),
-            ArticleModel::STATUS_PENDING => T('Pending Review'),
-        );
-
-        if (Gdn::Session()->CheckPermission('Articles.Articles.Edit')
-            || ($Article && ((int)$Article->Status == 2))
-        )
-            $StatusOptions[ArticleModel::STATUS_PUBLISHED] = T('Published');
-
-        return $StatusOptions;
     }
 
     public function Article($Article = false) {

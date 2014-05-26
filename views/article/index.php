@@ -1,4 +1,5 @@
-<?php if (!defined('APPLICATION'))
+<?php
+if (!defined('APPLICATION'))
     exit();
 
 if (!function_exists('ShowArticleOptions'))
@@ -44,3 +45,5 @@ else
 
     <div class="ArticleBody"><?php echo FormatArticleBody($Article->Body, $Article->Format); ?></div>
 </article>
+
+<?php include $this->FetchViewLocation('comments', 'article', 'Articles'); ?>
