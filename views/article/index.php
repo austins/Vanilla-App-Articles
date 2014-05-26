@@ -4,12 +4,12 @@
 if (!function_exists('ShowArticleOptions'))
     include($this->FetchViewLocation('helper_functions', 'article', 'articles'));
 
-$Article = $this->Data('Article');
+$Article = $this->Article;
 
 $ArticleUrl = ArticleUrl($Article);
 $Author = Gdn::UserModel()->GetID($Article->AuthorUserID);
 
-$Category = $this->Data('Category');
+$Category = $this->Category;
 
 if ($Article->CountComments == 0)
     $CommentCount = 'Comments';

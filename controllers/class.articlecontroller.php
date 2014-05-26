@@ -11,6 +11,9 @@ class ArticleController extends Gdn_Controller {
      */
     public $Uses = array('ArticleModel', 'ArticleCategoryModel');
 
+    protected $Article = false;
+    protected $Category = false;
+
     /**
      * Include JS, CSS, and modules used by all methods.
      * Extended by all other controllers in this application.
@@ -47,14 +50,13 @@ class ArticleController extends Gdn_Controller {
         $this->AddModule('ArticlesDashboardModule');
 
         // Get the article.
-        $Article = $this->ArticleModel->GetByUrlCode($ArticleUrlCode);
-        $this->SetData('Article', $Article);
+        $this->Article = $this->ArticleModel->GetByUrlCode($ArticleUrlCode);
 
         // Set required permission.
         $UserModel = new UserModel();
-        if ($Article->Status != ArticleModel::STATUS_PUBLISHED)
-            if (($Article->AuthorUserID == Gdn::Session()->UserID)
-                && !$UserModel->CheckPermission($Article->AuthorUserID, 'Articles.Articles.Edit')
+        if ($this->Article->Status != ArticleModel::STATUS_PUBLISHED)
+            if (($this->Article->AuthorUserID == Gdn::Session()->UserID)
+                && !$UserModel->CheckPermission($this->Article->AuthorUserID, 'Articles.Articles.Edit')
             )
                 $this->Permission('Articles.Articles.View');
             else
@@ -63,18 +65,18 @@ class ArticleController extends Gdn_Controller {
             $this->Permission('Articles.Articles.View');
 
         // Get the category.
-        $Category = $this->ArticleCategoryModel->GetByID($Article->CategoryID);
-        $this->SetData('Category', $Category);
+        $this->Category = $this->ArticleCategoryModel->GetByID($this->Article->CategoryID);
+        $this->SetData('Category', $this->Category);
 
-        $DateInsertedYear = Gdn_Format::Date($Article->DateInserted, '%Y');
+        $DateInsertedYear = Gdn_Format::Date($this->Article->DateInserted, '%Y');
         if ((count($this->RequestArgs) < 2) || !is_numeric($ArticleYear)
-            || ($ArticleUrlCode == '') || !$Article
+            || ($ArticleUrlCode == '') || !$this->Article
             || ($ArticleYear != $DateInsertedYear)
         )
             throw NotFoundException('Article');
 
         // Set the title.
-        $this->Title($Article->Name);
+        $this->Title($this->Article->Name);
 
         $this->View = 'index';
         $this->Render();

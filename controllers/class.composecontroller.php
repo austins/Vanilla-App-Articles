@@ -11,9 +11,6 @@ class ComposeController extends Gdn_Controller {
      */
     public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'Form');
 
-    protected $Article = false;
-    protected $Category = false;
-
     /**
      * Include JS, CSS, and modules used by all methods.
      * Extended by all other controllers in this application.
@@ -130,23 +127,23 @@ class ComposeController extends Gdn_Controller {
         $this->Render();
     }
 
-    private function GetArticleStatusOptions() {
+    private function GetArticleStatusOptions($Article = false) {
         $StatusOptions = array(
             ArticleModel::STATUS_DRAFT => T('Draft'),
             ArticleModel::STATUS_PENDING => T('Pending Review'),
         );
 
         if (Gdn::Session()->CheckPermission('Articles.Articles.Edit')
-            || ($this->Article && ((int)$this->Article->Status == 2))
+            || ($Article && ((int)$Article->Status == 2))
         )
             $StatusOptions[ArticleModel::STATUS_PUBLISHED] = T('Published');
 
         return $StatusOptions;
     }
 
-    public function Article() {
+    public function Article($Article = false) {
         // If not editing...
-        if (!$this->Article) {
+        if (!$Article) {
             $this->Title(T('Add Article'));
 
             // Set allowed permission.
@@ -161,24 +158,24 @@ class ComposeController extends Gdn_Controller {
         $this->SetData('Categories', $Categories, true);
 
         // Set status options.
-        $this->SetData('StatusOptions', $this->GetArticleStatusOptions(), true);
+        $this->SetData('StatusOptions', $this->GetArticleStatusOptions($Article), true);
 
         $UserModel = new UserModel();
 
         // The form has not been submitted yet.
         if (!$this->Form->AuthenticatedPostBack()) {
             // If editing...
-            if ($this->Article) {
-                $this->Form->SetData($this->Article);
+            if ($Article) {
+                $this->Form->SetData($Article);
 
                 $this->Form->AddHidden('UrlCodeIsDefined', '1');
 
                 // Set author field.
-                $Author = $UserModel->GetID($this->Article->AuthorUserID);
+                $Author = $UserModel->GetID($Article->AuthorUserID);
 
                 // If the user with AuthorUserID doesn't exist.
                 if (!$Author)
-                    $Author = $UserModel->GetID($this->Article->InsertUserID);
+                    $Author = $UserModel->GetID($Article->InsertUserID);
             } else {
                 // If not editing...
                 $this->Form->AddHidden('UrlCodeIsDefined', '0');
@@ -204,16 +201,16 @@ class ComposeController extends Gdn_Controller {
 
             // If editing, make sure the ArticleID is passed to the form save method.
             $SQL = Gdn::Database()->SQL();
-            if ($this->Article)
-                $this->Form->SetFormValue('ArticleID', (int)$this->Article->ArticleID);
+            if ($Article)
+                $this->Form->SetFormValue('ArticleID', (int)$Article->ArticleID);
 
             // Make sure that the UrlCode is unique among articles.
             $SQL->Select('a.ArticleID')
                 ->From('Article a')
                 ->Where('a.UrlCode', $FormValues['UrlCode']);
 
-            if ($this->Article)
-                $SQL->Where('a.ArticleID <>', $this->Article->ArticleID);
+            if ($Article)
+                $SQL->Where('a.ArticleID <>', $Article->ArticleID);
 
             $UrlCodeExists = isset($SQL->Get()->FirstRow()->ArticleID);
 
@@ -274,17 +271,20 @@ class ComposeController extends Gdn_Controller {
 
         // Get article.
         if (is_numeric($ArticleID))
-            $this->Article = $this->ArticleModel->GetByID($ArticleID);
+            $Article = $this->ArticleModel->GetByID($ArticleID);
 
         // If the article doesn't exist, then throw an exception.
-        if (!$this->Article)
+        if (!$Article)
             throw NotFoundException('Article');
 
+        $this->SetData('Article', $Article, true);
+
         // Get category.
-        $this->Category = $this->ArticleCategoryModel->GetByID($this->Article->CategoryID);
+        $Category = $this->ArticleCategoryModel->GetByID($Article->CategoryID);
+        $this->SetData('Category', $Category, true);
 
         $this->View = 'article';
-        $this->Article();
+        $this->Article($Article);
     }
 
     private function SendOptions($Article) {

@@ -4,9 +4,9 @@
 if (!function_exists('ShowArticleOptions'))
     include($this->FetchViewLocation('helper_functions', 'article', 'articles'));
 
-$Articles = $this->Data('Articles')->Result();
+$Articles = $this->Articles->Result();
 
-$Category = isset($this->Data('Category')->CategoryID) ? $this->Data('Category') : null;
+$Category = isset($this->Category->CategoryID) ? $this->Category : false;
 
 if ($Category)
     echo Wrap($Category->Name, 'h1', array('class' => 'H'));
@@ -21,7 +21,7 @@ if (count($Articles) == 0) {
         $ArticleUrl = ArticleUrl($Article);
         $Author = Gdn::UserModel()->GetID($Article->AuthorUserID);
 
-        $Category = $this->ArticleCategoryModel->GetByID($Article->CategoryID);
+        $ArticleCategory = $this->ArticleCategoryModel->GetByID($Article->CategoryID);
 
         $CommentCount = ($Article->CountComments == 0) ? 'Comments'
             : Plural($Article->CountComments, T('1 Comment'), T('%d Comments'));
@@ -41,8 +41,8 @@ if (count($Articles) == 0) {
                     Gdn::Controller()->FireEvent('AfterArticleLabels');
                     ?>
                     <span
-                        class="MItem MCount ArticleCategory"><?php echo Anchor($Category->Name,
-                            ArticleCategoryUrl($Category)); ?></span>
+                        class="MItem MCount ArticleCategory"><?php echo Anchor($ArticleCategory->Name,
+                            ArticleCategoryUrl($ArticleCategory)); ?></span>
                     <span
                         class="MItem MCount ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
                             '%e %B %Y - %l:%M %p'); ?></span>
@@ -64,7 +64,7 @@ if (count($Articles) == 0) {
 
     // Set up pager.
     $PagerOptions = array('Wrapper' => '<span class="PagerNub">&#160;</span><div %1$s>%2$s</div>',
-        'RecordCount' => $this->Data('CountArticles'), 'CurrentRecords' => $this->Data('Articles')->NumRows());
+        'RecordCount' => $this->Data('CountArticles'), 'CurrentRecords' => $this->Articles->NumRows());
     if ($this->Data('_PagerUrl'))
         $PagerOptions['Url'] = $this->Data('_PagerUrl');
 

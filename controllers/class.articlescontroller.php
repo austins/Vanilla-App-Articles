@@ -11,6 +11,9 @@ class ArticlesController extends Gdn_Controller {
      */
     public $Uses = array('ArticleModel', 'ArticleCategoryModel');
 
+    protected $Articles = false;
+    protected $Category = false;
+
     /**
      * Include JS, CSS, and modules used by all methods.
      * Extended by all other controllers in this application.
@@ -85,9 +88,7 @@ class ArticlesController extends Gdn_Controller {
 
         // Get published articles.
         $Wheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED);
-        $Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres);
-
-        $this->SetData('Articles', $Articles);
+        $this->Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres);
 
         Gdn_Theme::Section('ArticleList');
         $this->View = 'index';
@@ -105,28 +106,23 @@ class ArticlesController extends Gdn_Controller {
         $this->AddModule('ArticlesDashboardModule');
 
         // Get the category.
-        $Category = null;
-
         if ($UrlCode != '')
-            $Category = $this->ArticleCategoryModel->GetByUrlCode($UrlCode);
+            $this->Category = $this->ArticleCategoryModel->GetByUrlCode($UrlCode);
 
-        if (!$Category)
+        if (!$this->Category)
             throw NotFoundException('Article category');
 
-        $this->SetData('Category', $Category);
-
         // Set the title.
-        $this->Title($Category->Name);
+        $this->Title($this->Category->Name);
 
         // Get published articles.
         $Offset = 0;
         $Limit = false;
         $Wheres = array(
             'a.Status' => ArticleModel::STATUS_PUBLISHED,
-            'a.CategoryID' => $Category->CategoryID
+            'a.CategoryID' => $this->Category->CategoryID
         );
-        $Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result();
-        $this->SetData('Articles', $Articles);
+        $this->Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result();
 
         Gdn_Theme::Section('CategoryArticleList');
         $this->View = 'index';
