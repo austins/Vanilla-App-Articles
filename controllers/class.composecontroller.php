@@ -218,11 +218,16 @@ class ComposeController extends Gdn_Controller {
                 $this->Form->AddError('The specified URL code is already in use by another article.', 'UrlCode');
 
             // Retrieve author user ID.
-            $Author = $UserModel->GetByUsername($FormValues['AuthorUserName']);
+            if ($FormValues['AuthorUserName'] !== "")
+                $Author = $UserModel->GetByUsername($FormValues['AuthorUserName']);
 
             // If the inputted author doesn't exist.
             if (!$Author) {
-                if ($FormValues['AuthorUserName'] === "")
+                $Session = Gdn::Session();
+
+                if (!$Session->CheckPermission('Articles.Articles.Edit') && ($FormValues['AuthorUserName'] == ""))
+                    $Author = $Session->User;
+                else if ($FormValues['AuthorUserName'] == "")
                     $this->Form->AddError('Author is required.', 'AuthorUserName');
                 else
                     $this->Form->AddError('The user for the author field does not exist.', 'AuthorUserName');
