@@ -58,8 +58,30 @@ jQuery(document).ready(function ($) {
         );
     });
 
+    // Auto size text boxes.
     if ($.autogrow)
         $('textarea.TextBox').livequery(function () {
             $(this).autogrow();
         });
+
+    // Threaded comment replies.
+    // Hide/reveal the comments when the comment link is clicked
+    $('a.ReplyLink').click(function (e) {
+        e.preventDefault();
+
+        var commentBox = $('#CommentBox');
+        commentBox.insertAfter($(this));
+
+        // Add the ParentCommentID to the form as a hidden field.
+        var parentCommentID = commentBox.closest('.ItemComment').attr('id').replace(/[^\d.]/g, '');
+        $('#Form_Comment').append('<input id="Form_ParentCommentID" name="ParentCommentID" type="hidden" value="' + parentCommentID + '" />');
+
+        $('#CommentBox').find('textarea').focus().blur(function() {
+            // Hide the form on blur (de-focus) if empty.
+            if (this.value == '') {
+                commentBox.insertAfter($('#Comments'));
+                $('#Form_Comment').find('#Form_ParentCommentID').remove();
+            }
+        });
+    });
 });

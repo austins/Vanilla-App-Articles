@@ -8,7 +8,7 @@ $Editing = isset($this->Comment);
 $this->EventArguments['FormCssClass'] = 'MessageForm CommentForm FormTitleWrapper';
 $this->FireEvent('BeforeCommentForm');
 ?>
-<div class="<?php echo $this->EventArguments['FormCssClass']; ?>">
+<div id="CommentBox" class="<?php echo $this->EventArguments['FormCssClass']; ?>">
     <h2 class="H"><?php echo T($Editing ? 'Edit Comment' : 'Leave a Comment'); ?></h2>
 
     <div class="CommentFormWrap">

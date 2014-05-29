@@ -31,6 +31,7 @@ class ArticleController extends Gdn_Controller {
         $this->AddJsFile('jquery.popup.js');
         $this->AddJsFile('jquery.gardenhandleajaxform.js');
         $this->AddJsFile('global.js');
+        $this->AddJsFile('articles.js');
 
         // Add CSS files.
         $this->AddCssFile('style.css');

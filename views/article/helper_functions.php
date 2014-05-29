@@ -119,8 +119,8 @@ if (!function_exists('ShowCommentForm')) {
 }
 
 if (!function_exists('WriteArticleReactions')):
-    function WriteArticleReactions($Row, $Type = 'Comment') {
-        list($RecordType, $RecordID) = RecordType($Row);
+    function WriteArticleReactions($Comment, $Type = 'Comment') {
+        list($RecordType, $RecordID) = RecordType($Comment);
 
         Gdn::Controller()->EventArguments['RecordType'] = strtolower($RecordType);
         Gdn::Controller()->EventArguments['RecordID'] = $RecordID;
@@ -128,10 +128,10 @@ if (!function_exists('WriteArticleReactions')):
         echo '<div class="Reactions">';
         Gdn_Theme::BulletRow();
 
-        if (C('Articles.Articles.EnableThreadedComments', true))
+        if (C('Articles.Articles.EnableThreadedComments', true) && !$Comment->ParentCommentID)
             echo Anchor('<span class="ReactSprite ReactReply"></span> Reply',
-                '/compose/comment/' . $Row->ArticleID . '/' . $Row->CommentID . '/',
-                'ReactButton Reply Visible');
+                '/compose/comment/' . $Comment->ArticleID . '/' . $Comment->CommentID . '/',
+                'ReactButton ReplyLink Visible');
 
         Gdn::Controller()->FireEvent('AfterFlag');
         Gdn::Controller()->FireEvent('AfterReactions');

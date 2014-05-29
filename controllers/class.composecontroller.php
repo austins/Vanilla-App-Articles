@@ -388,6 +388,28 @@ class ComposeController extends Gdn_Controller {
         $FormValues['ArticleID'] = $ArticleID;
         $this->Form->SetFormValue('ArticleID', $FormValues['ArticleID']);
 
+        // If the form didn't have ParentCommentID set, then set it to the method argument as a default.
+        if(!is_numeric($FormValues['ParentCommentID'])) {
+            $ParentCommentID = is_numeric($ParentCommentID) ? $ParentCommentID : null;
+
+            $FormValues['ParentCommentID'] = $ParentCommentID;
+            $this->Form->SetFormValue('ParentCommentID', $ParentCommentID);
+        }
+
+        // Validate parent comment.
+        $ParentComment = false;
+        if(is_numeric($FormValues['ParentCommentID'])) {
+            $ParentComment = $this->ArticleCommentModel->GetByID($FormValues['ParentCommentID']);
+
+            // Parent comment doesn't exist.
+            if(!$ParentComment)
+                throw NotFoundException('Parent comment');
+
+            // Only allow one level of threading.
+            if(is_numeric($ParentComment->ParentCommentID))
+                throw ForbiddenException('reply to a comment more than one level down');
+        }
+
         if ($this->Form->ErrorCount() > 0) {
             // Return the form errors.
             $this->ErrorMessage($this->Form->Errors());

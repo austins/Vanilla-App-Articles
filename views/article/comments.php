@@ -13,9 +13,15 @@ if ($this->Comments->NumRows() > 0):
         <ul class="MessageList DataList Comments">
             <?php
             foreach ($Comments as $Comment) {
+                $CssClass = 'Item Alt ItemComment';
+
                 $User = Gdn::UserModel()->GetID($Comment->InsertUserID);
+
+                $ParentCommentID = is_numeric($Comment->ParentCommentID) ? $Comment->ParentCommentID : false;
+                if($ParentCommentID)
+                    $CssClass .= ' ItemCommentReply';
                 ?>
-                <li class="Item Alt ItemComment" id="Comment_<?php echo $Comment->CommentID; ?>">
+                <li class="<?php echo $CssClass; ?>" id="Comment_<?php echo $Comment->CommentID; ?>">
                     <div class="Comment">
                         <!-- Comment options to go here. -->
 

@@ -66,4 +66,16 @@ class ArticleCommentModel extends Gdn_Model {
 
         return $Comments;
     }
+
+    public function GetByID($CommentID, $Offset = 0, $Limit = false, $Wheres = null)
+    {
+        if (!is_numeric($CommentID))
+            throw new InvalidArgumentException('The comment ID must be a numeric value.');
+
+        $Wheres = array('c.CommentID', $CommentID);
+
+        $Comment = $this->Get($Offset, $Limit, $Wheres)->FirstRow();
+
+        return $Comment;
+    }
 }

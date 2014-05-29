@@ -122,3 +122,7 @@ body.Articles.category .Article .Options > .ToggleFlyout.Open {
 .ReactReply {
     background-position: -293px -6px;
 }
+
+.DataList .ItemCommentReply {
+    margin-left: 30px;
+}
