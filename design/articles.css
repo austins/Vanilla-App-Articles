@@ -118,3 +118,7 @@ body.Articles.category .Article .Options > .ToggleFlyout.Open {
 #articles_compose_editarticle #UrlCode a {
     margin-left: 10px;
 }
+
+.ReactReply {
+    background-position: -293px -6px;
+}

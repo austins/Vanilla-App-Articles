@@ -97,9 +97,10 @@ if (!function_exists('ShowCommentForm')) {
                 ?>
                 <div class="Foot Closed">
                     <div class="Note Closed SignInOrRegister"><?php
-                        $Popup =  (C('Garden.SignIn.Popup')) ? ' class="Popup"' : '';
+                        $Popup = (C('Garden.SignIn.Popup')) ? ' class="Popup"' : '';
                         echo FormatString(
-                            T('Sign In or Register to Comment.', '<a href="{SignInUrl,html}"{Popup}>Sign In</a> or <a href="{RegisterUrl,html}">Register</a> to comment.'),
+                            T('Sign In or Register to Comment.',
+                                '<a href="{SignInUrl,html}"{Popup}>Sign In</a> or <a href="{RegisterUrl,html}">Register</a> to comment.'),
                             array(
                                 'SignInUrl' => Url(SignInUrl(Url(''))),
                                 'RegisterUrl' => Url(RegisterUrl(Url(''))),
@@ -116,3 +117,24 @@ if (!function_exists('ShowCommentForm')) {
             echo $Controller->FetchView('comment', 'compose', 'Articles');
     }
 }
+
+if (!function_exists('WriteArticleReactions')):
+    function WriteArticleReactions($Row, $Type = 'Comment') {
+        list($RecordType, $RecordID) = RecordType($Row);
+
+        Gdn::Controller()->EventArguments['RecordType'] = strtolower($RecordType);
+        Gdn::Controller()->EventArguments['RecordID'] = $RecordID;
+
+        echo '<div class="Reactions">';
+        Gdn_Theme::BulletRow();
+
+        if (C('Articles.Articles.EnableThreadedComments', true))
+            echo Anchor('<span class="ReactSprite ReactReply"></span> Reply',
+                '/compose/comment/' . $Row->ArticleID . '/' . $Row->CommentID . '/',
+                'ReactButton Reply Visible');
+
+        Gdn::Controller()->FireEvent('AfterFlag');
+        Gdn::Controller()->FireEvent('AfterReactions');
+        echo '</div>';
+    }
+endif;

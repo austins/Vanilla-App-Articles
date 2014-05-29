@@ -366,7 +366,7 @@ class ComposeController extends Gdn_Controller {
         $this->Render();
     }
 
-    public function Comment($ArticleID) {
+    public function Comment($ArticleID, $ParentCommentID = false) {
         $this->Title(T('Post Article Comment'));
 
         // Set required permission.

@@ -63,6 +63,10 @@ if ($this->Comments->NumRows() > 0):
                                     Gdn::Controller()->FireEvent('AfterCommentFormat');
                                     ?>
                                 </div>
+                                <?php
+                                $this->FireEvent('AfterCommentBody');
+                                WriteArticleReactions($Comment);
+                                ?>
                             </div>
                         </div>
                     </div>
