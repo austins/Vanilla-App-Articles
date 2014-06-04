@@ -31,10 +31,8 @@ class ArticleModel extends Gdn_Model {
         $this->SQL->Select('a.*')->From('Article a');
 
         // Assign up limits and offsets.
-        if (!$Limit)
-            $Limit = Gdn::Config('Articles.Articles.PerPage', 12);
-
-        $Offset = !is_numeric($Offset) || ($Offset < 0 ? 0 : $Offset);
+        $Limit = $Limit ? $Limit : Gdn::Config('Articles.Articles.PerPage', 12);
+        $Offset = is_numeric($Offset) ? (($Offset < 0) ? 0 : $Offset) : false;
 
         if (($Offset !== false) && ($Limit !== false))
             $this->SQL->Limit($Limit, $Offset);

@@ -27,10 +27,8 @@ class ArticleCommentModel extends Gdn_Model {
         $this->SQL->Select('c.*')->From('ArticleComment c');
 
         // Assign up limits and offsets.
-        if (!$Limit)
-            $Limit = Gdn::Config('Articles.Comments.PerPage', 30);
-
-        $Offset = !is_numeric($Offset) || ($Offset < 0 ? 0 : $Offset);
+        $Limit = $Limit ? $Limit : Gdn::Config('Articles.Comments.PerPage', 30);
+        $Offset = is_numeric($Offset) ? (($Offset < 0) ? 0 : $Offset) : false;
 
         if (($Offset !== false) && ($Limit !== false))
             $this->SQL->Limit($Limit, $Offset);
