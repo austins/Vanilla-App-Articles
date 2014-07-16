@@ -6,7 +6,7 @@ if(!function_exists('ShowArticleOptions')) {
   include($this->FetchViewLocation('helper_functions', 'article', 'articles'));
 }
 
-$Articles = $this->Articles;
+$Articles = $this->Data('Articles');
 
 $Category = isset($this->Category->CategoryID) ? $this->Category : false;
 

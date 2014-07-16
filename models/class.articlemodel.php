@@ -47,6 +47,9 @@ class ArticleModel extends Gdn_Model {
         // Set order of data.
         $this->SQL->OrderBy('a.DateInserted', 'desc');
 
+        // Join in the author data
+        $this->SQL->Select('u.Name as InsertName, u.Email as InsertEmail, u.Photo as InsertPhoto')->Join('User u', 'u.UserID = a.InsertUserID');
+        
         // Fetch data.
         $Articles = $this->SQL->Get();
 

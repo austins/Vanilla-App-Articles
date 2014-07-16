@@ -88,7 +88,7 @@ class ArticlesController extends Gdn_Controller {
 
         // Get published articles.
         $Wheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED);
-        $this->Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result();
+        $this->SetData('Articles', $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result());
 
         Gdn_Theme::Section('ArticleList');
         $this->View = 'index';
@@ -122,7 +122,7 @@ class ArticlesController extends Gdn_Controller {
             'a.Status' => ArticleModel::STATUS_PUBLISHED,
             'a.CategoryID' => $this->Category->CategoryID
         );
-        $this->Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result();
+        $this->SetData('Articles', $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result());
 
         Gdn_Theme::Section('CategoryArticleList');
         $this->View = 'index';
