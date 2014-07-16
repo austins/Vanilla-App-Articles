@@ -40,6 +40,16 @@ class ArticlesHooks extends Gdn_Plugin {
             SaveToConfig($Save);
         }
     }
+    
+    /**
+    * Add the article search to the search.
+    *
+    * @param object $Sender SearchModel
+    */
+    public function SearchModel_Search_Handler($Sender) {
+        $SearchModel = new ArticleSearchModel();
+        $SearchModel->Search($Sender);
+    }
 
     /**
      * Create the Articles settings page.
