@@ -22,6 +22,12 @@ if (!function_exists('ArticleUrl')) {
     }
 }
 
+if (!function_exists('ArticleCommentUrl')) {
+  function ArticleCommentUrl($Article, $CommentID) {
+    return ArticleUrl($Article) . "#Comment_$CommentID";
+  }
+}
+
 if (!function_exists('FormatArticleBody')) {
     function FormatArticleBody($ArticleBody, $Format = 'Html') {
         if (strcasecmp($Format, 'Html') == 0) {

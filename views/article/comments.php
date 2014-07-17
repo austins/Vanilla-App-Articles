@@ -5,7 +5,8 @@ if (!defined('APPLICATION'))
 $Session = Gdn::Session();
 
 $Comments = $this->Comments->Result();
-
+$Article = $this->Article;
+$CurrentOffset = 0;
 if ($this->Comments->NumRows() > 0):
     ?>
     <section id="Comments" class="DataBox DataBox-Comments">
@@ -48,7 +49,7 @@ if ($this->Comments->NumRows() > 0):
 
                             <div class="Meta CommentMeta CommentInfo">
                             <span class="MItem DateCreated"><?php echo Anchor(Gdn_Format::Date($Comment->DateInserted,
-                                        'html'), $Permalink, 'Permalink',
+                                        'html'), ArticleCommentUrl($Article, $Comment->CommentID), 'Permalink',
                                     array('name' => 'Item_' . ($CurrentOffset), 'rel' => 'nofollow')); ?></span>
                                 <?php
                                 echo DateUpdated($Comment, array('<span class="MItem">', '</span>'));
@@ -77,7 +78,9 @@ if ($this->Comments->NumRows() > 0):
                         </div>
                     </div>
                 </li>
-            <?php } ?>
+            <?php 
+              $CurrentOffset++;
+            } ?>
         </ul>
     </section>
 <?php
