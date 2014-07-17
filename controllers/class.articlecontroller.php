@@ -105,7 +105,7 @@ class ArticleController extends Gdn_Controller {
         $this->Description(Gdn_Format::To($Article->Excerpt, $Article->Format));
       }
       else {
-        $this->Description(SliceParagraph(Gdn_Format::PlainText($Article->Body, $Article->Format), 160));
+        $this->Description(SliceParagraph(Gdn_Format::PlainText($Article->Body, $Article->Format), C('Articles.Excerpt.MaxLength')));
       }
       
       $HeadModule->AddTag('meta', array('property' => 'article:published_time', 'content' => $Article->DateInserted));
