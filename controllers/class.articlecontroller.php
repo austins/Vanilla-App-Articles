@@ -117,7 +117,7 @@ class ArticleController extends Gdn_Controller {
       // $HeadModule->AddTag('meta', array('property' => 'article:expiration_time', 'content' => $Article->DateExpired));
       
       $HeadModule->AddTag('meta', array('property' => 'article:author', 'content' => Url('/profile/' . $Article->AuthorName)));
-      $HeadModule->AddTag('meta', array('property' => 'article:section', 'content' => $Article->CategoryName));
+      $HeadModule->AddTag('meta', array('property' => 'article:section', 'content' => $this->Category->Name));
       
       // TODO: Add in image meta info
       // $HeadModule->AddTag('meta', array('property' => 'og:image', 'content' => $Article->Photo));
