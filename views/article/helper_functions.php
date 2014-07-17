@@ -23,7 +23,7 @@ if (!function_exists('ShowArticleOptions')) {
             $NewClosed = (int)!$Article->Closed;
             $Options['CloseArticle'] = array(
                 'Label' => T($Article->Closed ? 'Reopen' : 'Close'),
-                'Url' => "/compose/closearticle?articleid={$Article->ArticleID}&close={$NewClosed}",
+                'Url' => "/article/close/{$Article->ArticleID}/{$NewClosed}",
                 'Class' => 'Hijack');
         }
 
