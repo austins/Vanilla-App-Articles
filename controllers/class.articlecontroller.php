@@ -154,15 +154,17 @@ class ArticleController extends Gdn_Controller {
      */
     public function Close($ArticleID, $Close = true, $From = 'list') {
         // Make sure we are posting back.
-        if (!$this->Request->IsPostBack())
+        if (!$this->Request->IsPostBack()) {
             throw PermissionException('Javascript');
+        }
 
         $this->Permission('Articles.Articles.Close');
 
         $Article = $this->ArticleModel->GetID($ArticleID);
 
-        if (!$Article)
+        if (!$Article) {
             throw NotFoundException('Article');
+        }
 
         // Close the article.
         $this->ArticleModel->SetField($ArticleID, 'Closed', $Close);

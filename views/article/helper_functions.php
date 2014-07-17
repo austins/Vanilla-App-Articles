@@ -34,7 +34,7 @@ if (!function_exists('ShowArticleOptions')) {
 
             $Options['DeleteArticle'] = array(
                 'Label' => T('Delete'),
-                'Url' => '/compose/deletearticle/' . $Article->ArticleID,
+                'Url' => '/article/delete/' . $Article->ArticleID,
                 'Class' => 'DeleteArticle Popup');
 
             if (strtolower($Sender->ControllerName) === "articlecontroller")
