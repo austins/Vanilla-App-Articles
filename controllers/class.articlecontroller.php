@@ -83,13 +83,52 @@ class ArticleController extends Gdn_Controller {
         // Set the title.
         $this->Title($this->Article->Name);
 
+        // Add the open graph tags
+        $this->AddMetaTags();
+        
         // Set up comment form.
         $this->Form->SetModel($this->ArticleCommentModel);
         $this->Form->Action = Url('/compose/comment/' . $this->Article->ArticleID . '/');
         $this->Form->AddHidden('ArticleID', $this->Article->ArticleID);
 
         $this->View = 'index';
+        
         $this->Render();
+    }
+    
+    protected function AddMetaTags() {
+      $HeadModule =& $this->Head;
+      $Article = $this->Article;
+      $HeadModule->AddTag('meta', array('property' => 'og:type', 'content' => 'article'));
+      
+      $Excerpt = '';
+      if($Article->Excerpt != '') {
+        $Excerpt = $Article->Excerpt;
+      }
+      else {
+        $Excerpt = $Article->Body;
+      }
+      $HeadModule->AddTag('meta', array('property' => 'og:description', 'content' => $Excerpt));
+      $HeadModule->AddTag('meta', array('property' => 'article:published_time', 'content' => $Article->DateInserted));
+      if($Article->DateUpdated) {
+        $HeadModule->AddTag('meta', array('property' => 'article:modified_time', 'content' => $Article->DateUpdated));
+      }
+      
+      // TODO: Add expiration date meta
+      // $HeadModule->AddTag('meta', array('property' => 'article:expiration_time', 'content' => $Article->DateExpired));
+      
+      $HeadModule->AddTag('meta', array('property' => 'article:author', 'content' => Url('/profile/' . $Article->AuthorName)));
+      $HeadModule->AddTag('meta', array('property' => 'article:section', 'content' => $Article->CategoryName));
+      
+      // TODO: Add in image meta info
+      // $HeadModule->AddTag('meta', array('property' => 'og:image', 'content' => $Article->Photo));
+      // $HeadModule->AddTag('meta', array('property' => 'og:image:width', 'content' => $Article->PhotoWidth));
+      // $HeadModule->AddTag('meta', array('property' => 'og:image:height', 'content' => $Article->PhotoHeight));
+      
+      // TODO: Add article tags
+      // foreach($Article->Tags as $Tag) {
+      //   $HeadModule->AddTag('meta', array('property' => 'article:tag', 'content' => $Tag));
+      // }
     }
 
     private function SendOptions($Article) {
