@@ -44,8 +44,8 @@ class ArticleSearchModel extends Gdn_Model {
 			->Select('a.ArticleID as PrimaryID, a.Name as Title, a.Excerpt as Summary, a.Format, a.CategoryID')
 			->Select('a.UrlCode', "concat('/article/', %s)", 'Url')
 			->Select('a.DateInserted')
-			->Select('a.InsertUserID as UserID')
-      ->Select("'Article'", '', 'RecordType')
+			->Select('a.AuthorUserID as UserID')
+            ->Select("'Article'", '', 'RecordType')
 			->From('Article a');
 		
 		// Execute query
