@@ -65,7 +65,10 @@ class ArticleModel extends Gdn_Model {
         $this->SQL->Select('a.*')
             ->From('Article a')
             ->Where('a.ArticleID', $ArticleID);
-
+        
+        // Join in the author data
+        $this->SQL->Select('u.Name as AuthorName, u.Email as AuthorEmail, u.Photo as AuthorPhoto')->Join('User u', 'u.UserID = a.AuthorUserID');
+        
         // Fetch data.
         $Article = $this->SQL->Get()->FirstRow();
 
@@ -78,6 +81,9 @@ class ArticleModel extends Gdn_Model {
             ->From('Article a')
             ->Where('a.UrlCode', $ArticleUrlCode);
 
+        // Join in the author data
+        $this->SQL->Select('u.Name as AuthorName, u.Email as AuthorEmail, u.Photo as AuthorPhoto')->Join('User u', 'u.UserID = a.AuthorUserID');
+        
         // Fetch data.
         $Article = $this->SQL->Get()->FirstRow();
 
