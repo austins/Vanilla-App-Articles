@@ -6,7 +6,7 @@ echo '<atom:link href="' . htmlspecialchars(Url($this->SelfUrl, TRUE)) . '" rel=
 
 foreach($this->Data('Articles') as $Article) {
   $ItemString = Wrap(Gdn_Format::Text($Article->Name), 'title');
-  $ItemString .= Wrap($Article->UrlCode, 'link');
+  $ItemString .= Wrap(ArticleUrl($Article), 'link');
   $ItemString .= Wrap(date('r', Gdn_Format::ToTimeStamp($Article->DateInserted)), 'pubDate');
   $ItemString .= Wrap(Gdn_Format::Text($Article->InsertName), 'dc:creator');
   $ItemString .= Wrap($Article->ArticleID . '@' . Url('/article'), 'guid', array('isPermaLink' => 'false'));
