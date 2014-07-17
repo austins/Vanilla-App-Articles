@@ -101,14 +101,13 @@ class ArticleController extends Gdn_Controller {
       $Article = $this->Article;
       $HeadModule->AddTag('meta', array('property' => 'og:type', 'content' => 'article'));
       
-      $Excerpt = '';
       if($Article->Excerpt != '') {
-        $Excerpt = $Article->Excerpt;
+        $this->Description(Gdn_Format::To($Article->Excerpt, $Article->Format));
       }
       else {
-        $Excerpt = $Article->Body;
+        $this->Description(SliceParagraph(Gdn_Format::PlainText($Article->Body, $Article->Format), 160));
       }
-      $HeadModule->AddTag('meta', array('property' => 'og:description', 'content' => $Excerpt));
+      
       $HeadModule->AddTag('meta', array('property' => 'article:published_time', 'content' => $Article->DateInserted));
       if($Article->DateUpdated) {
         $HeadModule->AddTag('meta', array('property' => 'article:modified_time', 'content' => $Article->DateUpdated));
