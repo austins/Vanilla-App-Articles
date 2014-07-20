@@ -36,7 +36,7 @@ $Construct->PrimaryKey('ArticleID')
     ->Column('Body', 'longtext', false, 'fulltext')
     ->Column('Excerpt', 'text', true)
     ->Column('Format', 'varchar(20)', true)
-    ->Column('Status', 'varchar(20)', 'Draft') // draft; pending; published; trash
+    ->Column('Status', 'varchar(20)', 'Draft') // Draft; Pending; Published; Trash
     ->Column('Tags', 'varchar(255)', true)
     ->Column('Closed', 'tinyint(1)', 0)
     ->Column('DateInserted', 'datetime', false, 'index')

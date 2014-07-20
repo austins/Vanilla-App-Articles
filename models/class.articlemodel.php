@@ -114,4 +114,80 @@ class ArticleModel extends Gdn_Model {
 
         return $Articles;
     }
+
+    /**
+     * Takes a set of form data ($Form->_PostValues), validates them, and
+     * inserts or updates them to the database.
+     *
+     * @param array $FormPostValues An associative array of $Field => $Value pairs that represent data posted
+     * from the form in the $_POST or $_GET collection.
+     * @param array $Settings If a custom model needs special settings in order to perform a save, they
+     * would be passed in using this variable as an associative array.
+     * @return unknown
+     */
+    public function Save($FormPostValues, $Settings = false) {
+        // Define the primary key in this model's table.
+        $this->DefineSchema();
+
+        // See if a primary key value was posted and decide how to save
+        $PrimaryKeyVal = GetValue($this->PrimaryKey, $FormPostValues, false);
+        $Insert = $PrimaryKeyVal === false ? true : false;
+        if ($Insert) {
+            $this->AddInsertFields($FormPostValues);
+        } else {
+            $this->AddUpdateFields($FormPostValues);
+        }
+
+        // Validate the form posted values
+        if ($this->Validate($FormPostValues, $Insert) === true) {
+            $Fields = $this->Validation->ValidationFields();
+            $Fields = RemoveKeyFromArray($Fields, $this->PrimaryKey); // Don't try to insert or update the primary key
+            if ($Insert === false) {
+                $this->Update($Fields, array($this->PrimaryKey => $PrimaryKeyVal));
+            } else {
+                $PrimaryKeyVal = $this->Insert($Fields);
+            }
+
+            $this->AddActivity($Fields, $Insert); // Add the activity.
+        } else {
+            $PrimaryKeyVal = false;
+        }
+
+        return $PrimaryKeyVal;
+    }
+
+    private function AddActivity($Fields, $Insert) {
+        // Determine whether to add a new activity.
+        $InsertActivity = false;
+        if ($Insert && ($Fields['Status'] === self::STATUS_PUBLISHED)) {
+            // The article is new and will be published.
+            $InsertActivity = true;
+        } else {
+            // The article already exists.
+            $CurrentStatus = $this->SQL->Select('a.Status')->From('Article a')->Where('a.ArticleID', $Fields['ArticleID'])->Get()->FirstRow()->Status;
+
+            // Set $InsertActivity to true if the article wasn't published and is being changed to published status.
+            $InsertActivity = ($CurrentStatus !== self::STATUS_PUBLISHED) && ($Fields['Status'] === self::STATUS_PUBLISHED);
+        }
+
+        if ($InsertActivity) {
+                if($Fields['Excerpt'] != '') {
+                    $ActivityStory = Gdn_Format::To($Fields['Excerpt'], $Fields['Format']);
+                } else {
+                    $ActivityStory = SliceParagraph(Gdn_Format::PlainText($Fields['Body'], $Fields['Format']), C('Articles.Excerpt.MaxLength'));
+                }
+
+            $ActivityModel = new ActivityModel();
+            $Activity = array(
+                'ActivityType' => 'Article',
+                'ActivityUserID' => $Fields['AuthorUserID'],
+                'NotifyUserID' => ActivityModel::NOTIFY_PUBLIC,
+                'HeadlineFormat' => '{ActivityUserID,user} published "<a href="{Url,html}">{Data.Name}</a>".',
+                'Story' => $ActivityStory,
+                'Route' => rawurlencode(ArticleUrl($Fields)),
+                'Data' => array('Name' => $Fields['Name'])
+            );
+            $ActivityModel->Save($Activity);
+        }
+    }
 }
