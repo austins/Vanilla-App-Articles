@@ -4,7 +4,7 @@ if (!defined('APPLICATION'))
 
 echo '<h2 class="H">' . T('Articles') . '</h2>';
 
-if (!is_object($this->Articles) || $this->Articles->NumRows() <= 0) {
+if (!$this->Data('Articles') || count($this->Data('Articles')) == 0) {
     echo Wrap(T("This user has not published any articles yet."), 'div', array('Class' => 'Empty'));
 } else {
     echo '<ul class="DataList Articles">';

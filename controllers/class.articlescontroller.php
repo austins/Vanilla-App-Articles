@@ -11,7 +11,6 @@ class ArticlesController extends Gdn_Controller {
      */
     public $Uses = array('ArticleModel', 'ArticleCategoryModel');
 
-    protected $Articles = false;
     protected $Category = false;
 
     /**
