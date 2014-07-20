@@ -168,8 +168,10 @@ class ArticlesHooks extends Gdn_Plugin {
             // Manually validate certain fields.
             $FormValues = $Sender->Form->FormValues();
 
-            if ($Category)
+            if ($Category) {
                 $FormValues['CategoryID'] = $CategoryID;
+                $Sender->Form->SetFormValue('CategoryID', $CategoryID);
+            }
 
             // Format URL code before saving.
             $FormValues['UrlCode'] = Gdn_Format::Url($FormValues['UrlCode']);
