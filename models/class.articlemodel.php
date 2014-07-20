@@ -141,14 +141,16 @@ class ArticleModel extends Gdn_Model {
         // Validate the form posted values
         if ($this->Validate($FormPostValues, $Insert) === true) {
             $Fields = $this->Validation->ValidationFields();
+
+            // Add the activity.
+            $this->AddActivity($Fields, $Insert);
+
             $Fields = RemoveKeyFromArray($Fields, $this->PrimaryKey); // Don't try to insert or update the primary key
             if ($Insert === false) {
                 $this->Update($Fields, array($this->PrimaryKey => $PrimaryKeyVal));
             } else {
                 $PrimaryKeyVal = $this->Insert($Fields);
             }
-
-            $this->AddActivity($Fields, $Insert); // Add the activity.
         } else {
             $PrimaryKeyVal = false;
         }
@@ -163,12 +165,15 @@ class ArticleModel extends Gdn_Model {
             $InsertActivity = true;
         } else {
             // The article already exists.
-            $CurrentStatus = $this->SQL->Select('a.Status')->From('Article a')
-                ->Where('a.ArticleID', $Fields['ArticleID'])->Get()->FirstRow()->Status;
+            $CurrentArticle = Gdn::SQL()->Select('a.Status, a.DateInserted')->From('Article a')
+                ->Where('a.ArticleID', $Fields['ArticleID'])->Get()->FirstRow();
 
             // Set $InsertActivity to true if the article wasn't published and is being changed to published status.
-            $InsertActivity = ($CurrentStatus !== self::STATUS_PUBLISHED)
+            $InsertActivity = ($CurrentArticle->Status !== self::STATUS_PUBLISHED)
                 && ($Fields['Status'] === self::STATUS_PUBLISHED);
+
+            // Pass the DateInserted to be used for the route of the activity.
+            $Fields['DateInserted'] = $CurrentArticle->DateInserted;
         }
 
         if ($InsertActivity) {
@@ -184,9 +189,9 @@ class ArticleModel extends Gdn_Model {
                 'ActivityType' => 'Article',
                 'ActivityUserID' => $Fields['AuthorUserID'],
                 'NotifyUserID' => ActivityModel::NOTIFY_PUBLIC,
-                'HeadlineFormat' => '{ActivityUserID,user} published "<a href="{Url,html}">{Data.Name}</a>".',
+                'HeadlineFormat' => '{ActivityUserID,user} posted the "<a href="{Url,html}">{Data.Name}</a>" article.',
                 'Story' => $ActivityStory,
-                'Route' => rawurlencode(ArticleUrl($Fields)),
+                'Route' => '/article/' . Gdn_Format::Date($Fields['DateInserted'], '%Y') . '/' . $Fields['UrlCode'] . '/',
                 'Data' => array('Name' => $Fields['Name'])
             );
             $ActivityModel->Save($Activity);

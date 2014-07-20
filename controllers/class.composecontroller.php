@@ -201,8 +201,9 @@ class ComposeController extends Gdn_Controller {
 
             // If editing, make sure the ArticleID is passed to the form save method.
             $SQL = Gdn::Database()->SQL();
-            if ($Article)
+            if ($Article) {
                 $this->Form->SetFormValue('ArticleID', (int)$Article->ArticleID);
+            }
 
             // Make sure that the UrlCode is unique among articles.
             $SQL->Select('a.ArticleID')
