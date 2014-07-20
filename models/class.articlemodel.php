@@ -158,24 +158,26 @@ class ArticleModel extends Gdn_Model {
 
     private function AddActivity($Fields, $Insert) {
         // Determine whether to add a new activity.
-        $InsertActivity = false;
         if ($Insert && ($Fields['Status'] === self::STATUS_PUBLISHED)) {
             // The article is new and will be published.
             $InsertActivity = true;
         } else {
             // The article already exists.
-            $CurrentStatus = $this->SQL->Select('a.Status')->From('Article a')->Where('a.ArticleID', $Fields['ArticleID'])->Get()->FirstRow()->Status;
+            $CurrentStatus = $this->SQL->Select('a.Status')->From('Article a')
+                ->Where('a.ArticleID', $Fields['ArticleID'])->Get()->FirstRow()->Status;
 
             // Set $InsertActivity to true if the article wasn't published and is being changed to published status.
-            $InsertActivity = ($CurrentStatus !== self::STATUS_PUBLISHED) && ($Fields['Status'] === self::STATUS_PUBLISHED);
+            $InsertActivity = ($CurrentStatus !== self::STATUS_PUBLISHED)
+                && ($Fields['Status'] === self::STATUS_PUBLISHED);
         }
 
         if ($InsertActivity) {
-                if($Fields['Excerpt'] != '') {
-                    $ActivityStory = Gdn_Format::To($Fields['Excerpt'], $Fields['Format']);
-                } else {
-                    $ActivityStory = SliceParagraph(Gdn_Format::PlainText($Fields['Body'], $Fields['Format']), C('Articles.Excerpt.MaxLength'));
-                }
+            if ($Fields['Excerpt'] != '') {
+                $ActivityStory = Gdn_Format::To($Fields['Excerpt'], $Fields['Format']);
+            } else {
+                $ActivityStory = SliceParagraph(Gdn_Format::PlainText($Fields['Body'], $Fields['Format']),
+                    C('Articles.Excerpt.MaxLength'));
+            }
 
             $ActivityModel = new ActivityModel();
             $Activity = array(
