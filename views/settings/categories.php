@@ -28,8 +28,8 @@ $Categories = $this->Data('Categories')->Result();
                  ' . Wrap($Category->Description, 'blockquote') . '
               </td>
               <td class="Buttons">'
-            . Anchor(T('Edit'), '/settings/articles/editcategory/' . $Category->CategoryID . '/', 'SmallButton')
-            . Anchor(T('Delete'), '/settings/articles/deletecategory/' . $Category->CategoryID . '/', 'SmallButton')
+            . Anchor(T('Edit'), '/settings/articles/editcategory/' . $Category->CategoryID, 'SmallButton')
+            . Anchor(T('Delete'), '/settings/articles/deletecategory/' . $Category->CategoryID, 'SmallButton')
             . '</td>
             </tr>
          </table>';

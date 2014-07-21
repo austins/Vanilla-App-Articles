@@ -15,16 +15,13 @@ if (!function_exists('ArticleUrl')) {
         if ($Page && ($Page > 1 || Gdn::Session()->UserID))
             $Result .= '/p' . $Page;
 
-        // Add a trailing slash.
-        $Result .= '/';
-
         return Url($Result, $WithDomain);
     }
 }
 
 if (!function_exists('ArticleCommentUrl')) {
   function ArticleCommentUrl($Article, $CommentID) {
-    return ArticleUrl($Article) . "#Comment_$CommentID";
+    return ArticleUrl($Article) . "/#Comment_$CommentID";
   }
 }
 
@@ -65,9 +62,6 @@ if (!function_exists('ArticleCategoryUrl')) {
         // Add in the page number if necessary.
         if ($Page && ($Page > 1 || Gdn::Session()->UserID))
             $Result .= '/p' . $Page;
-
-        // Add a trailing slash.
-        $Result .= '/';
 
         return Url($Result, $WithDomain);
     }

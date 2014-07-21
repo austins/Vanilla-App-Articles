@@ -19,7 +19,7 @@ echo $this->Form->Errors();
             echo Wrap(T('Category URL:'), 'strong');
             echo ' ' . Gdn::Request()->Url('/articles/category/', true);
             echo Wrap(htmlspecialchars($this->Form->GetValue('UrlCode')));
-            echo $this->Form->TextBox('UrlCode') . '/';
+            echo $this->Form->TextBox('UrlCode');
             echo Anchor(T('edit'), '#', 'Edit');
             echo Anchor(T('OK'), '#', 'Save SmallButton');
             ?>

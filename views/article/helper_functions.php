@@ -16,14 +16,14 @@ if (!function_exists('ShowArticleOptions')) {
         if ($Session->CheckPermission('Articles.Articles.Edit'))
             $Options['EditArticle'] = array(
                 'Label' => T('Edit'),
-                'Url' => '/compose/editarticle/' . $Article->ArticleID . '/');
+                'Url' => '/compose/editarticle/' . $Article->ArticleID);
 
         // Can the user close?
         if ($Session->CheckPermission('Articles.Articles.Close')) {
             $NewClosed = (int)!$Article->Closed;
             $Options['CloseArticle'] = array(
                 'Label' => T($Article->Closed ? 'Reopen' : 'Close'),
-                'Url' => "/article/close/{$Article->ArticleID}/{$NewClosed}",
+                'Url' => "/article/close/{$Article->ArticleID}?close={$NewClosed}",
                 'Class' => 'Hijack');
         }
 
@@ -39,8 +39,6 @@ if (!function_exists('ShowArticleOptions')) {
 
             if (strtolower($Sender->ControllerName) === "articlecontroller")
                 $Options['DeleteArticle']['Url'] .= '?&target=' . urlencode(ArticleCategoryUrl($Category));
-            else
-                $Options['DeleteArticle']['Url'] .= '/';
         }
 
         // Render the article options menu.
@@ -130,7 +128,7 @@ if (!function_exists('WriteArticleReactions')):
 
         if (C('Articles.Articles.EnableThreadedComments', true) && !$Comment->ParentCommentID)
             echo Anchor('<span class="ReactSprite ReactReply"></span> Reply',
-                '/compose/comment/' . $Comment->ArticleID . '/' . $Comment->CommentID . '/',
+                '/compose/comment/' . $Comment->ArticleID . '/' . $Comment->CommentID,
                 'ReactButton ReplyLink Visible');
 
         Gdn::Controller()->FireEvent('AfterFlag');

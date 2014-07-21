@@ -91,7 +91,7 @@ class ArticleController extends Gdn_Controller {
         
         // Set up comment form.
         $this->Form->SetModel($this->ArticleCommentModel);
-        $this->Form->Action = Url('/compose/comment/' . $this->Article->ArticleID . '/');
+        $this->Form->Action = Url('/compose/comment/' . $this->Article->ArticleID);
         $this->Form->AddHidden('ArticleID', $this->Article->ArticleID);
 
         $this->View = 'index';

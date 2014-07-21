@@ -191,7 +191,7 @@ class ArticleModel extends Gdn_Model {
                 'NotifyUserID' => ActivityModel::NOTIFY_PUBLIC,
                 'HeadlineFormat' => '{ActivityUserID,user} posted the "<a href="{Url,html}">{Data.Name}</a>" article.',
                 'Story' => $ActivityStory,
-                'Route' => '/article/' . Gdn_Format::Date($Fields['DateInserted'], '%Y') . '/' . $Fields['UrlCode'] . '/',
+                'Route' => '/article/' . Gdn_Format::Date($Fields['DateInserted'], '%Y') . '/' . $Fields['UrlCode'],
                 'Data' => array('Name' => $Fields['Name'])
             );
             $ActivityModel->Save($Activity);
