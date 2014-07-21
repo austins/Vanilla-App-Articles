@@ -54,6 +54,9 @@ class ArticleController extends Gdn_Controller {
         // Get the article.
         $this->Article = $this->ArticleModel->GetByUrlCode($ArticleUrlCode);
 
+        if (!$this->Article)
+            throw NotFoundException('Article');
+
         // Set required permission.
         $UserModel = new UserModel();
         if ($this->Article->Status != ArticleModel::STATUS_PUBLISHED)

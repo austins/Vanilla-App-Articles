@@ -42,7 +42,7 @@ class ArticleSearchModel extends Gdn_Model {
 		// Build base query
 		$this->SQL
 			->Select('a.ArticleID as PrimaryID, a.Name as Title, a.Excerpt as Summary, a.Format, a.CategoryID')
-			->Select('a.UrlCode', "concat('/article/', %s)", 'Url')
+			->Select('a.UrlCode', "concat('/article/', year(a.DateInserted), '/', %s, '/')", 'Url')
 			->Select('a.DateInserted')
 			->Select('a.AuthorUserID as UserID')
             ->Select("'Article'", '', 'RecordType')
