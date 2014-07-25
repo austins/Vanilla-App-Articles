@@ -112,6 +112,8 @@ class ArticleCommentModel extends Gdn_Model {
 
         // TODO: Update the category count and last comment info.
 
+        // TODO: Add logic in either controller or in this method to handle deletion of child comments and guest comments.
+
         return true;
     }
 }
