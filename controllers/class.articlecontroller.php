@@ -222,4 +222,63 @@ class ArticleController extends Gdn_Controller {
         $this->SetData('Title', T('Delete Article'));
         $this->Render();
     }
+
+    /**
+     * Allows user to delete a comment.
+     *
+     * If the comment is the only one in the article, the article will
+     * be deleted as well. This is a "hard" delete - it is removed from the database.
+     *
+     * @param int $CommentID Unique comment ID.
+     * @param string $TransientKey Single-use hash to prove intent.
+     */
+    public function DeleteComment($CommentID = '', $TransientKey = '') {
+        $Session = Gdn::Session();
+        $DefaultTarget = '/articles/';
+        $ValidCommentID = is_numeric($CommentID) && $CommentID > 0;
+        $ValidUser = ($Session->UserID > 0) && $Session->ValidateTransientKey($TransientKey);
+
+        if ($ValidCommentID && $ValidUser) {
+            // Get comment and article data.
+            $Comment = $this->ArticleCommentModel->GetID($CommentID);
+            $ArticleID = GetValue('ArticleID', $Comment);
+            $Article = $this->ArticleModel->GetID($ArticleID);
+
+            if ($Comment && $Article) {
+                $DefaultTarget = ArticleUrl($Article);
+
+                // Make sure comment is this user's or they have Delete permission
+                if ($Comment->InsertUserID != $Session->UserID || !C('Articles.Comments.AllowSelfDelete'))
+                    $this->Permission('Articles.Comments.Delete');
+
+                // Make sure that content can (still) be edited
+                $EditContentTimeout = C('Garden.EditContentTimeout', -1);
+                $CanEdit = $EditContentTimeout == -1 || strtotime($Comment->DateInserted) + $EditContentTimeout > time();
+                if (!$CanEdit)
+                    $this->Permission('Articles.Comments.Delete');
+
+                // Delete the comment
+                if (!$this->ArticleCommentModel->Delete($CommentID))
+                    $this->Form->AddError('Failed to delete comment');
+            } else {
+                $this->Form->AddError('Invalid comment');
+            }
+        } else {
+            $this->Form->AddError('ErrPermission');
+        }
+
+        // Redirect
+        if ($this->_DeliveryType == DELIVERY_TYPE_ALL) {
+            $Target = GetIncomingValue('Target', $DefaultTarget);
+            SafeRedirect($Target);
+        }
+
+        if ($this->Form->ErrorCount() > 0) {
+            $this->SetJson('ErrorMessage', $this->Form->Errors());
+        } else {
+            $this->JsonTarget("#Comment_$CommentID", '', 'SlideUp');
+        }
+
+        $this->Render();
+    }
 }
