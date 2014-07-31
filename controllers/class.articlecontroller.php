@@ -60,8 +60,8 @@ class ArticleController extends Gdn_Controller {
         // Set required permission.
         $UserModel = new UserModel();
         if ($this->Article->Status != ArticleModel::STATUS_PUBLISHED)
-            if (($this->Article->AuthorUserID == Gdn::Session()->UserID)
-                && !$UserModel->CheckPermission($this->Article->AuthorUserID, 'Articles.Articles.Edit')
+            if (($this->Article->AttributionUserID == Gdn::Session()->UserID)
+                && !$UserModel->CheckPermission($this->Article->AttributionUserID, 'Articles.Articles.Edit')
             )
                 $this->Permission('Articles.Articles.View');
             else

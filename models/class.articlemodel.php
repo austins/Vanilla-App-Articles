@@ -67,7 +67,7 @@ class ArticleModel extends Gdn_Model {
             ->Where('a.ArticleID', $ArticleID);
         
         // Join in the author data
-        $this->SQL->Select('u.Name as AuthorName, u.Email as AuthorEmail, u.Photo as AuthorPhoto')->Join('User u', 'u.UserID = a.AuthorUserID');
+        $this->SQL->Select('u.Name as AuthorName, u.Email as AuthorEmail, u.Photo as AuthorPhoto')->Join('User u', 'u.UserID = a.AttributionUserID');
         
         // Fetch data.
         $Article = $this->SQL->Get()->FirstRow();
@@ -82,7 +82,7 @@ class ArticleModel extends Gdn_Model {
             ->Where('a.UrlCode', $ArticleUrlCode);
 
         // Join in the author data
-        $this->SQL->Select('u.Name as AuthorName, u.Email as AuthorEmail, u.Photo as AuthorPhoto')->Join('User u', 'u.UserID = a.AuthorUserID');
+        $this->SQL->Select('u.Name as AuthorName, u.Email as AuthorEmail, u.Photo as AuthorPhoto')->Join('User u', 'u.UserID = a.AttributionUserID');
         
         // Fetch data.
         $Article = $this->SQL->Get()->FirstRow();
@@ -107,7 +107,7 @@ class ArticleModel extends Gdn_Model {
         if (!$Wheres)
             $Wheres = array();
 
-        $Wheres['AuthorUserID'] = $UserID;
+        $Wheres['AttributionUserID'] = $UserID;
 
         $Articles = $this->Get($Offset, $Limit, $Wheres);
         $this->LastArticleCount = $Articles->NumRows();
@@ -157,7 +157,7 @@ class ArticleModel extends Gdn_Model {
 
                 // Update article count for affected category.
                 $this->UpdateArticleCount($CategoryID, $Article);
-                $this->UpdateUserArticleCount(GetValue('AuthorUserID', $Article, false));
+                $this->UpdateUserArticleCount(GetValue('AttributionUserID', $Article, false));
             }
         } else {
             $PrimaryKeyVal = false;
@@ -203,7 +203,7 @@ class ArticleModel extends Gdn_Model {
         $CountArticles = $this->SQL
             ->Select('a.ArticleID', 'count', 'CountArticles')
             ->From('Article a')
-            ->Where('a.AuthorUserID', $UserID)
+            ->Where('a.AttributionUserID', $UserID)
             ->Get()->Value('CountArticles', 0);
 
         Gdn::UserModel()->SetField($UserID, 'CountArticles', $CountArticles);
@@ -238,7 +238,7 @@ class ArticleModel extends Gdn_Model {
             $ActivityModel = new ActivityModel();
             $Activity = array(
                 'ActivityType' => 'Article',
-                'ActivityUserID' => $Fields['AuthorUserID'],
+                'ActivityUserID' => $Fields['AttributionUserID'],
                 'NotifyUserID' => ActivityModel::NOTIFY_PUBLIC,
                 'HeadlineFormat' => '{ActivityUserID,user} posted the "<a href="{Url,html}">{Data.Name}</a>" article.',
                 'Story' => $ActivityStory,

@@ -8,7 +8,7 @@ if (!function_exists('ShowArticleOptions'))
 $Article = $this->Article;
 
 $ArticleUrl = ArticleUrl($Article);
-$Author = Gdn::UserModel()->GetID($Article->AuthorUserID);
+$Author = Gdn::UserModel()->GetID($Article->AttributionUserID);
 
 $Category = $this->Category;
 

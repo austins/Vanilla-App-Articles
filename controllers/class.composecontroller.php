@@ -131,7 +131,7 @@ class ComposeController extends Gdn_Controller {
         $Session = Gdn::Session();
         $Wheres = false;
         if (!$Session->CheckPermission('Articles.Articles.Edit'))
-            $Wheres = array('a.AuthorUserID' => $Session->UserID);
+            $Wheres = array('a.AttributionUserID' => $Session->UserID);
 
         // Get the articles.
         $Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres);
@@ -171,9 +171,9 @@ class ComposeController extends Gdn_Controller {
                 $this->Form->AddHidden('UrlCodeIsDefined', '1');
 
                 // Set author field.
-                $Author = $UserModel->GetID($Article->AuthorUserID);
+                $Author = $UserModel->GetID($Article->AttributionUserID);
 
-                // If the user with AuthorUserID doesn't exist.
+                // If the user with AttributionUserID doesn't exist.
                 if (!$Author)
                     $Author = $UserModel->GetID($Article->InsertUserID);
             } else {
@@ -234,7 +234,7 @@ class ComposeController extends Gdn_Controller {
                     $this->Form->AddError('The user for the author field does not exist.', 'AuthorUserName');
             }
 
-            $this->Form->SetFormValue('AuthorUserID', (int)$Author->UserID);
+            $this->Form->SetFormValue('AttributionUserID', (int)$Author->UserID);
 
             if ($this->Form->ErrorCount() == 0) {
                 $ArticleID = $this->Form->Save($FormValues);

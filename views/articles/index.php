@@ -25,7 +25,7 @@ if(count($Articles) == 0) {
 else {
   foreach($Articles as $Article):
     $ArticleUrl = ArticleUrl($Article);
-    $Author = Gdn::UserModel()->GetID($Article->AuthorUserID);
+    $Author = Gdn::UserModel()->GetID($Article->AttributionUserID);
 
     $ArticleCategory = $this->ArticleCategoryModel->GetByID($Article->CategoryID);
 

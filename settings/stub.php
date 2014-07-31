@@ -50,7 +50,7 @@ $FirstArticleID = $SQL->Insert('Article', array(
     'Format' => 'Html',
     'Status' => 'published',
     'DateInserted' => $Now,
-    'AuthorUserID' => $SystemUserID,
+    'AttributionUserID' => $SystemUserID,
     'InsertUserID' => $SystemUserID,
     'InsertIPAddress' => '0.0.0.0'
 ));
