@@ -157,6 +157,7 @@ class ArticleModel extends Gdn_Model {
 
                 // Update article count for affected category.
                 $this->UpdateArticleCount($CategoryID, $Article);
+                $this->UpdateUserArticleCount(GetValue('AuthorUserID', $Article, false));
             }
         } else {
             $PrimaryKeyVal = false;
@@ -171,12 +172,15 @@ class ArticleModel extends Gdn_Model {
         if (!is_numeric($CategoryID) && !is_numeric($ArticleID))
             return false;
 
-        $this->SQL
+        $CategoryData = $this->SQL
             ->Select('a.ArticleID', 'count', 'CountArticles')
             ->From('Article a')
-            ->Where('a.CategoryID', $CategoryID);
+            ->Where('a.CategoryID', $CategoryID)
+            ->Get()->FirstRow();
 
-        $CategoryData = $this->SQL->Get()->FirstRow();
+        if (!$CategoryData)
+            return false;
+
         $CountArticles = (int)GetValue('CountArticles', $CategoryData, 0);
 
         $ArticleCategoryModel = new ArticleCategoryModel();
@@ -190,6 +194,19 @@ class ArticleModel extends Gdn_Model {
         $Wheres = array('ArticleID' => $ArticleID);
 
         $ArticleCategoryModel->Update($Fields, $Wheres, false);
+    }
+
+    private function UpdateUserArticleCount($UserID) {
+        if (!is_numeric($UserID))
+            return false;
+
+        $CountArticles = $this->SQL
+            ->Select('a.ArticleID', 'count', 'CountArticles')
+            ->From('Article a')
+            ->Where('a.AuthorUserID', $UserID)
+            ->Get()->Value('CountArticles', 0);
+
+        Gdn::UserModel()->SetField($UserID, 'CountArticles', $CountArticles);
     }
 
     private function AddActivity($Fields, $Insert) {

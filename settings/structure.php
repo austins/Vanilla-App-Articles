@@ -72,6 +72,12 @@ $Construct->PrimaryKey('CommentID')
     //->Column('DeleteUserID', 'int', true)
     ->Set($Explicit, $Drop);
 
+// Add extra columns to user table for tracking articles and comments.
+$Construct->Table('User')
+    ->Column('CountArticles', 'int', 0)
+    ->Column('CountArticleComments', 'int', 0)
+    ->Set(false, false);
+
 /*
  * Set up permissions.
  */
