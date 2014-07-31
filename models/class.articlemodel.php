@@ -166,9 +166,9 @@ class ArticleModel extends Gdn_Model {
     }
 
     private function UpdateArticleCount($CategoryID, $Article = false) {
-        if (is_numeric($CategoryID)) {
-            $ArticleID = GetValue('ArticleID', $Article, false);
+        $ArticleID = GetValue('ArticleID', $Article, false);
 
+        if (is_numeric($CategoryID) && is_numeric($ArticleID)) {
             $this->SQL
                 ->Select('a.ArticleID', 'count', 'CountArticles')
                 ->From('Article a')
