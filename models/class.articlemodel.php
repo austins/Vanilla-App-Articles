@@ -149,13 +149,46 @@ class ArticleModel extends Gdn_Model {
             if ($Insert === false) {
                 $this->Update($Fields, array($this->PrimaryKey => $PrimaryKeyVal));
             } else {
+                // Inserting.
                 $PrimaryKeyVal = $this->Insert($Fields);
+
+                $Article = $this->GetByID($PrimaryKeyVal);
+                $CategoryID = GetValue('CategoryID', $Article, false);
+
+                // Update article count for affected category.
+                $this->UpdateArticleCount($CategoryID, $Article);
             }
         } else {
             $PrimaryKeyVal = false;
         }
 
         return $PrimaryKeyVal;
+    }
+
+    private function UpdateArticleCount($CategoryID, $Article = false) {
+        if (is_numeric($CategoryID)) {
+            $ArticleID = GetValue('ArticleID', $Article, false);
+
+            $this->SQL
+                ->Select('a.ArticleID', 'count', 'CountArticles')
+                ->From('Article a')
+                ->Where('a.CategoryID', $CategoryID);
+
+            $CategoryData = $this->SQL->Get()->FirstRow();
+            $CountArticles = (int)GetValue('CountArticles', $CategoryData, 0);
+
+            $ArticleCategoryModel = new ArticleCategoryModel();
+
+            $Fields = array(
+                'LastDateInserted' => GetValue('DateInserted', $Article, false),
+                'CountArticles' => $CountArticles,
+                'LastArticleID' => $ArticleID
+            );
+
+            $Wheres = array('ArticleID' => $ArticleID);
+
+            $ArticleCategoryModel->Update($Fields, $Wheres, false);
+        }
     }
 
     private function AddActivity($Fields, $Insert) {

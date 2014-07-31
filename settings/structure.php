@@ -18,13 +18,13 @@ $Construct->PrimaryKey('CategoryID')
     ->Column('Description', 'varchar(500)', true)
     ->Column('DateInserted', 'datetime')
     ->Column('DateUpdated', 'datetime', true)
-    //->Column('CountArticles', 'int', 0)
-    //->Column('LastArticleID', 'int', null)
     ->Column('InsertUserID', 'int', false, 'key')
     ->Column('UpdateUserID', 'int', true)
+    ->Column('LastDateInserted', 'datetime', null)
+    ->Column('CountArticles', 'int', 0)
+    ->Column('LastArticleID', 'int', null)
     //->Column('CountComments', 'int', 0)
     //->Column('LastCommentID', 'int', null)
-    //->Column('LastDateInserted', 'datetime', null)
     ->Set($Explicit, $Drop);
 
 // Construct the Article table.
