@@ -168,27 +168,28 @@ class ArticleModel extends Gdn_Model {
     private function UpdateArticleCount($CategoryID, $Article = false) {
         $ArticleID = GetValue('ArticleID', $Article, false);
 
-        if (is_numeric($CategoryID) && is_numeric($ArticleID)) {
-            $this->SQL
-                ->Select('a.ArticleID', 'count', 'CountArticles')
-                ->From('Article a')
-                ->Where('a.CategoryID', $CategoryID);
+        if (!is_numeric($CategoryID) && !is_numeric($ArticleID))
+            return false;
 
-            $CategoryData = $this->SQL->Get()->FirstRow();
-            $CountArticles = (int)GetValue('CountArticles', $CategoryData, 0);
+        $this->SQL
+            ->Select('a.ArticleID', 'count', 'CountArticles')
+            ->From('Article a')
+            ->Where('a.CategoryID', $CategoryID);
 
-            $ArticleCategoryModel = new ArticleCategoryModel();
+        $CategoryData = $this->SQL->Get()->FirstRow();
+        $CountArticles = (int)GetValue('CountArticles', $CategoryData, 0);
 
-            $Fields = array(
-                'LastDateInserted' => GetValue('DateInserted', $Article, false),
-                'CountArticles' => $CountArticles,
-                'LastArticleID' => $ArticleID
-            );
+        $ArticleCategoryModel = new ArticleCategoryModel();
 
-            $Wheres = array('ArticleID' => $ArticleID);
+        $Fields = array(
+            'LastDateInserted' => GetValue('DateInserted', $Article, false),
+            'CountArticles' => $CountArticles,
+            'LastArticleID' => $ArticleID
+        );
 
-            $ArticleCategoryModel->Update($Fields, $Wheres, false);
-        }
+        $Wheres = array('ArticleID' => $ArticleID);
+
+        $ArticleCategoryModel->Update($Fields, $Wheres, false);
     }
 
     private function AddActivity($Fields, $Insert) {
