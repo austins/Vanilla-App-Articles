@@ -30,16 +30,16 @@ if ($this->Comments->NumRows() > 0):
                             <div class="AuthorWrap">
                             <span class="Author">
                                 <?php
-                                echo UserPhoto($Author);
-                                echo UserAnchor($Author, 'Username');
+                                echo UserPhoto($User);
+                                echo UserAnchor($User, 'Username');
                                 $this->FireEvent('AuthorPhoto');
                                 ?>
                             </span>
                             <span class="AuthorInfo">
                                 <?php
-                                echo ' ' . WrapIf(htmlspecialchars(GetValue('Title', $Author)), 'span',
+                                echo ' ' . WrapIf(htmlspecialchars(GetValue('Title', $User)), 'span',
                                         array('class' => 'MItem AuthorTitle'));
-                                echo ' ' . WrapIf(htmlspecialchars(GetValue('Location', $Author)), 'span',
+                                echo ' ' . WrapIf(htmlspecialchars(GetValue('Location', $User)), 'span',
                                         array('class' => 'MItem AuthorLocation'));
 
                                 $this->FireEvent('AuthorInfo');
