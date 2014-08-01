@@ -114,7 +114,7 @@ class ArticleCommentModel extends Gdn_Model {
 
                 // Update comment count for affected article, category, and user.
                 $Comment = $this->SQL
-                    ->Select('ac.CommentID')
+                    ->Select('ac.*')
                     ->From('ArticleComment ac')
                     ->OrderBy('ac.CommentID', 'desc')
                     ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT);
@@ -130,6 +130,52 @@ class ArticleCommentModel extends Gdn_Model {
         }
 
         return $PrimaryKeyVal;
+    }
+
+    /**
+     * Delete a comment.
+     *
+     * This is a hard delete that completely removes it from the database.
+     * Events: DeleteComment.
+     *
+     * @param int $CommentID Unique ID of the comment to be deleted.
+     * @param array $Options Additional options for the delete.
+     *
+     * @returns true on successful delete; false if comment ID doesn't exist.
+     */
+    public function Delete($CommentID, $Options = array()) {
+        $this->EventArguments['CommentID'] = &$CommentID;
+
+        $Comment = $this->GetByID($CommentID);
+        if (!$Comment)
+            return false;
+
+        $this->FireEvent('DeleteComment');
+
+        // Log the deletion.
+        $Log = GetValue('Log', $Options, 'Delete');
+        LogModel::Insert($Log, 'ArticleComment', $Comment, GetValue('LogOptions', $Options, array()));
+
+        // Delete the comment.
+        $this->SQL->Delete('ArticleComment', array('CommentID' => $CommentID));
+
+        // Update the comment count for the article.
+        $Article = $this->SQL->GetWhere('Article', array('ArticleId' => $Comment->ArticleID))->FirstRow();
+        $LastComment = $this->SQL
+            ->Select('ac.*')
+            ->From('ArticleComment ac')
+            ->OrderBy('ac.CommentID', 'desc')
+            ->Where('ac.ArticleID', $Article->ArticleID)
+            ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT);
+
+        $this->UpdateCommentCount($Article, $LastComment);
+
+        // Update the comment count for the user.
+        $this->UpdateUserCommentCount(GetValue('InsertUserID', $Comment, false));
+
+        // TODO: Add logic in either controller or in this method to handle deletion of child comments and guest comments.
+
+        return true;
     }
 
     public function UpdateCommentCount($Article, $Comment = false) {
@@ -179,45 +225,5 @@ class ArticleCommentModel extends Gdn_Model {
             ->Get()->Value('CountComments', 0);
 
         Gdn::UserModel()->SetField($UserID, 'CountArticleComments', $CountComments);
-    }
-
-    /**
-     * Delete a comment.
-     *
-     * This is a hard delete that completely removes it from the database.
-     * Events: DeleteComment.
-     *
-     * @param int $CommentID Unique ID of the comment to be deleted.
-     * @param array $Options Additional options for the delete.
-     *
-     * @returns true on successful delete; false if comment ID doesn't exist.
-     */
-    public function Delete($CommentID, $Options = array()) {
-        $this->EventArguments['CommentID'] = &$CommentID;
-
-        $Comment = $this->GetByID($CommentID);
-        if (!$Comment)
-            return false;
-
-        $this->FireEvent('DeleteComment');
-
-        // Log the deletion.
-        $Log = GetValue('Log', $Options, 'Delete');
-        LogModel::Insert($Log, 'ArticleComment', $Comment, GetValue('LogOptions', $Options, array()));
-
-        // Delete the comment.
-        $this->SQL->Delete('ArticleComment', array('CommentID' => $CommentID));
-
-        $Article = $this->SQL->GetWhere('Article', array('ArticleId' => $Comment->ArticleID))->FirstRow();
-
-        // TODO: Update the comment count
-
-        // TODO: Update the user's comment count
-
-        // TODO: Update the category count and last comment info.
-
-        // TODO: Add logic in either controller or in this method to handle deletion of child comments and guest comments.
-
-        return true;
     }
 }
