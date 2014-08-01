@@ -139,14 +139,14 @@ class ArticleModel extends Gdn_Model {
             } else {
                 // Inserting.
                 $PrimaryKeyVal = $this->Insert($Fields);
-            }
 
-            // Update article count for affected category and user.
-            $Article = $this->GetByID($PrimaryKeyVal);
-            $CategoryID = GetValue('CategoryID', $Article, false);
-            
-            $this->UpdateArticleCount($CategoryID, $Article);
-            $this->UpdateUserArticleCount(GetValue('AttributionUserID', $Article, false));
+                // Update article count for affected category and user.
+                $Article = $this->GetByID($PrimaryKeyVal);
+                $CategoryID = GetValue('CategoryID', $Article, false);
+
+                $this->UpdateArticleCount($CategoryID, $Article);
+                $this->UpdateUserArticleCount(GetValue('AttributionUserID', $Article, false));
+            }
         } else {
             $PrimaryKeyVal = false;
         }
