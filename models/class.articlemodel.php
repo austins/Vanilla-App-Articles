@@ -90,19 +90,6 @@ class ArticleModel extends Gdn_Model {
         return $Article;
     }
 
-    // TODO: Update delete method to recalculate counts, remove related article material, etc.
-    public function Delete($Where = '', $Limit = false, $ResetData = false) {
-        if (is_numeric($Where))
-            $Where = array($this->PrimaryKey => $Where);
-
-        if ($ResetData)
-            $Result = $this->SQL->Delete($this->Name, $Where, $Limit);
-        else
-            $Result = $this->SQL->NoReset()->Delete($this->Name, $Where, $Limit);
-
-        return $Result;
-    }
-
     public function GetByUser($UserID, $Offset = 0, $Limit = false, $Wheres = null) {
         if (!$Wheres)
             $Wheres = array();
@@ -155,7 +142,7 @@ class ArticleModel extends Gdn_Model {
                 $Article = $this->GetByID($PrimaryKeyVal);
                 $CategoryID = GetValue('CategoryID', $Article, false);
 
-                // Update article count for affected category.
+                // Update article count for affected category and user.
                 $this->UpdateArticleCount($CategoryID, $Article);
                 $this->UpdateUserArticleCount(GetValue('AttributionUserID', $Article, false));
             }
@@ -164,6 +151,34 @@ class ArticleModel extends Gdn_Model {
         }
 
         return $PrimaryKeyVal;
+    }
+
+    // TODO: Update delete method remove related article material, etc.
+    public function Delete($Where = '', $Limit = false, $ResetData = false) {
+        if (is_numeric($Where))
+            $Where = array($this->PrimaryKey => $Where);
+
+        $ArticleToDelete = $this->GetByID(GetValue($this->PrimaryKey, $Where, false));
+
+        if ($ResetData)
+            $Result = $this->SQL->Delete($this->Name, $Where, $Limit);
+        else
+            $Result = $this->SQL->NoReset()->Delete($this->Name, $Where, $Limit);
+
+        if ($ArticleToDelete && $Result) {
+            // Get the newest article in the table to set the LastDateInserted and LastArticleID accordingly.
+            $LastArticle = $this->SQL
+                ->Select('a.*')
+                ->From('Article a')
+                ->OrderBy('a.ArticleID', 'desc')
+                ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT);
+
+            // Update article count for affected category and user.
+            $this->UpdateArticleCount(GetValue('CategoryID', $ArticleToDelete, false), $LastArticle);
+            $this->UpdateUserArticleCount(GetValue('AttributionUserID', $ArticleToDelete, false));
+        }
+
+        return $Result;
     }
 
     public function UpdateArticleCount($CategoryID, $Article = false) {
