@@ -10,8 +10,8 @@ if (!defined('APPLICATION'))
  */
 
 // Only do this once, ever.
-if (!$Drop)
-    return;
+$Drop = (Gdn::Config('Articles.Version') === false) ? true : false;
+$Explicit = isset($Explicit) ? $Explicit : true;
 
 // Prep content meta data.
 $SystemUserID = Gdn::UserModel()->GetSystemUserID();
@@ -23,11 +23,13 @@ $UncategorizedArticleCategoryID = $SQL->Insert('ArticleCategory', array(
     'UrlCode' => 'uncategorized',
     'Description' => 'Uncategorized articles.',
     'DateInserted' => $Now,
-    //'CountArticles' => 1,
-    //'LastArticleID' => 1,
-    'InsertUserID' => $SystemUserID
-    //'LastDateInserted' => $Now
+    'InsertUserID' => $SystemUserID,
+    'LastDateInserted' => $Now,
+    'CountArticles' => 1,
+    'LastArticleID' => 1
 ));
+
+// TODO: update counts in stub manually also.
 
 // Insert first article.
 $FirstArticleName = 'My First Article!';

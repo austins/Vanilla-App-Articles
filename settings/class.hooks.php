@@ -24,7 +24,7 @@ class ArticlesHooks extends Gdn_Plugin {
         // Initialize variables that are used for the structuring and stub inserts.
         $Database = Gdn::Database();
         $SQL = $Database->SQL();
-        $Drop = false; // Gdn::Config('Articles.Version') === FALSE ? TRUE : FALSE;
+        $Drop = false; // Gdn::Config('Articles.Version') === false ? true : false;
         $Explicit = true;
 
         // Call structure.php to update database.

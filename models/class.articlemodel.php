@@ -166,7 +166,7 @@ class ArticleModel extends Gdn_Model {
         return $PrimaryKeyVal;
     }
 
-    private function UpdateArticleCount($CategoryID, $Article = false) {
+    public function UpdateArticleCount($CategoryID, $Article = false) {
         $ArticleID = GetValue('ArticleID', $Article, false);
 
         if (!is_numeric($CategoryID) && !is_numeric($ArticleID))
@@ -196,7 +196,7 @@ class ArticleModel extends Gdn_Model {
         $ArticleCategoryModel->Update($Fields, $Wheres, false);
     }
 
-    private function UpdateUserArticleCount($UserID) {
+    public function UpdateUserArticleCount($UserID) {
         if (!is_numeric($UserID))
             return false;
 
