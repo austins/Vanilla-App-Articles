@@ -78,6 +78,110 @@ class ArticleCommentModel extends Gdn_Model {
     }
 
     /**
+     * Takes a set of form data ($Form->_PostValues), validates them, and
+     * inserts or updates them to the database.
+     *
+     * @param array $FormPostValues An associative array of $Field => $Value pairs that represent data posted
+     * from the form in the $_POST or $_GET collection.
+     * @param array $Settings If a custom model needs special settings in order to perform a save, they
+     * would be passed in using this variable as an associative array.
+     * @return unknown
+     */
+    public function Save($FormPostValues, $Settings = false) {
+        // Define the primary key in this model's table.
+        $this->DefineSchema();
+
+        // See if a primary key value was posted and decide how to save
+        $PrimaryKeyVal = GetValue($this->PrimaryKey, $FormPostValues, false);
+        $Insert = $PrimaryKeyVal === false ? true : false;
+        if ($Insert) {
+            $this->AddInsertFields($FormPostValues);
+        } else {
+            $this->AddUpdateFields($FormPostValues);
+        }
+
+        // Validate the form posted values
+        if ($this->Validate($FormPostValues, $Insert) === true) {
+            $Fields = $this->Validation->ValidationFields();
+
+            $Fields = RemoveKeyFromArray($Fields, $this->PrimaryKey); // Don't try to insert or update the primary key
+            if ($Insert === false) {
+                // Updating.
+                $this->Update($Fields, array($this->PrimaryKey => $PrimaryKeyVal));
+            } else {
+                // Inserting.
+                $PrimaryKeyVal = $this->Insert($Fields);
+
+                // Update comment count for affected article, category, and user.
+                $Comment = $this->SQL
+                    ->Select('ac.CommentID')
+                    ->From('ArticleComment ac')
+                    ->OrderBy('ac.CommentID', 'desc')
+                    ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT);
+
+                $ArticleModel = new ArticleModel();
+                $Article = $ArticleModel->GetByID(GetValue('ArticleID', $FormPostValues, false));
+
+                $this->UpdateCommentCount($Article, $Comment);
+                $this->UpdateUserCommentCount($Comment->InsertUserID);
+            }
+        } else {
+            $PrimaryKeyVal = false;
+        }
+
+        return $PrimaryKeyVal;
+    }
+
+    public function UpdateCommentCount($Article, $Comment = false) {
+        $ArticleID = GetValue('ArticleID', $Article, false);
+
+        if (!is_numeric($ArticleID))
+            return false;
+
+        $ArticleData = $this->SQL
+            ->Select('ac.CommentID', 'count', 'CountComments')
+            ->From('ArticleComment ac')
+            ->Where('ac.ArticleID', $ArticleID)
+            ->Get()->FirstRow();
+
+        if (!$ArticleData)
+            return false;
+
+        $CountComments = (int)GetValue('CountComments', $ArticleData, 0);
+
+        $Fields = array(
+            'CountComments' => $CountComments,
+            'FirstCommentID' => $this->SQL
+                                    ->Select('ac.CommentID')
+                                    ->From('ArticleComment ac')
+                                    ->OrderBy('ac.CommentID', 'asc')
+                                    ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT)->CommentID,
+            'LastCommentID' => $Comment->CommentID,
+            'DateLastComment' => $Comment->DateInserted,
+            'LastCommentUserID' => $Comment->InsertUserID
+        );
+
+        $ArticleModel = new ArticleModel();
+        $ArticleModel->Update($Fields, array('ArticleID' => $ArticleID), false);
+
+        // Update the comment counts on the article's category.
+        $ArticleModel->UpdateArticleCount($Article->CategoryID, $Article);
+    }
+
+    public function UpdateUserCommentCount($UserID) {
+        if (!is_numeric($UserID))
+            return false;
+
+        $CountComments = $this->SQL
+            ->Select('ac.CommentID', 'count', 'CountComments')
+            ->From('ArticleComment ac')
+            ->Where('ac.InsertUserID', $UserID)
+            ->Get()->Value('CountComments', 0);
+
+        Gdn::UserModel()->SetField($UserID, 'CountArticleComments', $CountComments);
+    }
+
+    /**
      * Delete a comment.
      *
      * This is a hard delete that completely removes it from the database.

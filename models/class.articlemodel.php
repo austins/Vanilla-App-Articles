@@ -175,8 +175,22 @@ class ArticleModel extends Gdn_Model {
                 ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT);
 
             // Update article count for affected category and user.
-            $this->UpdateArticleCount(GetValue('CategoryID', $ArticleToDelete, false), $LastArticle);
+            $this->UpdateArticleCount($ArticleToDelete->CategoryID, $LastArticle);
             $this->UpdateUserArticleCount(GetValue('AttributionUserID', $ArticleToDelete, false));
+
+            // See if LastDateInserted should be the latest comment.
+            $LastComment = $this->SQL
+                ->Select('ac.*')
+                ->From('ArticleComment ac')
+                ->OrderBy('ac.CommentID', 'desc')
+                ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT);
+
+            if ($LastComment && (strtotime($LastComment->DateInserted) > strtotime($LastArticle->DateInserted))) {
+                $ArticleCategoryModel = new ArticleCategoryModel();
+
+                $ArticleCategoryModel->Update(array('LastDateInserted' => $LastComment->DateInserted),
+                    array('CategoryID' => $LastArticle->CategoryID), false);
+            }
         }
 
         return $Result;
@@ -190,6 +204,8 @@ class ArticleModel extends Gdn_Model {
 
         $CategoryData = $this->SQL
             ->Select('a.ArticleID', 'count', 'CountArticles')
+            ->Select('a.CountComments', 'count', 'CountComments')
+            ->Select('a.LastCommentID', '', 'LastCommentID')
             ->From('Article a')
             ->Where('a.CategoryID', $CategoryID)
             ->Get()->FirstRow();
@@ -204,7 +220,9 @@ class ArticleModel extends Gdn_Model {
         $Fields = array(
             'LastDateInserted' => GetValue('DateInserted', $Article, false),
             'CountArticles' => $CountArticles,
-            'LastArticleID' => $ArticleID
+            'LastArticleID' => $ArticleID,
+            'CountComments' => (int)GetValue('CountComments', $CategoryData, 0),
+            'LastCommentID' => (int)GetValue('LastCommentID', $CategoryData, 0)
         );
 
         $Wheres = array('CategoryID' => GetValue('CategoryID', $Article, false));

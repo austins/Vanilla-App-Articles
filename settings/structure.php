@@ -23,8 +23,8 @@ $Construct->PrimaryKey('CategoryID')
     ->Column('LastDateInserted', 'datetime', null)
     ->Column('CountArticles', 'int', 0)
     ->Column('LastArticleID', 'int', null)
-    //->Column('CountComments', 'int', 0)
-    //->Column('LastCommentID', 'int', null)
+    ->Column('CountComments', 'int', 0)
+    ->Column('LastCommentID', 'int', null)
     ->Set($Explicit, $Drop);
 
 // Construct the Article table.
@@ -47,10 +47,10 @@ $Construct->PrimaryKey('ArticleID')
     ->Column('InsertIPAddress', 'varchar(15)', true)
     ->Column('UpdateIPAddress', 'varchar(15)', true)
     ->Column('CountComments', 'int', 0)
-    //->Column('FirstCommentID', 'int', true)
-    //->Column('LastCommentID', 'int', true)
-    //->Column('DateLastComment', 'datetime', null, array('index', 'index.CategoryPages'))
-    //->Column('LastCommentUserID', 'int', true)
+    ->Column('FirstCommentID', 'int', true)
+    ->Column('LastCommentID', 'int', true)
+    ->Column('DateLastComment', 'datetime', null, array('index', 'index.CategoryPages'))
+    ->Column('LastCommentUserID', 'int', true)
     ->Set($Explicit, $Drop);
 
 // Construct the ArticleComment table.
