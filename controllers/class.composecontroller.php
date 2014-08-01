@@ -246,11 +246,12 @@ class ComposeController extends Gdn_Controller {
                     if ($Article) {
                         $InitialAttributionUserID = GetValue('AttributionUserID', $Article, false);
 
-                        if ($InitialAttributionUserID != $Author->UserID)
+                        if ($InitialAttributionUserID != $Author->UserID) {
                             $this->ArticleModel->UpdateUserArticleCount($InitialAttributionUserID);
 
-                        // Update the count for the new author.
-                        $this->ArticleModel->UpdateUserArticleCount($Author->UserID);
+                            // Update the count for the new author.
+                            $this->ArticleModel->UpdateUserArticleCount($Author->UserID);
+                        }
                     }
 
                     $Article = $this->ArticleModel->GetByID($ArticleID);
