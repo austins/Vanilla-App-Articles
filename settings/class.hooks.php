@@ -375,4 +375,118 @@ class ArticlesHooks extends Gdn_Plugin {
         // Render the ProfileController
         $Sender->Render();
     }
+
+    /**
+     * Remove Articles data when deleting a user.
+     *
+     * @param UserModel $Sender UserModel.
+     */
+    public function UserModel_BeforeDeleteUser_Handler($Sender) {
+        $UserID = GetValue('UserID', $Sender->EventArguments);
+        $Options = GetValue('Options', $Sender->EventArguments, array());
+        $Options = is_array($Options) ? $Options : array();
+        $Content =& $Sender->EventArguments['Content'];
+
+        $this->DeleteUserData($UserID, $Options, $Content);
+    }
+
+    /**
+     * Delete all of the Articles related information for a specific user.
+     *
+     * @param int $UserID The ID of the user to delete.
+     * @param array $Options An array of options:
+     *  - DeleteMethod: One of delete, wipe, or null
+     */
+    public function DeleteUserData($UserID, $Options = array(), &$Data = null) {
+        $SQL = Gdn::SQL();
+
+        // Comment deletion depends on method selected.
+        $DeleteMethod = GetValue('DeleteMethod', $Options, 'delete');
+        if ($DeleteMethod == 'delete') {
+            // Clear out the last posts to the categories.
+            $SQL->Update('ArticleCategory c')
+                ->Join('Article a', 'a.ArticleID = c.LastArticleID')
+                ->Where('a.InsertUserID', $UserID)
+                ->Set('c.LastArticleID', null)
+                ->Set('c.LastCommentID', null)
+                ->Put();
+
+            $SQL->Update('ArticleCategory c')
+                ->Join('ArticleComment ac', 'ac.CommentID = c.LastCommentID')
+                ->Where('ac.InsertUserID', $UserID)
+                ->Set('c.LastArticleID', null)
+                ->Set('c.LastCommentID', null)
+                ->Put();
+
+            // Grab all of the articles that the user has engaged in.
+            $ArticleIDs = $SQL
+                ->Select('ArticleID')
+                ->From('ArticleComment')
+                ->Where('InsertUserID', $UserID)
+                ->GroupBy('ArticleID')
+                ->Get()->ResultArray();
+            $ArticleIDs = ConsolidateArrayValuesByKey($ArticleIDs, 'ArticleID');
+
+            Gdn::UserModel()->GetDelete('ArticleComment', array('InsertUserID' => $UserID), $Data);
+
+            // Update the comment counts.
+            $CommentCounts = $SQL
+                ->Select('ArticleID')
+                ->Select('CommentID', 'count', 'CountComments')
+                ->Select('CommentID', 'max', 'LastCommentID')
+                ->WhereIn('ArticleID', $ArticleIDs)
+                ->GroupBy('ArticleID')
+                ->Get('ArticleComment')->ResultArray();
+
+            foreach ($CommentCounts as $Row) {
+                $SQL->Put('Article',
+                    array('CountComments' => $Row['CountComments'] + 1, 'LastCommentID' => $Row['LastCommentID']),
+                    array('ArticleID' => $Row['ArticleID']));
+            }
+
+            // Update the last user IDs.
+            $SQL->Update('Article a')
+                ->Join('ArticleComment ac', 'a.LastCommentID = ac.CommentID', 'left')
+                ->Set('a.LastCommentUserID', 'ac.InsertUserID', false, false)
+                ->Set('a.DateLastComment', 'ac.DateInserted', false, false)
+                ->WhereIn('a.ArticleID', $ArticleIDs)
+                ->Put();
+
+            // Update the last posts.
+            $Articles = $SQL
+                ->WhereIn('ArticleID', $ArticleIDs)
+                ->Where('LastCommentUserID', $UserID)
+                ->Get('Article');
+
+            // Delete the user's articles
+            Gdn::UserModel()->GetDelete('Article', array('AttributionUserID' => $UserID), $Data);
+
+            // Update the appropriate recent posts in the categories.
+            $ArticleCategoryModel = new ArticleCategoryModel();
+            $Categories = $ArticleCategoryModel->GetWhere(array('LastArticleID' => null))->ResultArray();
+            foreach ($Categories as $Category) {
+                $ArticleCategoryModel->SetRecentPost($Category['CategoryID']);
+            }
+        } else if ($DeleteMethod == 'wipe') {
+            // Erase the user's articles
+            $SQL->Update('Article')
+                ->Set('Status', 'Trash')
+                ->Where('AuthorUserID', $UserID)
+                ->Put();
+
+            $SQL->Update('ArticleComment')
+                ->Set('Body', T('The user and all related content has been deleted.'))
+                ->Set('Format', 'Deleted')
+                ->Where('InsertUserID', $UserID)
+                ->Put();
+        }
+
+        // Remove the user's profile information related to this application
+        $SQL->Update('User')
+            ->Set(array(
+                'CountArticles' => 0,
+                'CountArticleComments' => 0))
+            ->Where('UserID', $UserID)
+            ->Put();
+    }
 }

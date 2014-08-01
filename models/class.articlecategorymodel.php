@@ -128,4 +128,19 @@ class ArticleCategoryModel extends Gdn_Model {
             $this->SQL->Delete('ArticleCategory', array('CategoryID' => $Category->CategoryID));
         }
     }
+
+    public function SetRecentPost($CategoryID) {
+        $Row = $this->SQL
+            ->GetWhere('Article', array('CategoryID' => $CategoryID), 'DateLastComment', 'desc', 1)
+            ->FirstRow(DATASET_TYPE_ARRAY);
+
+        $Fields = array('LastCommentID' => NULL, 'LastArticleID' => NULL);
+
+        if ($Row) {
+            $Fields['LastCommentID'] = $Row['LastCommentID'];
+            $Fields['LastArticleID'] = $Row['ArticleID'];
+        }
+
+        $this->SetField($CategoryID, $Fields);
+    }
 }
