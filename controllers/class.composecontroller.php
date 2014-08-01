@@ -241,6 +241,15 @@ class ComposeController extends Gdn_Controller {
 
                 // If the article was saved successfully.
                 if ($ArticleID) {
+                    // If editing and the author has changed from the initial article, then
+                    // update the counts for the initial author after the article has been saved.
+                    if ($Article) {
+                        $InitialAttributionUserID = GetValue('AttributionUserID', $Article, false);
+
+                        if ($InitialAttributionUserID != $Author->UserID)
+                            $this->ArticleModel->UpdateUserArticleCount($InitialAttributionUserID);
+                    }
+
                     $Article = $this->ArticleModel->GetByID($ArticleID);
 
                     // Redirect to the article.
