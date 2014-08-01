@@ -191,7 +191,7 @@ class ArticleModel extends Gdn_Model {
             'LastArticleID' => $ArticleID
         );
 
-        $Wheres = array('ArticleID' => $ArticleID);
+        $Wheres = array('CategoryID' => GetValue('CategoryID', $Article, false));
 
         $ArticleCategoryModel->Update($Fields, $Wheres, false);
     }
