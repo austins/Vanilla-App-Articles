@@ -126,3 +126,7 @@ body.Articles.category .Article .Options > .ToggleFlyout.Open {
 .DataList .ItemCommentReply {
     margin-left: 30px;
 }
+
+.CommentForm.Guest .FormWrapper {
+    padding-left: 10px;
+}

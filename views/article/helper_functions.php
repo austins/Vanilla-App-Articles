@@ -82,6 +82,7 @@ if (!function_exists('ShowCommentForm')) {
         $Article = $Controller->Article;
         $UserCanClose = $Session->CheckPermission('Articles.Articles.Close');
         $UserCanComment = $Session->CheckPermission('Articles.Comments.Add');
+        $GuestCommenting = (C('Articles.Comments.AllowGuests', false) && !$Session->IsValid());
 
         // Closed notification
         if ((bool)$Article->Closed) {
@@ -90,8 +91,8 @@ if (!function_exists('ShowCommentForm')) {
                 <div class="Note Closed"><?php echo T('This article has been closed.'); ?></div>
             </div>
         <?php
-        } else if (!$UserCanComment) {
-            if (!Gdn::Session()->IsValid()) {
+        } else if (!$UserCanComment && !$GuestCommenting) {
+            if (!$Session->IsValid()) {
                 ?>
                 <div class="Foot Closed">
                     <div class="Note Closed SignInOrRegister"><?php
@@ -111,7 +112,7 @@ if (!function_exists('ShowCommentForm')) {
             }
         }
 
-        if ((($Article->Closed == '1') && $UserCanClose) || (($Article->Closed == '0') && $UserCanComment))
+        if ((($Article->Closed == '1') && $UserCanClose) || (($Article->Closed == '0') && $UserCanComment) || $GuestCommenting)
             echo $Controller->FetchView('comment', 'compose', 'Articles');
     }
 }
@@ -126,10 +127,15 @@ if (!function_exists('WriteArticleReactions')):
         echo '<div class="Reactions">';
         Gdn_Theme::BulletRow();
 
-        if (C('Articles.Articles.EnableThreadedComments', true) && !$Comment->ParentCommentID)
-            echo Anchor('<span class="ReactSprite ReactReply"></span> Reply',
-                '/compose/comment/' . $Comment->ArticleID . '/' . $Comment->CommentID,
-                'ReactButton ReplyLink Visible');
+        $Session = Gdn::Session();
+        $GuestCommenting = (C('Articles.Comments.AllowGuests', false) && !$Session->IsValid());
+        if (C('Articles.Comments.EnableThreadedComments', true) && !$Comment->ParentCommentID) {
+            if ($Session->IsValid() || $GuestCommenting) {
+                echo Anchor('<span class="ReactSprite ReactReply"></span> Reply',
+                    '/compose/comment/' . $Comment->ArticleID . '/' . $Comment->CommentID,
+                    'ReactButton ReplyLink Visible');
+            }
+        }
 
         Gdn::Controller()->FireEvent('AfterFlag');
         Gdn::Controller()->FireEvent('AfterReactions');

@@ -3,9 +3,14 @@ if (!defined('APPLICATION'))
     exit();
 
 $Session = Gdn::Session();
+$GuestCommenting = (C('Articles.Comments.AllowGuests', false) && !$Session->IsValid());
 $Editing = isset($this->Comment);
 
 $this->EventArguments['FormCssClass'] = 'MessageForm CommentForm FormTitleWrapper';
+
+if ($GuestCommenting)
+    $this->EventArguments['FormCssClass'] .= ' Guest';
+
 $this->FireEvent('BeforeCommentForm');
 ?>
 <div id="CommentBox" class="<?php echo $this->EventArguments['FormCssClass']; ?>">
@@ -35,7 +40,22 @@ $this->FireEvent('BeforeCommentForm');
                     <?php
                     echo $this->Form->Open(array('id' => 'Form_Comment'));
                     echo $this->Form->Errors();
+
+                    // Guest fields.
+                    if ($GuestCommenting) {
+                        echo $this->Form->Label('Your Name', 'GuestName');
+                        echo $this->Form->TextBox('GuestName');
+                        echo '<br />';
+                        echo $this->Form->Label('Your Email', 'GuestEmail');
+                        echo $this->Form->TextBox('GuestEmail');
+                    }
+
                     $this->FireEvent('BeforeBodyField');
+
+                    if ($GuestCommenting) {
+                        echo '<br />';
+                        echo $this->Form->Label('Message', 'Body');
+                    }
 
                     echo $this->Form->BodyBox('Body', array('Table' => 'ArticleComment', 'tabindex' => 1));
 
@@ -59,24 +79,27 @@ $this->FireEvent('BeforeCommentForm');
                     $ButtonOptions = array('class' => 'Button Primary CommentButton');
                     $ButtonOptions['tabindex'] = 2;
 
-                    if (!$Editing && $Session->IsValid()) {
+                    if ((!$Editing && $Session->IsValid()) || (!$Editing && $GuestCommenting)) {
                         echo ' ' . Anchor(T('Preview'), '#', 'Button PreviewButton') . "\n";
                         echo ' ' . Anchor(T('Edit'), '#', 'Button WriteButton Hidden') . "\n";
                     }
+
                     if ($Session->IsValid())
                         echo $this->Form->Button($Editing ? 'Save Comment' : 'Post Comment', $ButtonOptions);
                     else {
-                        $AllowSigninPopup = C('Garden.SignIn.Popup');
-                        $Attributes = array('tabindex' => '-1');
-                        if (!$AllowSigninPopup)
-                            $Attributes['target'] = '_parent';
+//                        $AllowSigninPopup = C('Garden.SignIn.Popup');
+//                        $Attributes = array('tabindex' => '-1');
+//                        if (!$AllowSigninPopup)
+//                            $Attributes['target'] = '_parent';
+//
+//                        $AuthenticationUrl = SignInUrl(Gdn::Controller()->SelfUrl);
+//                        $CssClass = 'Button Primary Stash';
+//                        if ($AllowSigninPopup)
+//                            $CssClass .= ' SignInPopup';
+//
+//                        echo Anchor(T('Sign In'), $AuthenticationUrl, $CssClass, $Attributes);
 
-                        $AuthenticationUrl = SignInUrl($this->Data('ForeignUrl', '/'));
-                        $CssClass = 'Button Primary Stash';
-                        if ($AllowSigninPopup)
-                            $CssClass .= ' SignInPopup';
-
-                        echo Anchor(T('Comment As ...'), $AuthenticationUrl, $CssClass, $Attributes);
+                        echo ' ' . $this->Form->Button($Editing ? 'Save Comment' : 'Comment As Guest', $ButtonOptions);
                     }
 
                     $this->FireEvent('AfterFormButtons');

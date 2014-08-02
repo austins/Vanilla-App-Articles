@@ -97,6 +97,13 @@ $PermissionModel->Define(array(
     'Articles.Comments.Edit' => 0
 ));
 
+// Set the initial guest permissions.
+$PermissionModel->Save(array(
+    'Role' => 'Guest',
+    'Articles.Articles.View' => 1,
+    'Articles.Comments.Add' => 0
+));
+
 // Set initial role permissions for the Administrator role.
 $PermissionModel->Save(array(
     'Role' => 'Administrator',

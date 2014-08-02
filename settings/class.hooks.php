@@ -14,7 +14,7 @@ class ArticlesHooks extends Gdn_Plugin {
      */
     public function Base_Render_Before($Sender) {
         if ($Sender->Menu)
-            $Sender->Menu->AddLink('Articles', T('Articles'), '/articles/');
+            $Sender->Menu->AddLink('Articles', T('Articles'), '/articles');
     }
 
     /**
@@ -62,6 +62,20 @@ class ArticlesHooks extends Gdn_Plugin {
     }
 
     /**
+     * Add links for the setting pages to the dashboard sidebar.
+     *
+     * @param Gdn_Controller $Sender
+     */
+    public function Base_GetAppSettingsMenuItems_Handler($Sender) {
+        $GroupName = 'Articles';
+        $Menu = & $Sender->EventArguments['SideMenu'];
+
+        $Menu->AddItem($GroupName, $GroupName, false, array('class' => $GroupName));
+        $Menu->AddLink($GroupName, T('Settings'), '/settings/articles', 'Garden.Settings.Manage');
+        $Menu->AddLink($GroupName, T('Categories'), '/settings/articles/categories', 'Garden.Settings.Manage');
+    }
+
+    /**
      * The Index method of the Articles setting page.
      *
      * @param SettingsController $Sender
@@ -76,15 +90,19 @@ class ArticlesHooks extends Gdn_Plugin {
         $ConfigModule = new ConfigurationModule($Sender);
 
         $ConfigModule->Initialize(array(
-            //'Example.Example.Enabled' => array(
-            //   'LabelCode' => 'Use Example',
-            //   'Control'   => 'Checkbox'
-            //)
+            'Articles.Comments.EnableThreadedComments' => array(
+               'LabelCode' => 'Enable threaded comment replies?',
+               'Control'   => 'Checkbox'
+            ),
+            'Articles.Comments.AllowGuests' => array(
+                'LabelCode' => 'Allow guest commenting?',
+                'Control'   => 'Checkbox'
+            )
         ));
 
         $Sender->ConfigurationModule = $ConfigModule;
 
-        $Sender->AddSideMenu('/settings/articles/');
+        $Sender->AddSideMenu('/settings/articles');
         $ConfigModule->RenderAll();
     }
 
@@ -109,7 +127,7 @@ class ArticlesHooks extends Gdn_Plugin {
         $Categories = $ArticleCategoryModel->Get();
         $Sender->SetData('Categories', $Categories, true);
 
-        $Sender->AddSideMenu('/settings/articles/categories/');
+        $Sender->AddSideMenu('/settings/articles/categories');
         $Sender->View = $Sender->FetchViewLocation('categories', 'settings', 'articles');
         $Sender->Render();
     }
@@ -278,20 +296,6 @@ class ArticlesHooks extends Gdn_Plugin {
     }
 
     /**
-     * Add links for the setting pages to the dashboard sidebar.
-     *
-     * @param Gdn_Controller $Sender
-     */
-    public function Base_GetAppSettingsMenuItems_Handler($Sender) {
-        $GroupName = 'Articles';
-        $Menu = & $Sender->EventArguments['SideMenu'];
-
-        $Menu->AddItem($GroupName, $GroupName, false, array('class' => $GroupName));
-        $Menu->AddLink($GroupName, T('Settings'), '/settings/articles/', 'Garden.Settings.Manage');
-        $Menu->AddLink($GroupName, T('Categories'), '/settings/articles/categories/', 'Garden.Settings.Manage');
-    }
-
-    /**
      * Adds 'Articles' tab to profiles and adds CSS & JS files to their head.
      *
      * @param ProfileController $Sender
@@ -397,7 +401,7 @@ class ArticlesHooks extends Gdn_Plugin {
      * @param array $Options An array of options:
      *  - DeleteMethod: One of delete, wipe, or null
      */
-    public function DeleteUserData($UserID, $Options = array(), &$Data = null) {
+    private function DeleteUserData($UserID, $Options = array(), &$Data = null) {
         $SQL = Gdn::SQL();
 
         // Comment deletion depends on method selected.
