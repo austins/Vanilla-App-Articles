@@ -26,7 +26,7 @@ if ($this->Comments->NumRows() > 0):
                 ?>
                 <li class="<?php echo $CssClass; ?>" id="Comment_<?php echo $Comment->CommentID; ?>">
                     <div class="Comment">
-                        <!-- Comment options to go here. -->
+                        <div class="Options"><?php WriteCommentOptions($Comment); ?></div>
 
                         <div class="Item-Header CommentHeader">
                             <div class="AuthorWrap">

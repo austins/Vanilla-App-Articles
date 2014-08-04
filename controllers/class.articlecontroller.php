@@ -242,9 +242,9 @@ class ArticleController extends Gdn_Controller {
 
         if ($ValidCommentID && $ValidUser) {
             // Get comment and article data.
-            $Comment = $this->ArticleCommentModel->GetID($CommentID);
+            $Comment = $this->ArticleCommentModel->GetByID($CommentID);
             $ArticleID = GetValue('ArticleID', $Comment);
-            $Article = $this->ArticleModel->GetID($ArticleID);
+            $Article = $this->ArticleModel->GetByID($ArticleID);
 
             if ($Comment && $Article) {
                 $DefaultTarget = ArticleUrl($Article);
