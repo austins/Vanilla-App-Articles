@@ -75,13 +75,27 @@ jQuery(document).ready(function ($) {
         // Add the ParentCommentID to the form as a hidden field.
         var parentCommentID = commentBox.closest('.ItemComment').attr('id').replace(/[^\d.]/g, '');
         $('#Form_Comment').append('<input id="Form_ParentCommentID" name="ParentCommentID" type="hidden" value="' + parentCommentID + '" />');
+    });
 
-        $('#CommentBox').find('textarea').focus().blur(function() {
-            // Hide the form on blur (de-focus) if empty.
-            if (this.value == '') {
-                commentBox.insertAfter($('#Comments'));
-                $('#Form_Comment').find('#Form_ParentCommentID').remove();
+    function resetCommentBoxPlacement() {
+        $('#CommentBox').insertAfter($('#Comments'));
+        $('#Form_Comment').find('#Form_ParentCommentID').remove();
+    }
+
+    // If the #CommentBox form is not in the initial position due to threaded commenting
+    // and all required fields are empty, then move the form block back to the initial position.
+    $(document).on('click', function(e) {
+        if (!$('#Comments').next('div').is($('#CommentBox'))) {
+            var commentBox = $('#CommentBox');
+
+            if (!$(e.target).is('a.ReplyLink') && $(e.target).closest(commentBox).length === 0) {
+                // Hide the form on blur (de-focus) if empty.
+                if ($('#Form_GuestName').length && ($('#Form_GuestName').val() == '')
+                    && ($('#Form_GuestEmail').val() == '') && ($('#Form_Body').val() == ''))
+                    resetCommentBoxPlacement();
+                else if ($('#Form_Body').val() == '')
+                    resetCommentBoxPlacement();
             }
-        });
+        }
     });
 });

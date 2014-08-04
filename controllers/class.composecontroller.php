@@ -352,6 +352,10 @@ class ComposeController extends Gdn_Controller {
             $FormValues['GuestName'] = null;
             $FormValues['GuestEmail'] = null;
         } else {
+            // The InsertUserID should be null for inserting a guest comment.
+            $FormValues['InsertUserID'] = null;
+            $this->Form->SetFormValue('InsertUserID', $FormValues['InsertUserID']);
+
             // Require the guest fields.
             $this->Form->ValidateRule('GuestName', 'ValidateRequired', T('Guest name is required.'));
             $this->Form->ValidateRule('GuestEmail', 'ValidateRequired', T('Guest email is required.'));

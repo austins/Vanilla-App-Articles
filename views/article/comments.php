@@ -16,7 +16,9 @@ if ($this->Comments->NumRows() > 0):
             foreach ($Comments as $Comment) {
                 $CssClass = 'Item Alt ItemComment';
 
-                $User = Gdn::UserModel()->GetID($Comment->InsertUserID);
+                $User = false;
+                if (is_numeric($Comment->InsertUserID))
+                    $User = Gdn::UserModel()->GetID($Comment->InsertUserID);
 
                 $ParentCommentID = is_numeric($Comment->ParentCommentID) ? $Comment->ParentCommentID : false;
                 if($ParentCommentID)
@@ -30,9 +32,13 @@ if ($this->Comments->NumRows() > 0):
                             <div class="AuthorWrap">
                             <span class="Author">
                                 <?php
-                                echo UserPhoto($User);
-                                echo UserAnchor($User, 'Username');
-                                $this->FireEvent('AuthorPhoto');
+                                if ($User) {
+                                    echo UserPhoto($User);
+                                    echo UserAnchor($User, 'Username');
+                                    $this->FireEvent('AuthorPhoto');
+                                } else {
+                                    echo Wrap($Comment->GuestName, 'span', array('class' => 'Username GuestName'));
+                                }
                                 ?>
                             </span>
                             <span class="AuthorInfo">
