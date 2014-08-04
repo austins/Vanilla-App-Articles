@@ -355,6 +355,7 @@ class ComposeController extends Gdn_Controller {
             // Require the guest fields.
             $this->Form->ValidateRule('GuestName', 'ValidateRequired', T('Guest name is required.'));
             $this->Form->ValidateRule('GuestEmail', 'ValidateRequired', T('Guest email is required.'));
+            $this->Form->ValidateRule('GuestEmail', 'ValidateEmail', T('That email address is not valid.'));
 
             // Sanitize the guest properties.
             $FormValues['GuestName'] = Gdn_Format::PlainText($FormValues['GuestName']);
