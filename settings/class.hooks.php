@@ -494,7 +494,6 @@ class ArticlesHooks extends Gdn_Plugin {
             ->Put();
     }
 
-// TODO: Bug: $Comment is false for unknown reason.
 // TODO: The search/results.php view outputs a UserAnchor; the guest name gets linked to a profile.
 //    // Set the username of article guest comment search results to the GuestName.
 //    public function SearchController_BeforeItemContent_Handler($Sender) {

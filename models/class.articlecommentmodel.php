@@ -24,7 +24,7 @@ class ArticleCommentModel extends Gdn_Model {
      */
     public function Get($Offset = 0, $Limit = false, $Wheres = null) {
         // Set up selection query.
-        $this->SQL->Select('c.*')->From('ArticleComment c');
+        $this->SQL->Select('ac.*')->From('ArticleComment ac');
 
         // Assign up limits and offsets.
         $Limit = $Limit ? $Limit : Gdn::Config('Articles.Comments.PerPage', 30);
@@ -41,7 +41,7 @@ class ArticleCommentModel extends Gdn_Model {
             $this->SQL->Where($Wheres);
 
         // Set order of data.
-        $this->SQL->OrderBy('c.DateInserted', 'asc');
+        $this->SQL->OrderBy('ac.DateInserted', 'asc');
 
         // Fetch data.
         $Comments = $this->SQL->Get();
@@ -58,7 +58,7 @@ class ArticleCommentModel extends Gdn_Model {
         if (!is_numeric($ArticleID))
             throw new InvalidArgumentException('The article ID must be a numeric value.');
 
-        $Wheres = array('c.ArticleID', $ArticleID);
+        $Wheres = array('ac.ArticleID', $ArticleID);
 
         $Comments = $this->Get($Offset, $Limit, $Wheres);
 
@@ -70,7 +70,7 @@ class ArticleCommentModel extends Gdn_Model {
         if (!is_numeric($CommentID))
             throw new InvalidArgumentException('The comment ID must be a numeric value.');
 
-        $Wheres = array('c.CommentID', $CommentID);
+        $Wheres = array('ac.CommentID' => $CommentID);
 
         $Comment = $this->Get($Offset, $Limit, $Wheres)->FirstRow();
 
@@ -225,5 +225,52 @@ class ArticleCommentModel extends Gdn_Model {
             ->Get()->Value('CountComments', 0);
 
         Gdn::UserModel()->SetField($UserID, 'CountArticleComments', $CountComments);
+    }
+
+    /**
+     * Gets the offset of the specified comment in its related article.
+     *
+     * Events: BeforeGetOffset
+     *
+     * @param mixed $Comment Unique ID or or a comment object for which the offset is being defined.
+     * @return object SQL result.
+     */
+    public function GetOffset($Comment) {
+        $this->FireEvent('BeforeGetOffset');
+
+        if (is_numeric($Comment)) {
+            $Comment = $this->GetID($Comment);
+        }
+
+        $this->SQL
+            ->Select('ac.CommentID', 'count', 'CountComments')
+            ->From('ArticleComment ac')
+            ->Where('ac.ArticleID', GetValue('ArticleID', $Comment));
+
+        $this->SQL->BeginWhereGroup();
+
+        // Figure out the where clause based on the sort.
+        foreach ($this->_OrderBy as $Part) {
+            //$Op = count($this->_OrderBy) == 1 || isset($PrevWhere) ? '=' : '';
+            list($Expr, $Value) = $this->_WhereFromOrderBy($Part, $Comment, '');
+
+            if (!isset($PrevWhere)) {
+                $this->SQL->Where($Expr, $Value);
+            } else {
+                $this->SQL->BeginWhereGroup();
+                $this->SQL->OrWhere($PrevWhere[0], $PrevWhere[1]);
+                $this->SQL->Where($Expr, $Value);
+                $this->SQL->EndWhereGroup();
+            }
+
+            $PrevWhere = $this->_WhereFromOrderBy($Part, $Comment, '==');
+        }
+
+        $this->SQL->EndWhereGroup();
+
+        return $this->SQL
+            ->Get()
+            ->FirstRow()
+            ->CountComments;
     }
 }

@@ -47,7 +47,7 @@ class ArticleController extends Gdn_Controller {
     /**
      * The main method of this controller.
      */
-    public function Index($ArticleYear, $ArticleUrlCode) {
+    public function Index($ArticleYear, $ArticleUrlCode, $Page = false) {
         // Add module.
         $this->AddModule('ArticlesDashboardModule');
 
@@ -77,7 +77,7 @@ class ArticleController extends Gdn_Controller {
 
         // Validate slugs.
         $DateInsertedYear = Gdn_Format::Date($this->Article->DateInserted, '%Y');
-        if ((count($this->RequestArgs) < 2) || !is_numeric($ArticleYear)
+        if (((count($this->RequestArgs) < 2) && (!$ArticleYear || !$ArticleUrlCode)) || !is_numeric($ArticleYear)
             || ($ArticleUrlCode == '') || !$this->Article
             || ($ArticleYear != $DateInsertedYear)
         )
@@ -97,6 +97,8 @@ class ArticleController extends Gdn_Controller {
         $this->View = 'index';
         
         $this->Render();
+
+        // TODO: PageNumber logic. Canonical URL.
     }
     
     protected function AddMetaTags() {
@@ -280,5 +282,31 @@ class ArticleController extends Gdn_Controller {
         }
 
         $this->Render();
+    }
+
+
+    /**
+     * Display article page starting with a particular comment.
+     *
+     * @param int $CommentID Unique comment ID
+     */
+    public function Comment($CommentID) {
+        // Get the ArticleID
+        $Comment = $this->ArticleCommentModel->GetByID($CommentID);
+        if (!$Comment)
+            throw NotFoundException('Article comment');
+
+        // Figure out how many comments are before this one
+        $Offset = $this->ArticleCommentModel->GetOffset($Comment);
+        $Limit = Gdn::Config('Articles.Comments.PerPage', 30);
+
+        $PageNumber = PageNumber($Offset, $Limit, true);
+        $this->SetData('Page', $PageNumber);
+
+        $this->View = 'index';
+
+        $Article = $this->ArticleModel->GetByID($Comment->ArticleID);
+
+        $this->Index(Gdn_Format::Date($Article->DateInserted, '%Y'), $Article->UrlCode, $PageNumber);
     }
 }
