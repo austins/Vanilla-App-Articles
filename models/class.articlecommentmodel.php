@@ -177,7 +177,10 @@ class ArticleCommentModel extends Gdn_Model {
                 $Article = $ArticleModel->GetByID(GetValue('ArticleID', $FormPostValues, false));
 
                 $this->UpdateCommentCount($Article, $Comment);
-                $this->UpdateUserCommentCount($Comment->InsertUserID);
+
+                // Update user comment count if this isn't a guest comment.
+                if (is_numeric($Comment->InsertUserID))
+                    $this->UpdateUserCommentCount($Comment->InsertUserID);
             }
         } else {
             $PrimaryKeyVal = false;
@@ -224,10 +227,12 @@ class ArticleCommentModel extends Gdn_Model {
 
         $this->UpdateCommentCount($Article, $LastComment);
 
-        // Update the comment count for the user.
-        $this->UpdateUserCommentCount(GetValue('InsertUserID', $Comment, false));
+        // Update the comment count for the user if this isn't a guest comment.
+        $InsertUserID = GetValue('InsertUserID', $Comment, false);
+        if (is_numeric($InsertUserID))
+            $this->UpdateUserCommentCount($InsertUserID);
 
-        // TODO: Add logic in either controller or in this method to handle deletion of child comments and guest comments.
+        // TODO: Add logic in either controller or in this method to handle deletion of threaded comments.
 
         return true;
     }
