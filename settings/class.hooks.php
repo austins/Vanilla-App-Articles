@@ -493,4 +493,18 @@ class ArticlesHooks extends Gdn_Plugin {
             ->Where('UserID', $UserID)
             ->Put();
     }
+
+// TODO: Bug: $Comment is false for unknown reason.
+// TODO: The search/results.php view outputs a UserAnchor; the guest name gets linked to a profile.
+//    // Set the username of article guest comment search results to the GuestName.
+//    public function SearchController_BeforeItemContent_Handler($Sender) {
+//        $Row = &$Sender->EventArguments['Row'];
+//
+//        if (($Row->RecordType === 'ArticleComment') && !$Row->UserID) {
+//            $ArticleCommentModel = new ArticleCommentModel();
+//            $Comment = $ArticleCommentModel->GetByID($Row->PrimaryID);
+//
+//            $Row->Name = $Comment->GuestName;
+//        }
+//    }
 }

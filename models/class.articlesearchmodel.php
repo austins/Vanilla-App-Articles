@@ -75,7 +75,7 @@ class ArticleSearchModel extends Gdn_Model {
 			->Select("'/article/comment/', ac.CommentID, '/#Comment_', ac.CommentID", "concat", 'Url')
 			->Select('ac.DateInserted')
 			->Select('ac.InsertUserID as UserID')
-      ->Select("'Comment'", '', 'RecordType')
+            ->Select("'ArticleComment'", '', 'RecordType')
 			->From('ArticleComment ac')
 			->Join('Article a', 'a.ArticleID = ac.ArticleID');
 		
