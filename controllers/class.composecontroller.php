@@ -297,7 +297,15 @@ class ComposeController extends Gdn_Controller {
         $this->Title(T('Post Article Comment'));
 
         // Set required permission.
-        $this->Permission('Articles.Comments.Add');
+        $GuestCommenting = false;
+        $Session = Gdn::Session();
+
+        if ($Session->IsValid())
+            $this->Permission('Articles.Comments.Add');
+        else if (C('Articles.Comments.AllowGuests', false))
+            $GuestCommenting = true;
+        else
+            throw PermissionException('Articles.Comments.Add');
 
         if(!is_numeric($ArticleID))
             throw NotFoundException('Article');
@@ -336,6 +344,23 @@ class ComposeController extends Gdn_Controller {
             if(is_numeric($ParentComment->ParentCommentID))
                 throw ForbiddenException('reply to a comment more than one level down');
         }
+
+        // If the user is signed in, then nullify the guest properties.
+        if (!$GuestCommenting) {
+            $FormValues['GuestName'] = null;
+            $FormValues['GuestEmail'] = null;
+        } else {
+            // Require the guest fields.
+            $this->Form->ValidateRule('GuestName', 'ValidateRequired');
+            $this->Form->ValidateRule('GuestEmail', 'ValidateRequired');
+
+            // Sanitize the guest properties.
+            $FormValues['GuestName'] = Gdn_Format::PlainText($FormValues['GuestName']);
+            $FormValues['GuestEmail'] = Gdn_Format::PlainText($FormValues['GuestEmail']);
+        }
+
+        $this->Form->SetFormValue('GuestName', $FormValues['GuestName']);
+        $this->Form->SetFormValue('GuestEmail', $FormValues['GuestEmail']);
 
         if ($this->Form->ErrorCount() > 0) {
             // Return the form errors.
