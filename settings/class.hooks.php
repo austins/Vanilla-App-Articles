@@ -315,6 +315,17 @@ class ArticlesHooks extends Gdn_Plugin {
                 'profile/articles/' . $Sender->User->UserID . '/' . rawurlencode($Sender->User->Name), 'Articles',
                 $ArticlesLabel);
 
+            // Add the article comments tab
+            $ArticleCommentsLabel = Sprite('SpArticleComments') . ' ' . T('Article Comments');
+
+            if (C('Articles.Profile.ShowCounts', true))
+                $ArticleCommentsLabel .= '<span class="Aside">' . CountString(GetValueR('User.CountArticleComments',
+                        $Sender, null), "/profile/count/articlecomments?userid=$UserID") . '</span>';
+
+            $Sender->AddProfileTab(T('Article Comments'),
+                'profile/articlecomments/' . $Sender->User->UserID . '/' . rawurlencode($Sender->User->Name),
+                'Article Comments', $ArticleCommentsLabel);
+
             // Add the article tab's CSS and Javascript.
             $Sender->AddJsFile('jquery.gardenmorepager.js');
             $Sender->AddJsFile('articles.js');
@@ -363,6 +374,65 @@ class ArticlesHooks extends Gdn_Plugin {
             $Sender->SetJson('LessRow', $Sender->Pager->ToString('less'));
             $Sender->SetJson('MoreRow', $Sender->Pager->ToString('more'));
             $Sender->View = 'articles';
+        }
+
+        // Set the HandlerType back to normal on the profilecontroller so that it fetches it's own views
+        $Sender->HandlerType = HANDLER_TYPE_NORMAL;
+
+        // Do not show article options
+        $Sender->ShowOptions = false;
+
+        if ($Sender->Head) {
+            // These pages offer only duplicate content to search engines and are a bit slow.
+            $Sender->Head->AddTag('meta', array('name' => 'robots', 'content' => 'noindex,noarchive'));
+        }
+
+        // Render the ProfileController
+        $Sender->Render();
+    }
+
+    /**
+     * Creates virtual 'Article Comments' method in ProfileController.
+     *
+     * @param ProfileController $Sender
+     */
+    public function ProfileController_ArticleComments_Create($Sender, $UserReference = '', $Username = '',
+                                                             $Page = '', $UserID = '') {
+        $Sender->EditMode(false);
+
+        // Tell the ProfileController what tab to load
+        $Sender->GetUserInfo($UserReference, $Username, $UserID);
+        $Sender->_SetBreadcrumbs(T('Article Comments'), '/profile/articlecomments');
+        $Sender->SetTabView('Article Comments', 'Comments', 'Profile', 'Articles');
+        $Sender->CountCommentsPerPage = C('Articles.Comments.PerPage', 30);
+
+        list($Offset, $Limit) = OffsetLimit($Page, Gdn::Config('Articles.Comments.PerPage', 30));
+
+        $ArticleCommentModel = new ArticleCommentModel();
+        $Comments = $ArticleCommentModel->GetByUser($Sender->User->UserID, $Offset, $Limit)->Result();
+        $CountComments = $Offset + $ArticleCommentModel->LastCommentCount + 1;
+        $Sender->SetData('Comments', $Comments);
+
+        $Sender->ArticleModel = new ArticleModel();
+
+        // Build a pager
+        $PagerFactory = new Gdn_PagerFactory();
+        $Sender->Pager = $PagerFactory->GetPager('MorePager', $Sender);
+        $Sender->Pager->MoreCode = 'More Article Comments';
+        $Sender->Pager->LessCode = 'Newer Article Comments';
+        $Sender->Pager->ClientID = 'Pager';
+        $Sender->Pager->Configure(
+            $Offset,
+            $Limit,
+            $CountComments,
+            UserUrl($Sender->User, '', 'articlecomments') . '/{Page}'
+        );
+
+        // Deliver JSON data if necessary
+        if ($Sender->DeliveryType() != DELIVERY_TYPE_ALL && $Offset > 0) {
+            $Sender->SetJson('LessRow', $Sender->Pager->ToString('less'));
+            $Sender->SetJson('MoreRow', $Sender->Pager->ToString('more'));
+            $Sender->View = 'comments';
         }
 
         // Set the HandlerType back to normal on the profilecontroller so that it fetches it's own views

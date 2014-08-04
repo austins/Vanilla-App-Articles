@@ -78,6 +78,60 @@ class ArticleCommentModel extends Gdn_Model {
     }
 
     /**
+     * Select the data for a single comment.
+     *
+     * @param bool $FireEvent Kludge to fix VanillaCommentReplies plugin.
+     */
+    public function PrepareCommentQuery($FireEvent = true, $Join = true) {
+        $this->SQL->Select('ac.*')
+            ->From('ArticleComment ac');
+
+        if ($Join) {
+            $this->SQL
+                ->Select('iu.Name', '', 'InsertName')
+                ->Select('iu.Photo', '', 'InsertPhoto')
+                ->Select('iu.Email', '', 'InsertEmail')
+                ->Join('User iu', 'ac.InsertUserID = iu.UserID', 'left')
+
+                ->Select('uu.Name', '', 'UpdateName')
+                ->Select('uu.Photo', '', 'UpdatePhoto')
+                ->Select('uu.Email', '', 'UpdateEmail')
+                ->Join('User uu', 'ac.UpdateUserID = uu.UserID', 'left');
+        }
+
+        if($FireEvent)
+            $this->FireEvent('AfterCommentQuery');
+    }
+
+    /**
+     * Get comments for a user.
+     *
+     * @param int $UserID Which user to get comments for.
+     * @param int $Limit Max number to get.
+     * @param int $Offset Number to skip.
+     * @return object SQL results.
+     */
+    public function GetByUser($UserID, $Offset = 0, $Limit = false) {
+        if (!is_numeric($UserID))
+            throw new InvalidArgumentException('The user ID must be a numeric value.');
+
+        $this->PrepareCommentQuery(true, true);
+        $this->FireEvent('BeforeGet');
+
+        $this->SQL
+            ->Select('a.Name', '', 'ArticleName')
+            ->Join('Article a', 'ac.ArticleID = a.ArticleID')
+            ->Where('ac.InsertUserID', $UserID)
+            ->OrderBy('ac.CommentID', 'desc')
+            ->Limit($Limit, $Offset);
+
+        $Data = $this->SQL->Get();
+        Gdn::UserModel()->JoinUsers($Data, array('InsertUserID', 'UpdateUserID'));
+
+        return $Data;
+    }
+
+    /**
      * Takes a set of form data ($Form->_PostValues), validates them, and
      * inserts or updates them to the database.
      *
