@@ -319,6 +319,8 @@ class ComposeController extends Gdn_Controller {
         // Validate fields.
         $FormValues = $this->Form->FormValues();
 
+        $this->Form->ValidateRule('Body', 'ValidateRequired');
+
         // Set article ID.
         $FormValues['ArticleID'] = $ArticleID;
         $this->Form->SetFormValue('ArticleID', $FormValues['ArticleID']);
@@ -351,8 +353,8 @@ class ComposeController extends Gdn_Controller {
             $FormValues['GuestEmail'] = null;
         } else {
             // Require the guest fields.
-            $this->Form->ValidateRule('GuestName', 'ValidateRequired');
-            $this->Form->ValidateRule('GuestEmail', 'ValidateRequired');
+            $this->Form->ValidateRule('GuestName', 'ValidateRequired', T('Guest name is required.'));
+            $this->Form->ValidateRule('GuestEmail', 'ValidateRequired', T('Guest email is required.'));
 
             // Sanitize the guest properties.
             $FormValues['GuestName'] = Gdn_Format::PlainText($FormValues['GuestName']);
