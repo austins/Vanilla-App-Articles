@@ -84,22 +84,22 @@ $this->FireEvent('BeforeCommentForm');
                         echo ' ' . Anchor(T('Edit'), '#', 'Button WriteButton Hidden') . "\n";
                     }
 
-                    if ($Session->IsValid())
+                    if ($Session->IsValid()) {
                         echo $this->Form->Button($Editing ? 'Save Comment' : 'Post Comment', $ButtonOptions);
-                    else {
-//                        $AllowSigninPopup = C('Garden.SignIn.Popup');
-//                        $Attributes = array('tabindex' => '-1');
-//                        if (!$AllowSigninPopup)
-//                            $Attributes['target'] = '_parent';
-//
-//                        $AuthenticationUrl = SignInUrl(Gdn::Controller()->SelfUrl);
-//                        $CssClass = 'Button Primary Stash';
-//                        if ($AllowSigninPopup)
-//                            $CssClass .= ' SignInPopup';
-//
-//                        echo Anchor(T('Sign In'), $AuthenticationUrl, $CssClass, $Attributes);
-
+                    } else if($GuestCommenting) {
                         echo ' ' . $this->Form->Button($Editing ? 'Save Comment' : 'Comment As Guest', $ButtonOptions);
+                    } else {
+                        $AllowSigninPopup = C('Garden.SignIn.Popup');
+                        $Attributes = array('tabindex' => '-1');
+                        if (!$AllowSigninPopup)
+                            $Attributes['target'] = '_parent';
+
+                        $AuthenticationUrl = SignInUrl(Gdn::Controller()->SelfUrl);
+                        $CssClass = 'Button Primary Stash';
+                        if ($AllowSigninPopup)
+                            $CssClass .= ' SignInPopup';
+
+                        echo Anchor(T('Sign In'), $AuthenticationUrl, $CssClass, $Attributes);
                     }
 
                     $this->FireEvent('AfterFormButtons');

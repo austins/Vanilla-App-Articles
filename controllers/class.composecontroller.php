@@ -300,86 +300,150 @@ class ComposeController extends Gdn_Controller {
         $GuestCommenting = false;
         $Session = Gdn::Session();
 
-        if ($Session->IsValid())
-            $this->Permission('Articles.Comments.Add');
-        else if (C('Articles.Comments.AllowGuests', false))
-            $GuestCommenting = true;
-        else
-            throw PermissionException('Articles.Comments.Add');
-
         if(!is_numeric($ArticleID))
             throw NotFoundException('Article');
 
         // Get the article.
         $Article = $this->ArticleModel->GetByID($ArticleID);
 
-        // Set the model on the form.
-        $this->Form->SetModel($this->ArticleCommentModel);
+        // Determine whether we are editing.
+        $CommentID = isset($this->Comment) && property_exists($this->Comment, 'CommentID') ? $this->Comment->CommentID : false;
+        $this->EventArguments['CommentID'] = &$CommentID;
+        $Editing = ($CommentID > 0);
 
-        // Validate fields.
-        $FormValues = $this->Form->FormValues();
+        // If closed, cancel and go to article.
+        if ($Article && $Article->Closed == 1 && !$Editing && !$Session->CheckPermission('Articles.Articles.Close'))
+            Redirect(ArticleUrl($Article));
 
-        $this->Form->ValidateRule('Body', 'ValidateRequired');
+        // Add hidden IDs to form.
+        $this->Form->AddHidden('ArticleID', $ArticleID);
+        $this->Form->AddHidden('CommentID', $CommentID);
 
-        // Set article ID.
-        $FormValues['ArticleID'] = $ArticleID;
-        $this->Form->SetFormValue('ArticleID', $FormValues['ArticleID']);
+        // Check permissions.
+        if ($Session->IsValid()) {
+            if ($Article && $Editing) {
+                // Permission to edit
+                if ($this->Comment->InsertUserID != $Session->UserID)
+                    $this->Permission('Articles.Comments.Edit');
 
-        // If the form didn't have ParentCommentID set, then set it to the method argument as a default.
-        if(!is_numeric($FormValues['ParentCommentID'])) {
-            $ParentCommentID = is_numeric($ParentCommentID) ? $ParentCommentID : null;
+                // Make sure that content can (still) be edited.
+                $EditContentTimeout = C('Garden.EditContentTimeout', -1);
+                $CanEdit = $EditContentTimeout == -1 || strtotime($this->Comment->DateInserted) + $EditContentTimeout > time();
+                if (!$CanEdit)
+                    $this->Permission('Articles.Comments.Edit');
 
-            $FormValues['ParentCommentID'] = $ParentCommentID;
-            $this->Form->SetFormValue('ParentCommentID', $ParentCommentID);
-        }
-
-        // Validate parent comment.
-        $ParentComment = false;
-        if(is_numeric($FormValues['ParentCommentID'])) {
-            $ParentComment = $this->ArticleCommentModel->GetByID($FormValues['ParentCommentID']);
-
-            // Parent comment doesn't exist.
-            if(!$ParentComment)
-                throw NotFoundException('Parent comment');
-
-            // Only allow one level of threading.
-            if(is_numeric($ParentComment->ParentCommentID))
-                throw ForbiddenException('reply to a comment more than one level down');
-        }
-
-        // If the user is signed in, then nullify the guest properties.
-        if (!$GuestCommenting) {
-            $FormValues['GuestName'] = null;
-            $FormValues['GuestEmail'] = null;
-        } else {
-            // The InsertUserID should be null for inserting a guest comment.
-            $FormValues['InsertUserID'] = null;
-            $this->Form->SetFormValue('InsertUserID', $FormValues['InsertUserID']);
-
-            // Require the guest fields.
-            $this->Form->ValidateRule('GuestName', 'ValidateRequired', T('Guest name is required.'));
-            $this->Form->ValidateRule('GuestEmail', 'ValidateRequired', T('Guest email is required.'));
-            $this->Form->ValidateRule('GuestEmail', 'ValidateEmail', T('That email address is not valid.'));
-
-            // Sanitize the guest properties.
-            $FormValues['GuestName'] = Gdn_Format::PlainText($FormValues['GuestName']);
-            $FormValues['GuestEmail'] = Gdn_Format::PlainText($FormValues['GuestEmail']);
-        }
-
-        $this->Form->SetFormValue('GuestName', $FormValues['GuestName']);
-        $this->Form->SetFormValue('GuestEmail', $FormValues['GuestEmail']);
-
-        if ($this->Form->ErrorCount() > 0) {
-            // Return the form errors.
-            $this->ErrorMessage($this->Form->Errors());
-        } else {
-            // There are no form errors.
-            if ($this->Form->Save($FormValues)) {
-                $this->RedirectUrl = ArticleUrl($Article);
+                // Make sure only moderators can edit closed things
+                if ($Article->Closed)
+                    $this->Permission('Articles.Comments.Edit');
+            } else if ($Article) {
+                // Permission to add
+                $this->Permission('Articles.Comments.Add');
             }
         }
 
-        $this->View = 'comment';
+        // Set the model on the form.
+        $this->Form->SetModel($this->ArticleCommentModel);
+
+        if (!$this->Form->IsPostBack()) {
+            if (isset($this->Comment)) {
+                $this->Form->SetData((array)$this->Comment);
+            }
+        } else {
+            // Form was validly submitted.
+            // Validate fields.
+            $FormValues = $this->Form->FormValues();
+
+            $this->Form->ValidateRule('Body', 'ValidateRequired');
+
+            // Set article ID.
+            $FormValues['ArticleID'] = $ArticleID;
+            $this->Form->SetFormValue('ArticleID', $FormValues['ArticleID']);
+
+            // If the form didn't have ParentCommentID set, then set it to the method argument as a default.
+            if(!is_numeric($FormValues['ParentCommentID'])) {
+                $ParentCommentID = is_numeric($ParentCommentID) ? $ParentCommentID : null;
+
+                $FormValues['ParentCommentID'] = $ParentCommentID;
+                $this->Form->SetFormValue('ParentCommentID', $ParentCommentID);
+            }
+
+            // Validate parent comment.
+            $ParentComment = false;
+            if(is_numeric($FormValues['ParentCommentID'])) {
+                $ParentComment = $this->ArticleCommentModel->GetByID($FormValues['ParentCommentID']);
+
+                // Parent comment doesn't exist.
+                if(!$ParentComment)
+                    throw NotFoundException('Parent comment');
+
+                // Only allow one level of threading.
+                if(is_numeric($ParentComment->ParentCommentID))
+                    throw ForbiddenException('reply to a comment more than one level down');
+            }
+
+            // If the user is signed in, then nullify the guest properties.
+            if (!$Editing) {
+                $GuestCommenting = C('Articles.Comments.AllowGuests', false);
+
+                if (!$GuestCommenting) {
+                    $FormValues['GuestName'] = null;
+                    $FormValues['GuestEmail'] = null;
+                } else {
+                    // The InsertUserID should be null for inserting a guest comment.
+                    $FormValues['InsertUserID'] = null;
+                    $this->Form->SetFormValue('InsertUserID', $FormValues['InsertUserID']);
+
+                    // Require the guest fields.
+                    $this->Form->ValidateRule('GuestName', 'ValidateRequired', T('Guest name is required.'));
+                    $this->Form->ValidateRule('GuestEmail', 'ValidateRequired', T('Guest email is required.'));
+                    $this->Form->ValidateRule('GuestEmail', 'ValidateEmail', T('That email address is not valid.'));
+
+                    // Sanitize the guest properties.
+                    $FormValues['GuestName'] = Gdn_Format::PlainText($FormValues['GuestName']);
+                    $FormValues['GuestEmail'] = Gdn_Format::PlainText($FormValues['GuestEmail']);
+                }
+
+                $this->Form->SetFormValue('GuestName', $FormValues['GuestName']);
+                $this->Form->SetFormValue('GuestEmail', $FormValues['GuestEmail']);
+            }
+
+            if ($this->Form->ErrorCount() > 0) {
+                // Return the form errors.
+                $this->ErrorMessage($this->Form->Errors());
+            } else {
+                // There are no form errors.
+                if ($this->Form->Save($FormValues)) {
+                    $this->RedirectUrl = ArticleUrl($Article);
+                }
+            }
+        }
+
+        if (!$Editing)
+            $this->View = 'comment';
+
         $this->Render();
+    }
+
+    /**
+     * Edit a comment (wrapper for the Comment method).
+     *
+     * @param int $CommentID Unique ID of the comment to edit.
+     */
+    public function EditComment($CommentID = '') {
+        if (!is_numeric($CommentID))
+            throw new InvalidArgumentException('The comment ID must be a numeric value.');
+
+        if ($CommentID > 0)
+            $this->Comment = $this->ArticleCommentModel->GetByID($CommentID);
+
+        $this->Form->SetFormValue('Format', GetValue('Format', $this->Comment));
+
+        $this->View = 'editcomment';
+
+        $ParentCommentID = null;
+        if (!is_numeric($this->Comment->ParentCommentID) && ($this->Comment->ParentCommentID > 0))
+            $ParentCommentID = $this->Comment->ParentCommentID;
+
+        $this->Comment($this->Comment->ArticleID, $ParentCommentID);
     }
 }

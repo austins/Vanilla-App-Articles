@@ -153,12 +153,17 @@ if (!function_exists('GetCommentOptions')):
         $Sender = Gdn::Controller();
         $Session = Gdn::Session();
 
-        $Article = &$Sender->Article;
+        $Article = & $Sender->Article;
         $CategoryID = GetValue('CategoryID', $Article);
 
         // Determine if we still have time to edit
         $EditContentTimeout = C('Garden.EditContentTimeout', -1);
         $CanEdit = $EditContentTimeout == -1 || strtotime($Comment->DateInserted) + $EditContentTimeout > time();
+
+        // Don't allow guests to edit.
+        if (!$Session->IsValid())
+            $CanEdit = false;
+
         $TimeLeft = '';
 
         if ($CanEdit && $EditContentTimeout > 0 && !$Session->CheckPermission('Articles.Articles.Edit')) {
@@ -177,7 +182,7 @@ if (!function_exists('GetCommentOptions')):
             $Options['DeleteComment'] = array('Label' => T('Delete'),
                 'Url' => '/articles/article/deletecomment/' . $Comment->CommentID . '/' . $Session->TransientKey()
                     . '/?Target=' . urlencode('/article/' . Gdn_Format::Date($Article->DateInserted, '%Y') . '/'
-                    . $Article->UrlCode), 'Class' => 'DeleteComment');
+                        . $Article->UrlCode), 'Class' => 'DeleteComment');
 
         // Allow plugins to add options
         $Sender->EventArguments['CommentOptions'] = & $Options;
@@ -192,15 +197,19 @@ if (!function_exists('WriteCommentOptions')):
     function WriteCommentOptions($Comment) {
         $Options = GetCommentOptions($Comment);
 
-        echo '<span class="ToggleFlyout OptionsMenu">';
-        echo '<span class="OptionsTitle" title="' . T('Options') . '">' . T('Options') . '</span>';
-        echo Sprite('SpFlyoutHandle', 'Arrow');
-        echo '<ul class="Flyout MenuItems">';
-        foreach ($Options as $Code => $Option) {
-            echo Wrap(Anchor($Option['Label'], $Option['Url'], GetValue('Class', $Option, $Code)),
-                'li');
+        if (count($Options) > 0) {
+            echo '<div class="Options">';
+            echo '<span class="ToggleFlyout OptionsMenu">';
+            echo '<span class="OptionsTitle" title="' . T('Options') . '">' . T('Options') . '</span>';
+            echo Sprite('SpFlyoutHandle', 'Arrow');
+            echo '<ul class="Flyout MenuItems">';
+            foreach ($Options as $Code => $Option) {
+                echo Wrap(Anchor($Option['Label'], $Option['Url'], GetValue('Class', $Option, $Code)),
+                    'li');
+            }
+            echo '</ul>';
+            echo '</span>';
+            echo '</div>';
         }
-        echo '</ul>';
-        echo '</span>';
     }
 endif;
