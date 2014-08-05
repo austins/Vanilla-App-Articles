@@ -213,11 +213,10 @@ class ArticleCommentModel extends Gdn_Model {
         $Log = GetValue('Log', $Options, 'Delete');
         LogModel::Insert($Log, 'ArticleComment', $Comment, GetValue('LogOptions', $Options, array()));
 
-        // Delete the comment.
         $this->SQL->Delete('ArticleComment', array('CommentID' => $CommentID));
 
         // Update the comment count for the article.
-        $Article = $this->SQL->GetWhere('Article', array('ArticleId' => $Comment->ArticleID))->FirstRow();
+        $Article = $this->SQL->GetWhere('Article', array('ArticleID' => $Comment->ArticleID))->FirstRow();
         $LastComment = $this->SQL
             ->Select('ac.*')
             ->From('ArticleComment ac')
@@ -231,8 +230,6 @@ class ArticleCommentModel extends Gdn_Model {
         $InsertUserID = GetValue('InsertUserID', $Comment, false);
         if (is_numeric($InsertUserID))
             $this->UpdateUserCommentCount($InsertUserID);
-
-        // TODO: Add logic in either controller or in this method to handle deletion of threaded comments.
 
         return true;
     }

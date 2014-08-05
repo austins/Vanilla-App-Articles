@@ -377,13 +377,13 @@ class ComposeController extends Gdn_Controller {
                     throw NotFoundException('Parent comment');
 
                 // Only allow one level of threading.
-                if(is_numeric($ParentComment->ParentCommentID))
+                if(is_numeric($ParentComment->ParentCommentID) && ($ParentComment->ParentCommentID > 0))
                     throw ForbiddenException('reply to a comment more than one level down');
             }
 
             // If the user is signed in, then nullify the guest properties.
             if (!$Editing) {
-                $GuestCommenting = C('Articles.Comments.AllowGuests', false);
+                $GuestCommenting = (C('Articles.Comments.AllowGuests', false) && !$Session->IsValid());
 
                 if (!$GuestCommenting) {
                     $FormValues['GuestName'] = null;

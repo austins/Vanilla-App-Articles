@@ -181,7 +181,6 @@ jQuery(document).ready(function ($) {
         var frm = $(parent).find('form');
         var textbox = $(frm).find('textarea');
         var inpCommentID = $(frm).find('input:hidden[name$=CommentID]');
-        var inpDraftID = $(frm).find('input:hidden[name$=DraftID]');
         var type = 'Post';
         var preview = $(btn).hasClass('PreviewButton');
         if (preview) {
@@ -230,7 +229,7 @@ jQuery(document).ready(function ($) {
             data: postValues,
             dataType: 'json',
             error: function(xhr) {
-                gdn.informError(xhr, draft);
+                gdn.informError(xhr);
             },
             success: function(json) {
                 json = $.postParseJson(json);

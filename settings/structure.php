@@ -68,8 +68,6 @@ $Construct->PrimaryKey('CommentID')
     ->Column('UpdateIPAddress', 'varchar(39)', true)
     ->Column('GuestName', 'varchar(50)', true)
     ->Column('GuestEmail', 'varchar(200)', true)
-    //->Column('DateDeleted', 'datetime', true)
-    //->Column('DeleteUserID', 'int', true)
     ->Set($Explicit, $Drop);
 
 // Add extra columns to user table for tracking articles and comments.
