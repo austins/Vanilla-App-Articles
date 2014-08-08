@@ -450,6 +450,17 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->Render();
     }
 
+    public function ProfileController_EditMyAccountAfter_Handler($Sender) {
+      echo '<li>';
+      echo $Sender->Form->Label('Author Display Name', 'AuthorDisplayName');
+      echo $Sender->Form->Textbox('AuthorDisplayName');
+      echo '</li>';
+      
+      echo '<li>';
+      echo $Sender->Form->Label('Author Bio', 'AuthorBio');
+      echo $Sender->Form->Textbox('AuthorBio', array('multiline' => TRUE));
+      echo '</li>';
+    }
     /**
      * Remove Articles data when deleting a user.
      *
