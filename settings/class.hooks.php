@@ -461,6 +461,7 @@ class ArticlesHooks extends Gdn_Plugin {
       echo $Sender->Form->Textbox('AuthorBio', array('multiline' => TRUE));
       echo '</li>';
     }
+
     /**
      * Remove Articles data when deleting a user.
      *

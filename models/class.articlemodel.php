@@ -6,6 +6,10 @@ if (!defined('APPLICATION'))
  * Handles data for articles.
  */
 class ArticleModel extends Gdn_Model {
+    const STATUS_DRAFT = 'Draft';
+    const STATUS_PENDING = 'Pending';
+    const STATUS_PUBLISHED = 'Published';
+
     /**
      * Class constructor. Defines the related database table name.
      */
@@ -13,9 +17,69 @@ class ArticleModel extends Gdn_Model {
         parent::__construct('Article');
     }
 
-    const STATUS_DRAFT = 'Draft';
-    const STATUS_PENDING = 'Pending';
-    const STATUS_PUBLISHED = 'Published';
+    public function Counts($Column, $From = false, $To = false, $Max = false) {
+        $Result = array('Complete' => true);
+
+        switch ($Column) {
+            case 'CountComments':
+                $this->Database->Query(DBAModel::GetCountSQL('count', 'Article', 'ArticleComment'));
+                break;
+            case 'FirstCommentID':
+                $this->Database->Query(DBAModel::GetCountSQL('min', 'Article', 'ArticleComment', $Column));
+                break;
+            case 'LastCommentID':
+                $this->Database->Query(DBAModel::GetCountSQL('max', 'Article', 'ArticleComment', $Column));
+                break;
+            case 'DateLastComment':
+                $this->Database->Query(DBAModel::GetCountSQL('max', 'Article', 'ArticleComment', $Column, 'DateInserted'));
+                $this->SQL
+                    ->Update('Article')
+                    ->Set('DateLastComment', 'DateInserted', false, false)
+                    ->Where('DateLastComment', null)
+                    ->Put();
+
+                break;
+            case 'LastCommentUserID':
+                if (!$Max) {
+                    // Get the range for this update.
+                    $DBAModel = new DBAModel();
+                    list($Min, $Max) = $DBAModel->PrimaryKeyRange('Article');
+
+                    if (!$From) {
+                        $From = $Min;
+                        $To = $Min + DBAModel::$ChunkSize - 1;
+                    }
+                }
+
+                $this->SQL
+                    ->Update('Article a')
+                    ->Join('ArticleComment ac', 'ac.CommentID = a.LastCommentID')
+                    ->Set('a.LastCommentUserID', 'ac.InsertUserID', false, false)
+                    ->Where('a.ArticleID >=', $From)
+                    ->Where('a.ArticleID <=', $To)
+                    ->Put();
+
+                $Result['Complete'] = $To >= $Max;
+
+                $Percent = round($To * 100 / $Max);
+                if ($Percent > 100 || $Result['Complete'])
+                    $Result['Percent'] = '100%';
+                else
+                    $Result['Percent'] = $Percent . '%';
+
+                $From = $To + 1;
+                $To = $From + DBAModel::$ChunkSize - 1;
+                $Result['Args']['From'] = $From;
+                $Result['Args']['To'] = $To;
+                $Result['Args']['Max'] = $Max;
+
+                break;
+            default:
+                throw new Gdn_UserException("Unknown column $Column");
+        }
+
+        return $Result;
+    }
 
     /**
      * Gets the data for multiple articles based on given criteria.
