@@ -450,6 +450,14 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->Render();
     }
 
+    public function ProfileController_BeforeEdit_Handler($Sender) {
+      $UserID = $Sender->User->UserID;
+      $UserMetaModel = Gdn::UserMetaModel();
+      $UserMeta = $UserMetaModel->GetUserMeta($UserID);
+      $Sender->Form->SetValue('AuthorDisplayName', $UserMeta['AuthorDisplayName']);
+      $Sender->Form->SetValue('AuthorBio', $UserMeta['AuthorBio']);      
+    }
+    
     public function ProfileController_EditMyAccountAfter_Handler($Sender) {
       if(Gdn::Session()->CheckPermission(array('Garden.Users.Edit','Articles.Articles.Add'), false)) {
         echo Wrap(
@@ -461,6 +469,17 @@ class ArticlesHooks extends Gdn_Plugin {
           $Sender->Form->Label('Author Bio', 'AuthorBio') .
           $Sender->Form->Textbox('AuthorBio', array('multiline' => TRUE)),
           'li');
+      }
+    }
+    
+    
+    public function UserModel_AfterSave_Handler($Sender) {
+      $UserID = val('UserID', $Sender->EventArguments);
+      $FormValues = val('FormPostValues', $Sender->EventArguments, array());
+      $AuthorInfo = array_intersect_key($FormValues, array('AuthorDisplayName' => 1, 'AuthorBio' => 1));
+      
+      foreach($AuthorInfo as $k => $v) {
+        Gdn::UserMetaModel()->SetUserMeta($UserID, $k, $v);
       }
     }
 
@@ -477,7 +496,7 @@ class ArticlesHooks extends Gdn_Plugin {
 
         $this->DeleteUserData($UserID, $Options, $Content);
     }
-
+    
     /**
      * Delete all of the Articles related information for a specific user.
      *
