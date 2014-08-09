@@ -564,6 +564,22 @@ class ArticlesHooks extends Gdn_Plugin {
             ->Put();
     }
 
+    public function DbaController_CountJobs_Handler($Sender) {
+        $Counts = array(
+            'Article' => array('CountComments', 'FirstCommentID', 'LastCommentID', 'DateLastComment', 'LastCommentUserID'),
+            'ArticleCategory' => array('CountArticles', 'CountComments', 'LastArticleID', 'LastCommentID', 'LastDateInserted')
+        );
+
+        foreach ($Counts as $Table => $Columns) {
+            foreach ($Columns as $Column) {
+                $Name = "Recalculate $Table.$Column";
+                $Url = "/dba/counts.json?".http_build_query(array('table' => $Table, 'column' => $Column));
+
+                $Sender->Data['Jobs'][$Name] = $Url;
+            }
+        }
+    }
+
 // TODO: The search/results.php view outputs a UserAnchor; the guest name gets linked to a profile.
 //    // Set the username of article guest comment search results to the GuestName.
 //    public function SearchController_BeforeItemContent_Handler($Sender) {
