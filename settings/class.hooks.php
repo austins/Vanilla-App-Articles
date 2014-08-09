@@ -450,6 +450,11 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->Render();
     }
 
+    /**
+     * Load author meta into the form when editing.
+     * 
+     * @param ProfileController $Sender ProfileController
+     */
     public function ProfileController_BeforeEdit_Handler($Sender) {
       $UserID = $Sender->User->UserID;
       $UserMetaModel = Gdn::UserMetaModel();
@@ -458,6 +463,11 @@ class ArticlesHooks extends Gdn_Plugin {
       $Sender->Form->SetValue('AuthorBio', $UserMeta['AuthorBio']);      
     }
     
+    /**
+     * Display author meta inputs when editing.
+     * 
+     * @param ProfileController $Sender ProfileController
+     */
     public function ProfileController_EditMyAccountAfter_Handler($Sender) {
       if(Gdn::Session()->CheckPermission(array('Garden.Users.Edit','Articles.Articles.Add'), false)) {
         echo Wrap(
@@ -472,7 +482,11 @@ class ArticlesHooks extends Gdn_Plugin {
       }
     }
     
-    
+    /**
+     * Save the author meta if it exists.
+     * 
+     * @param UserModel $Sender UserModel
+     */
     public function UserModel_AfterSave_Handler($Sender) {
       $UserID = val('UserID', $Sender->EventArguments);
       $FormValues = val('FormPostValues', $Sender->EventArguments, array());
