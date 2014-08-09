@@ -451,15 +451,17 @@ class ArticlesHooks extends Gdn_Plugin {
     }
 
     public function ProfileController_EditMyAccountAfter_Handler($Sender) {
-      echo '<li>';
-      echo $Sender->Form->Label('Author Display Name', 'AuthorDisplayName');
-      echo $Sender->Form->Textbox('AuthorDisplayName');
-      echo '</li>';
-      
-      echo '<li>';
-      echo $Sender->Form->Label('Author Bio', 'AuthorBio');
-      echo $Sender->Form->Textbox('AuthorBio', array('multiline' => TRUE));
-      echo '</li>';
+      if(Gdn::Session()->CheckPermission(array('Garden.Users.Edit','Articles.Articles.Add'), false)) {
+        echo Wrap(
+          $Sender->Form->Label('Author Display Name', 'AuthorDisplayName') .
+          $Sender->Form->Textbox('AuthorDisplayName'),
+          'li');
+        
+        echo Wrap(
+          $Sender->Form->Label('Author Bio', 'AuthorBio') .
+          $Sender->Form->Textbox('AuthorBio', array('multiline' => TRUE)),
+          'li');
+      }
     }
 
     /**
