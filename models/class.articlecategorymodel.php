@@ -13,6 +13,107 @@ class ArticleCategoryModel extends Gdn_Model {
         parent::__construct('ArticleCategory');
     }
 
+    public function Counts($Column) {
+        $Result = array('Complete' => true);
+
+        switch ($Column) {
+            case 'CountArticles':
+                $this->Database->Query(DBAModel::GetCountSQL('count', 'ArticleCategory', 'Article'));
+                break;
+            case 'CountComments':
+                $this->Database->Query(DBAModel::GetCountSQL('sum', 'ArticleCategory', 'Article', $Column,
+                    'CountComments'));
+                break;
+            case 'LastArticleID':
+                $this->Database->Query(DBAModel::GetCountSQL('max', 'ArticleCategory', 'Article'));
+                break;
+            case 'LastCommentID':
+                $Data = $this->SQL
+                    ->Select('a.CategoryID')
+                    ->Select('ac.CommentID', 'max', 'LastCommentID')
+                    ->Select('a.ArticleID', 'max', 'LastArticleID')
+                    ->Select('ac.DateInserted', 'max', 'DateLastComment')
+                    ->Select('a.DateInserted', 'max', 'DateLastArticle')
+                    ->From('ArticleComment ac')
+                    ->Join('Article a', 'a.ArticleID = ac.ArticleID')
+                    ->GroupBy('a.CategoryID')
+                    ->Get()->ResultArray();
+
+                // Now we have to grab the discussions associated with these comments.
+                $CommentIDs = ConsolidateArrayValuesByKey($Data, 'LastCommentID');
+
+                // Grab the discussions for the comments.
+                $this->SQL
+                    ->Select('ac.CommentID, ac.ArticleID')
+                    ->From('ArticleComment ac')
+                    ->WhereIn('ac.CommentID', $CommentIDs);
+
+                $Articles = $this->SQL->Get()->ResultArray();
+                $Articles = Gdn_DataSet::Index($Articles, array('CommentID'));
+
+                foreach ($Data as $Row) {
+                    $CategoryID = (int)$Row['CategoryID'];
+                    $Category = $this->GetByID($CategoryID);
+                    $CommentID = $Row['LastCommentID'];
+                    $ArticleID = GetValueR("$CommentID.ArticleID", $Articles, null);
+
+                    $DateLastComment = Gdn_Format::ToTimestamp($Row['DateLastComment']);
+                    $DateLastArticle = Gdn_Format::ToTimestamp($Row['DateLastArticle']);
+
+                    $Set = array('LastCommentID' => $CommentID);
+
+                    if ($ArticleID) {
+                        $LastArticleID = GetValue('LastArticleID', $Category);
+
+                        if ($DateLastComment >= $DateLastArticle) {
+                            // The most recent article is from this comment.
+                            $Set['LastArticleID'] = $ArticleID;
+                        } else {
+                            // The most recent discussion has no comments.
+                            $Set['LastCommentID'] = null;
+                        }
+                    } else {
+                        // Something went wrong.
+                        $Set['LastCommentID'] = null;
+                        $Set['LastArticleID'] = null;
+                    }
+
+                    $this->SetField($CategoryID, $Set);
+                }
+
+                break;
+            case 'LastDateInserted':
+                $Categories = $this->SQL
+                    ->Select('ca.CategoryID')
+                    ->Select('a.DateInserted', '', 'DateLastArticle')
+                    ->Select('ac.DateInserted', '', 'DateLastComment')
+
+                    ->From('ArticleCategory ca')
+                    ->Join('Article a', 'a.ArticleID = ca.LastArticleID')
+                    ->Join('ArticleComment ac', 'ac.CommentID = ca.LastCommentID')
+                    ->Get()->ResultArray();
+
+                foreach ($Categories as $Category) {
+                    $DateLastArticle = GetValue('DateLastArticle', $Category);
+                    $DateLastComment = GetValue('DateLastComment', $Category);
+
+                    $MaxDate = $DateLastComment;
+                    if (is_null($DateLastComment) || $DateLastArticle > $MaxDate)
+                        $MaxDate = $DateLastArticle;
+
+                    if (is_null($MaxDate))
+                        continue;
+
+                    $CategoryID = (int)$Category['CategoryID'];
+                    $this->SetField($CategoryID, 'LastDateInserted', $MaxDate);
+                }
+
+                break;
+        }
+
+        return $Result;
+    }
+
     /**
      * Gets the data for multiple articles based on given criteria.
      *
