@@ -241,9 +241,12 @@ class ComposeController extends Gdn_Controller {
 
                 // If the article was saved successfully.
                 if ($ArticleID) {
-                    // If editing and the author has changed from the initial article, then
-                    // update the counts for the initial author after the article has been saved.
+                    $NewArticle = $this->ArticleModel->GetByID($ArticleID);
+
+                    // If editing.
                     if ($Article) {
+                        // If the author has changed from the initial article, then update the counts
+                        // for the initial author after the article has been saved.
                         $InitialAttributionUserID = GetValue('AttributionUserID', $Article, false);
 
                         if ($InitialAttributionUserID != $Author->UserID) {
@@ -252,15 +255,21 @@ class ComposeController extends Gdn_Controller {
                             // Update the count for the new author.
                             $this->ArticleModel->UpdateUserArticleCount($Author->UserID);
                         }
-                    }
 
-                    $Article = $this->ArticleModel->GetByID($ArticleID);
+                        // If the status has changed from non-published to published, then update the DateInserted date.
+                        $InitialStatus = GetValue('Status', $Article, false);
+
+                        if (($InitialStatus != ArticleModel::STATUS_PUBLISHED)
+                                && ($NewArticle->Status == ArticleModel::STATUS_PUBLISHED)) {
+                            $this->ArticleModel->SetField($ArticleID, 'DateInserted', Gdn_Format::ToDateTime());
+                        }
+                    }
 
                     // Redirect to the article.
                     if ($this->_DeliveryType == DELIVERY_TYPE_ALL)
-                        Redirect(ArticleUrl($Article));
+                        Redirect(ArticleUrl($NewArticle));
                     else
-                        $this->RedirectUrl = ArticleUrl($Article, '', true);
+                        $this->RedirectUrl = ArticleUrl($NewArticle, '', true);
                 }
             }
         }
