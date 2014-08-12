@@ -450,16 +450,51 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->Render();
     }
 
+    /**
+     * Load author meta into the form when editing.
+     * 
+     * @param ProfileController $Sender ProfileController
+     */
+    public function ProfileController_BeforeEdit_Handler($Sender) {
+      $UserID = $Sender->User->UserID;
+      $UserMetaModel = Gdn::UserMetaModel();
+      $UserMeta = $UserMetaModel->GetUserMeta($UserID);
+      $Sender->Form->SetValue('AuthorDisplayName', $UserMeta['AuthorDisplayName']);
+      $Sender->Form->SetValue('AuthorBio', $UserMeta['AuthorBio']);      
+    }
+    
+    /**
+     * Display author meta inputs when editing.
+     * 
+     * @param ProfileController $Sender ProfileController
+     */
     public function ProfileController_EditMyAccountAfter_Handler($Sender) {
-      echo '<li>';
-      echo $Sender->Form->Label('Author Display Name', 'AuthorDisplayName');
-      echo $Sender->Form->Textbox('AuthorDisplayName');
-      echo '</li>';
+      if(Gdn::Session()->CheckPermission(array('Garden.Users.Edit','Articles.Articles.Add'), false)) {
+        echo Wrap(
+          $Sender->Form->Label('Author Display Name', 'AuthorDisplayName') .
+          $Sender->Form->Textbox('AuthorDisplayName'),
+          'li');
+        
+        echo Wrap(
+          $Sender->Form->Label('Author Bio', 'AuthorBio') .
+          $Sender->Form->Textbox('AuthorBio', array('multiline' => TRUE)),
+          'li');
+      }
+    }
+    
+    /**
+     * Save the author meta if it exists.
+     * 
+     * @param UserModel $Sender UserModel
+     */
+    public function UserModel_AfterSave_Handler($Sender) {
+      $UserID = val('UserID', $Sender->EventArguments);
+      $FormValues = val('FormPostValues', $Sender->EventArguments, array());
+      $AuthorInfo = array_intersect_key($FormValues, array('AuthorDisplayName' => 1, 'AuthorBio' => 1));
       
-      echo '<li>';
-      echo $Sender->Form->Label('Author Bio', 'AuthorBio');
-      echo $Sender->Form->Textbox('AuthorBio', array('multiline' => TRUE));
-      echo '</li>';
+      foreach($AuthorInfo as $k => $v) {
+        Gdn::UserMetaModel()->SetUserMeta($UserID, $k, $v);
+      }
     }
 
     /**
@@ -475,7 +510,7 @@ class ArticlesHooks extends Gdn_Plugin {
 
         $this->DeleteUserData($UserID, $Options, $Content);
     }
-
+    
     /**
      * Delete all of the Articles related information for a specific user.
      *
