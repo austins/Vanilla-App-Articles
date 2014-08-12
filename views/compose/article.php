@@ -17,12 +17,12 @@ echo $this->Form->Errors();
         <?php
         if ($Categories->NumRows() > 0) {
             echo '<div class="P">';
-            echo $this->Form->Label('Category', 'CategoryID'), ' ';
-            echo $this->Form->DropDown('CategoryID', $Categories, array(
+            echo $this->Form->Label('Category', 'ArticleCategoryID'), ' ';
+            echo $this->Form->DropDown('ArticleCategoryID', $Categories, array(
                 'IncludeNull' => true,
-                'ValueField' => 'CategoryID',
+                'ValueField' => 'ArticleCategoryID',
                 'TextField' => 'Name',
-                'Value' => GetValue('CategoryID', $this->Category)
+                'Value' => GetValue('ArticleCategoryID', $this->Category)
             ));
             echo '</div>';
         }

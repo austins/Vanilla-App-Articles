@@ -72,14 +72,14 @@ jQuery(document).ready(function ($) {
         var commentBox = $('#CommentBox');
         commentBox.insertAfter($(this));
 
-        // Add the ParentCommentID to the form as a hidden field.
-        var parentCommentID = commentBox.closest('.ItemComment').attr('id').replace(/[^\d.]/g, '');
-        $('#Form_Comment').append('<input id="Form_ParentCommentID" name="ParentCommentID" type="hidden" value="' + parentCommentID + '" />');
+        // Add the ParentArticleCommentID to the form as a hidden field.
+        var parentArticleCommentID = commentBox.closest('.ItemComment').attr('id').replace(/[^\d.]/g, '');
+        $('#Form_Comment').append('<input id="Form_ParentArticleCommentID" name="ParentArticleCommentID" type="hidden" value="' + parentArticleCommentID + '" />');
     });
 
     function resetCommentBoxPlacement() {
         $('#CommentBox').insertAfter($('#Comments'));
-        $('#Form_Comment').find('#Form_ParentCommentID').remove();
+        $('#Form_Comment').find('#Form_ParentArticleCommentID').remove();
     }
 
     // If the #CommentBox form is not in the initial position due to threaded commenting
@@ -161,7 +161,7 @@ jQuery(document).ready(function ($) {
         $('div.Popup,.Overlay').remove();
         var frm = $(sender).parents('div.CommentForm, .EditCommentForm');
         frm.find('textarea').val('');
-        frm.find('input:hidden[name$=CommentID]').val('');
+        frm.find('input:hidden[name$=ArticleCommentID]').val('');
         frm.find('div.Errors').remove();
         $('div.Information').fadeOut('fast', function() {$(this).remove();});
         $(sender).closest('form').trigger('clearCommentForm');
@@ -180,7 +180,7 @@ jQuery(document).ready(function ($) {
         var parent = $(btn).parents('div.CommentForm, div.EditCommentForm');
         var frm = $(parent).find('form');
         var textbox = $(frm).find('textarea');
-        var inpCommentID = $(frm).find('input:hidden[name$=CommentID]');
+        var inpArticleCommentID = $(frm).find('input:hidden[name$=ArticleCommentID]');
         var type = 'Post';
         var preview = $(btn).hasClass('PreviewButton');
         if (preview) {
@@ -201,13 +201,13 @@ jQuery(document).ready(function ($) {
         // Get the last comment id on the page
         var comments = $('ul.Comments li.ItemComment');
         var lastComment = $(comments).get(comments.length-1);
-        var lastCommentID = $(lastComment).attr('id');
-        if (lastCommentID)
-            lastCommentID = lastCommentID.indexOf('Article_') == 0 ? 0 : lastCommentID.replace('Comment_', '');
+        var lastArticleCommentID = $(lastComment).attr('id');
+        if (lastArticleCommentID)
+            lastArticleCommentID = lastArticleCommentID.indexOf('Article_') == 0 ? 0 : lastArticleCommentID.replace('Comment_', '');
         else
-            lastCommentID = 0;
+            lastArticleCommentID = 0;
 
-        postValues += '&' + prefix + 'LastCommentID=' + lastCommentID;
+        postValues += '&' + prefix + 'LastArticleCommentID=' + lastArticleCommentID;
         var action = $(frm).attr('action');
         if (action.indexOf('?') < 0)
             action += '?';
@@ -251,11 +251,11 @@ jQuery(document).ready(function ($) {
                 if (json.FormSaved == true)
                     $('div.Popup,.Overlay').remove();
 
-                var commentID = json.CommentID;
+                var commentID = json.ArticleCommentID;
 
                 // Assign the comment id to the form if it was defined
                 if (commentID != null && commentID != '') {
-                    $(inpCommentID).val(commentID);
+                    $(inpArticleCommentID).val(commentID);
                 }
 
                 // Remove any old errors from the form
@@ -287,7 +287,7 @@ jQuery(document).ready(function ($) {
                         existingCommentRow.after(json.Data).remove();
                         $('#Comment_' + commentID).effect("highlight", {}, "slow");
                     } else {
-                        gdn.definition('LastCommentID', commentID, true);
+                        gdn.definition('LastArticleCommentID', commentID, true);
                         // If adding a new comment, show all new comments since the page last loaded, including the new one.
                         if (gdn.definition('PrependNewComments') == '1') {
                             $(json.Data).prependTo('ul.Comments');

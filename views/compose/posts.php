@@ -31,10 +31,10 @@ else {
         $ArticleUrl = ArticleUrl($Article);
         $Author = Gdn::UserModel()->GetID($Article->AttributionUserID);
 
-        $Category = $this->ArticleCategoryModel->GetByID($Article->CategoryID);
+        $Category = $this->ArticleCategoryModel->GetByID($Article->ArticleCategoryID);
 
-        $CommentCount = ($Article->CountComments == 0) ? '0 Comments'
-            : Plural($Article->CountComments, T('1 Comment'), T('%d Comments'));
+        $CommentCount = ($Article->CountArticleComments == 0) ? '0 Comments'
+            : Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
 
         $CssClass = 'Item ItemArticle';
 

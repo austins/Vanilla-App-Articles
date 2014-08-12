@@ -19,7 +19,7 @@ $Categories = $this->Data('Categories')->Result();
 <ol class="Sortable">
     <?php
     foreach ($Categories as $Category) {
-        echo '<li id="Category_' . $Category->CategoryID . '">';
+        echo '<li id="Category_' . $Category->ArticleCategoryID . '">';
         echo '<table>
             <tr>
               <td>
@@ -28,8 +28,8 @@ $Categories = $this->Data('Categories')->Result();
                  ' . Wrap($Category->Description, 'blockquote') . '
               </td>
               <td class="Buttons">'
-            . Anchor(T('Edit'), '/settings/articles/editcategory/' . $Category->CategoryID, 'SmallButton')
-            . Anchor(T('Delete'), '/settings/articles/deletecategory/' . $Category->CategoryID, 'SmallButton')
+            . Anchor(T('Edit'), '/settings/articles/editcategory/' . $Category->ArticleCategoryID, 'SmallButton')
+            . Anchor(T('Delete'), '/settings/articles/deletecategory/' . $Category->ArticleCategoryID, 'SmallButton')
             . '</td>
             </tr>
          </table>';

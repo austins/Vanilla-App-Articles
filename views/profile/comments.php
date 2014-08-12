@@ -12,11 +12,11 @@ if (!$Comments || count($Comments) == 0) {
     echo '<ul class="DataList SearchResults">';
 
     foreach ($Comments as $Comment) {
-        $Permalink = '/article/comment/' . $Comment->CommentID . '/#Comment_' . $Comment->CommentID;
+        $Permalink = '/article/comment/' . $Comment->ArticleCommentID . '/#Comment_' . $Comment->ArticleCommentID;
         $User = UserBuilder($Comment, 'Insert');
         $Article = $this->ArticleModel->GetByID($Comment->ArticleID);
         ?>
-        <li id="<?php echo 'Comment_' . $Comment->CommentID; ?>" class="Item">
+        <li id="<?php echo 'Comment_' . $Comment->ArticleCommentID; ?>" class="Item">
             <?php $this->FireEvent('BeforeItemContent'); ?>
             <div class="ItemContent">
                 <div class="Message"><?php

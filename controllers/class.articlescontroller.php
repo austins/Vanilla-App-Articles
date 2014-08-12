@@ -120,7 +120,7 @@ class ArticlesController extends Gdn_Controller {
         $Limit = false;
         $Wheres = array(
             'a.Status' => ArticleModel::STATUS_PUBLISHED,
-            'a.CategoryID' => $this->Category->CategoryID
+            'a.ArticleCategoryID' => $this->Category->ArticleCategoryID
         );
         $this->SetData('Articles', $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result());
 

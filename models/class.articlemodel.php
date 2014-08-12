@@ -21,25 +21,25 @@ class ArticleModel extends Gdn_Model {
         $Result = array('Complete' => true);
 
         switch ($Column) {
-            case 'CountComments':
+            case 'CountArticleComments':
                 $this->Database->Query(DBAModel::GetCountSQL('count', 'Article', 'ArticleComment'));
                 break;
-            case 'FirstCommentID':
+            case 'FirstArticleCommentID':
                 $this->Database->Query(DBAModel::GetCountSQL('min', 'Article', 'ArticleComment', $Column));
                 break;
-            case 'LastCommentID':
+            case 'LastArticleCommentID':
                 $this->Database->Query(DBAModel::GetCountSQL('max', 'Article', 'ArticleComment', $Column));
                 break;
-            case 'DateLastComment':
+            case 'DateLastArticleComment':
                 $this->Database->Query(DBAModel::GetCountSQL('max', 'Article', 'ArticleComment', $Column, 'DateInserted'));
                 $this->SQL
                     ->Update('Article')
-                    ->Set('DateLastComment', 'DateInserted', false, false)
-                    ->Where('DateLastComment', null)
+                    ->Set('DateLastArticleComment', 'DateInserted', false, false)
+                    ->Where('DateLastArticleComment', null)
                     ->Put();
 
                 break;
-            case 'LastCommentUserID':
+            case 'LastArticleCommentUserID':
                 if (!$Max) {
                     // Get the range for this update.
                     $DBAModel = new DBAModel();
@@ -53,8 +53,8 @@ class ArticleModel extends Gdn_Model {
 
                 $this->SQL
                     ->Update('Article a')
-                    ->Join('ArticleComment ac', 'ac.CommentID = a.LastCommentID')
-                    ->Set('a.LastCommentUserID', 'ac.InsertUserID', false, false)
+                    ->Join('ArticleComment ac', 'ac.ArticleCommentID = a.LastArticleCommentID')
+                    ->Set('a.LastArticleCommentUserID', 'ac.InsertUserID', false, false)
                     ->Where('a.ArticleID >=', $From)
                     ->Where('a.ArticleID <=', $To)
                     ->Put();
@@ -206,9 +206,9 @@ class ArticleModel extends Gdn_Model {
 
                 // Update article count for affected category and user.
                 $Article = $this->GetByID($PrimaryKeyVal);
-                $CategoryID = GetValue('CategoryID', $Article, false);
+                $ArticleCategoryID = GetValue('ArticleCategoryID', $Article, false);
 
-                $this->UpdateArticleCount($CategoryID, $Article);
+                $this->UpdateArticleCount($ArticleCategoryID, $Article);
                 $this->UpdateUserArticleCount(GetValue('AttributionUserID', $Article, false));
             }
         } else {
@@ -239,39 +239,39 @@ class ArticleModel extends Gdn_Model {
                 ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT);
 
             // Update article count for affected category and user.
-            $this->UpdateArticleCount($ArticleToDelete->CategoryID, $LastArticle);
+            $this->UpdateArticleCount($ArticleToDelete->ArticleCategoryID, $LastArticle);
             $this->UpdateUserArticleCount(GetValue('AttributionUserID', $ArticleToDelete, false));
 
             // See if LastDateInserted should be the latest comment.
             $LastComment = $this->SQL
                 ->Select('ac.*')
                 ->From('ArticleComment ac')
-                ->OrderBy('ac.CommentID', 'desc')
+                ->OrderBy('ac.ArticleCommentID', 'desc')
                 ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT);
 
             if ($LastComment && (strtotime($LastComment->DateInserted) > strtotime($LastArticle->DateInserted))) {
                 $ArticleCategoryModel = new ArticleCategoryModel();
 
                 $ArticleCategoryModel->Update(array('LastDateInserted' => $LastComment->DateInserted),
-                    array('CategoryID' => $LastArticle->CategoryID), false);
+                    array('ArticleCategoryID' => $LastArticle->ArticleCategoryID), false);
             }
         }
 
         return $Result;
     }
 
-    public function UpdateArticleCount($CategoryID, $Article = false) {
+    public function UpdateArticleCount($ArticleCategoryID, $Article = false) {
         $ArticleID = GetValue('ArticleID', $Article, false);
 
-        if (!is_numeric($CategoryID) && !is_numeric($ArticleID))
+        if (!is_numeric($ArticleCategoryID) && !is_numeric($ArticleID))
             return false;
 
         $CategoryData = $this->SQL
             ->Select('a.ArticleID', 'count', 'CountArticles')
-            ->Select('a.CountComments', 'count', 'CountComments')
-            ->Select('a.LastCommentID', '', 'LastCommentID')
+            ->Select('a.CountArticleComments', 'count', 'CountArticleComments')
+            ->Select('a.LastArticleCommentID', '', 'LastArticleCommentID')
             ->From('Article a')
-            ->Where('a.CategoryID', $CategoryID)
+            ->Where('a.ArticleCategoryID', $ArticleCategoryID)
             ->Get()->FirstRow();
 
         if (!$CategoryData)
@@ -285,11 +285,11 @@ class ArticleModel extends Gdn_Model {
             'LastDateInserted' => GetValue('DateInserted', $Article, false),
             'CountArticles' => $CountArticles,
             'LastArticleID' => $ArticleID,
-            'CountComments' => (int)GetValue('CountComments', $CategoryData, 0),
-            'LastCommentID' => (int)GetValue('LastCommentID', $CategoryData, 0)
+            'CountArticleComments' => (int)GetValue('CountArticleComments', $CategoryData, 0),
+            'LastArticleCommentID' => (int)GetValue('LastArticleCommentID', $CategoryData, 0)
         );
 
-        $Wheres = array('CategoryID' => GetValue('CategoryID', $Article, false));
+        $Wheres = array('ArticleCategoryID' => GetValue('ArticleCategoryID', $Article, false));
 
         $ArticleCategoryModel->Update($Fields, $Wheres, false);
     }

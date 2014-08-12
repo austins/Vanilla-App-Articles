@@ -152,10 +152,10 @@ class ArticlesHooks extends Gdn_Plugin {
         // If editing a category, then set the data in the form.
         $Category = false;
         if ($Sender->RequestArgs[0] === 'editcategory') {
-            $CategoryID = (int)$Sender->RequestArgs[1];
+            $ArticleCategoryID = (int)$Sender->RequestArgs[1];
 
-            if (is_numeric($CategoryID)) {
-                $Category = $ArticleCategoryModel->GetByID($CategoryID);
+            if (is_numeric($ArticleCategoryID)) {
+                $Category = $ArticleCategoryModel->GetByID($ArticleCategoryID);
 
                 if ($Category)
                     $Sender->Form->SetData($Category);
@@ -187,8 +187,8 @@ class ArticlesHooks extends Gdn_Plugin {
             $FormValues = $Sender->Form->FormValues();
 
             if ($Category) {
-                $FormValues['CategoryID'] = $CategoryID;
-                $Sender->Form->SetFormValue('CategoryID', $CategoryID);
+                $FormValues['ArticleCategoryID'] = $ArticleCategoryID;
+                $Sender->Form->SetFormValue('ArticleCategoryID', $ArticleCategoryID);
             }
 
             // Format URL code before saving.
@@ -241,34 +241,34 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->AddJsFile('articles.js', 'articles');
 
         // Get category ID.
-        $CategoryID = false;
+        $ArticleCategoryID = false;
         if (isset($Sender->RequestArgs[1]) && is_numeric($Sender->RequestArgs[1]))
-            $CategoryID = $Sender->RequestArgs[1];
+            $ArticleCategoryID = $Sender->RequestArgs[1];
 
         // Get category data.
         $Sender->Form = new Gdn_Form();
         $ArticleCategoryModel = new ArticleCategoryModel();
-        $Category = $ArticleCategoryModel->GetByID($CategoryID);
+        $Category = $ArticleCategoryModel->GetByID($ArticleCategoryID);
         $Sender->SetData('Category', $Category, true);
 
         if (!$Category) {
             $Sender->Form->AddError('The specified article category could not be found.');
         } else {
             // Make sure the form knows which item we are deleting.
-            $Sender->Form->AddHidden('CategoryID', $CategoryID);
+            $Sender->Form->AddHidden('ArticleCategoryID', $ArticleCategoryID);
 
             // Get a list of categories other than this one that can act as a replacement.
             $OtherCategories = $ArticleCategoryModel->Get(array(
-                'CategoryID <>' => $CategoryID,
-                'CategoryID >' => 0
+                'ArticleCategoryID <>' => $ArticleCategoryID,
+                'ArticleCategoryID >' => 0
             ));
             $Sender->SetData('OtherCategories', $OtherCategories, true);
 
             if (!$Sender->Form->AuthenticatedPostBack()) {
                 $Sender->Form->SetFormValue('DeleteArticles', '1'); // Checked by default
             } else {
-                $ReplacementCategoryID = $Sender->Form->GetValue('ReplacementCategoryID');
-                $ReplacementCategory = $ArticleCategoryModel->GetByID($ReplacementCategoryID);
+                $ReplacementArticleCategoryID = $Sender->Form->GetValue('ReplacementArticleCategoryID');
+                $ReplacementCategory = $ArticleCategoryModel->GetByID($ReplacementArticleCategoryID);
                 // Error if:
                 // 1. The category being deleted is the last remaining category.
                 if ($OtherCategories->NumRows() == 0)
@@ -277,7 +277,7 @@ class ArticlesHooks extends Gdn_Plugin {
                 if ($Sender->Form->ErrorCount() == 0) {
                     // Go ahead and delete the category.
                     try {
-                        $ArticleCategoryModel->Delete($Category, $Sender->Form->GetValue('ReplacementCategoryID'));
+                        $ArticleCategoryModel->Delete($Category, $Sender->Form->GetValue('ReplacementArticleCategoryID'));
                     } catch (Exception $ex) {
                         $Sender->Form->AddError($ex);
                     }
@@ -344,7 +344,7 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->GetUserInfo($UserReference, $Username, $UserID);
         $Sender->_SetBreadcrumbs(T('Articles'), '/profile/articles');
         $Sender->SetTabView('Articles', 'Articles', 'Profile', 'Articles');
-        $Sender->CountCommentsPerPage = C('Articles.Articles.PerPage', 12);
+        $Sender->CountArticleCommentsPerPage = C('Articles.Articles.PerPage', 12);
 
         list($Offset, $Limit) = OffsetLimit($Page, Gdn::Config('Articles.Articles.PerPage', 12));
 
@@ -404,13 +404,13 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->GetUserInfo($UserReference, $Username, $UserID);
         $Sender->_SetBreadcrumbs(T('Article Comments'), '/profile/articlecomments');
         $Sender->SetTabView('Article Comments', 'Comments', 'Profile', 'Articles');
-        $Sender->CountCommentsPerPage = C('Articles.Comments.PerPage', 30);
+        $Sender->CountArticleCommentsPerPage = C('Articles.Comments.PerPage', 30);
 
         list($Offset, $Limit) = OffsetLimit($Page, Gdn::Config('Articles.Comments.PerPage', 30));
 
         $ArticleCommentModel = new ArticleCommentModel();
         $Comments = $ArticleCommentModel->GetByUser($Sender->User->UserID, $Offset, $Limit)->Result();
-        $CountComments = $Offset + $ArticleCommentModel->LastCommentCount + 1;
+        $CountArticleComments = $Offset + $ArticleCommentModel->LastCommentCount + 1;
         $Sender->SetData('Comments', $Comments);
 
         $Sender->ArticleModel = new ArticleModel();
@@ -424,7 +424,7 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->Pager->Configure(
             $Offset,
             $Limit,
-            $CountComments,
+            $CountArticleComments,
             UserUrl($Sender->User, '', 'articlecomments') . '/{Page}'
         );
 
@@ -494,14 +494,14 @@ class ArticlesHooks extends Gdn_Plugin {
                 ->Join('Article a', 'a.ArticleID = c.LastArticleID')
                 ->Where('a.InsertUserID', $UserID)
                 ->Set('c.LastArticleID', null)
-                ->Set('c.LastCommentID', null)
+                ->Set('c.LastArticleCommentID', null)
                 ->Put();
 
             $SQL->Update('ArticleCategory c')
-                ->Join('ArticleComment ac', 'ac.CommentID = c.LastCommentID')
+                ->Join('ArticleComment ac', 'ac.ArticleCommentID = c.LastArticleCommentID')
                 ->Where('ac.InsertUserID', $UserID)
                 ->Set('c.LastArticleID', null)
-                ->Set('c.LastCommentID', null)
+                ->Set('c.LastArticleCommentID', null)
                 ->Put();
 
             // Grab all of the articles that the user has engaged in.
@@ -518,30 +518,30 @@ class ArticlesHooks extends Gdn_Plugin {
             // Update the comment counts.
             $CommentCounts = $SQL
                 ->Select('ArticleID')
-                ->Select('CommentID', 'count', 'CountComments')
-                ->Select('CommentID', 'max', 'LastCommentID')
+                ->Select('ArticleCommentID', 'count', 'CountArticleComments')
+                ->Select('ArticleCommentID', 'max', 'LastArticleCommentID')
                 ->WhereIn('ArticleID', $ArticleIDs)
                 ->GroupBy('ArticleID')
                 ->Get('ArticleComment')->ResultArray();
 
             foreach ($CommentCounts as $Row) {
                 $SQL->Put('Article',
-                    array('CountComments' => $Row['CountComments'] + 1, 'LastCommentID' => $Row['LastCommentID']),
+                    array('CountArticleComments' => $Row['CountArticleComments'] + 1, 'LastArticleCommentID' => $Row['LastArticleCommentID']),
                     array('ArticleID' => $Row['ArticleID']));
             }
 
             // Update the last user IDs.
             $SQL->Update('Article a')
-                ->Join('ArticleComment ac', 'a.LastCommentID = ac.CommentID', 'left')
-                ->Set('a.LastCommentUserID', 'ac.InsertUserID', false, false)
-                ->Set('a.DateLastComment', 'ac.DateInserted', false, false)
+                ->Join('ArticleComment ac', 'a.LastArticleCommentID = ac.ArticleCommentID', 'left')
+                ->Set('a.LastArticleCommentUserID', 'ac.InsertUserID', false, false)
+                ->Set('a.DateLastArticleComment', 'ac.DateInserted', false, false)
                 ->WhereIn('a.ArticleID', $ArticleIDs)
                 ->Put();
 
             // Update the last posts.
             $Articles = $SQL
                 ->WhereIn('ArticleID', $ArticleIDs)
-                ->Where('LastCommentUserID', $UserID)
+                ->Where('LastArticleCommentUserID', $UserID)
                 ->Get('Article');
 
             // Delete the user's articles
@@ -551,7 +551,7 @@ class ArticlesHooks extends Gdn_Plugin {
             $ArticleCategoryModel = new ArticleCategoryModel();
             $Categories = $ArticleCategoryModel->GetWhere(array('LastArticleID' => null))->ResultArray();
             foreach ($Categories as $Category) {
-                $ArticleCategoryModel->SetRecentPost($Category['CategoryID']);
+                $ArticleCategoryModel->SetRecentPost($Category['ArticleCategoryID']);
             }
         } else if ($DeleteMethod == 'wipe') {
             // Erase the user's articles
@@ -578,8 +578,8 @@ class ArticlesHooks extends Gdn_Plugin {
 
     public function DbaController_CountJobs_Handler($Sender) {
         $Counts = array(
-            'Article' => array('CountComments', 'FirstCommentID', 'LastCommentID', 'DateLastComment', 'LastCommentUserID'),
-            'ArticleCategory' => array('CountArticles', 'CountComments', 'LastArticleID', 'LastCommentID', 'LastDateInserted')
+            'Article' => array('CountArticleComments', 'FirstArticleCommentID', 'LastArticleCommentID', 'DateLastArticleComment', 'LastArticleCommentUserID'),
+            'ArticleCategory' => array('CountArticles', 'CountArticleComments', 'LastArticleID', 'LastArticleCommentID', 'LastDateInserted')
         );
 
         foreach ($Counts as $Table => $Columns) {

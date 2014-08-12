@@ -65,12 +65,12 @@ class ArticleCommentModel extends Gdn_Model {
         return $Comments;
     }
 
-    public function GetByID($CommentID, $Offset = 0, $Limit = false, $Wheres = null)
+    public function GetByID($ArticleCommentID, $Offset = 0, $Limit = false, $Wheres = null)
     {
-        if (!is_numeric($CommentID))
+        if (!is_numeric($ArticleCommentID))
             throw new InvalidArgumentException('The comment ID must be a numeric value.');
 
-        $Wheres = array('ac.CommentID' => $CommentID);
+        $Wheres = array('ac.ArticleCommentID' => $ArticleCommentID);
 
         $Comment = $this->Get($Offset, $Limit, $Wheres)->FirstRow();
 
@@ -122,7 +122,7 @@ class ArticleCommentModel extends Gdn_Model {
             ->Select('a.Name', '', 'ArticleName')
             ->Join('Article a', 'ac.ArticleID = a.ArticleID')
             ->Where('ac.InsertUserID', $UserID)
-            ->OrderBy('ac.CommentID', 'desc')
+            ->OrderBy('ac.ArticleCommentID', 'desc')
             ->Limit($Limit, $Offset);
 
         $Data = $this->SQL->Get();
@@ -170,7 +170,7 @@ class ArticleCommentModel extends Gdn_Model {
                 $Comment = $this->SQL
                     ->Select('ac.*')
                     ->From('ArticleComment ac')
-                    ->OrderBy('ac.CommentID', 'desc')
+                    ->OrderBy('ac.ArticleCommentID', 'desc')
                     ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT);
 
                 $ArticleModel = new ArticleModel();
@@ -195,15 +195,15 @@ class ArticleCommentModel extends Gdn_Model {
      * This is a hard delete that completely removes it from the database.
      * Events: DeleteComment.
      *
-     * @param int $CommentID Unique ID of the comment to be deleted.
+     * @param int $ArticleCommentID Unique ID of the comment to be deleted.
      * @param array $Options Additional options for the delete.
      *
      * @returns true on successful delete; false if comment ID doesn't exist.
      */
-    public function Delete($CommentID, $Options = array()) {
-        $this->EventArguments['CommentID'] = &$CommentID;
+    public function Delete($ArticleCommentID, $Options = array()) {
+        $this->EventArguments['ArticleCommentID'] = &$ArticleCommentID;
 
-        $Comment = $this->GetByID($CommentID);
+        $Comment = $this->GetByID($ArticleCommentID);
         if (!$Comment)
             return false;
 
@@ -213,14 +213,14 @@ class ArticleCommentModel extends Gdn_Model {
         $Log = GetValue('Log', $Options, 'Delete');
         LogModel::Insert($Log, 'ArticleComment', $Comment, GetValue('LogOptions', $Options, array()));
 
-        $this->SQL->Delete('ArticleComment', array('CommentID' => $CommentID));
+        $this->SQL->Delete('ArticleComment', array('ArticleCommentID' => $ArticleCommentID));
 
         // Update the comment count for the article.
         $Article = $this->SQL->GetWhere('Article', array('ArticleID' => $Comment->ArticleID))->FirstRow();
         $LastComment = $this->SQL
             ->Select('ac.*')
             ->From('ArticleComment ac')
-            ->OrderBy('ac.CommentID', 'desc')
+            ->OrderBy('ac.ArticleCommentID', 'desc')
             ->Where('ac.ArticleID', $Article->ArticleID)
             ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT);
 
@@ -241,7 +241,7 @@ class ArticleCommentModel extends Gdn_Model {
             return false;
 
         $ArticleData = $this->SQL
-            ->Select('ac.CommentID', 'count', 'CountComments')
+            ->Select('ac.ArticleCommentID', 'count', 'CountArticleComments')
             ->From('ArticleComment ac')
             ->Where('ac.ArticleID', $ArticleID)
             ->Get()->FirstRow();
@@ -249,38 +249,38 @@ class ArticleCommentModel extends Gdn_Model {
         if (!$ArticleData)
             return false;
 
-        $CountComments = (int)GetValue('CountComments', $ArticleData, 0);
+        $CountArticleComments = (int)GetValue('CountArticleComments', $ArticleData, 0);
 
         $Fields = array(
-            'CountComments' => $CountComments,
-            'FirstCommentID' => $this->SQL
-                                    ->Select('ac.CommentID')
+            'CountArticleComments' => $CountArticleComments,
+            'FirstArticleCommentID' => $this->SQL
+                                    ->Select('ac.ArticleCommentID')
                                     ->From('ArticleComment ac')
-                                    ->OrderBy('ac.CommentID', 'asc')
-                                    ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT)->CommentID,
-            'LastCommentID' => $Comment->CommentID,
-            'DateLastComment' => $Comment->DateInserted,
-            'LastCommentUserID' => $Comment->InsertUserID
+                                    ->OrderBy('ac.ArticleCommentID', 'asc')
+                                    ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT)->ArticleCommentID,
+            'LastArticleCommentID' => $Comment->ArticleCommentID,
+            'DateLastArticleComment' => $Comment->DateInserted,
+            'LastArticleCommentUserID' => $Comment->InsertUserID
         );
 
         $ArticleModel = new ArticleModel();
         $ArticleModel->Update($Fields, array('ArticleID' => $ArticleID), false);
 
         // Update the comment counts on the article's category.
-        $ArticleModel->UpdateArticleCount($Article->CategoryID, $Article);
+        $ArticleModel->UpdateArticleCount($Article->ArticleCategoryID, $Article);
     }
 
     public function UpdateUserCommentCount($UserID) {
         if (!is_numeric($UserID))
             return false;
 
-        $CountComments = $this->SQL
-            ->Select('ac.CommentID', 'count', 'CountComments')
+        $CountArticleComments = $this->SQL
+            ->Select('ac.ArticleCommentID', 'count', 'CountArticleComments')
             ->From('ArticleComment ac')
             ->Where('ac.InsertUserID', $UserID)
-            ->Get()->Value('CountComments', 0);
+            ->Get()->Value('CountArticleComments', 0);
 
-        Gdn::UserModel()->SetField($UserID, 'CountArticleComments', $CountComments);
+        Gdn::UserModel()->SetField($UserID, 'CountArticleComments', $CountArticleComments);
     }
 
     /**
@@ -299,7 +299,7 @@ class ArticleCommentModel extends Gdn_Model {
         }
 
         $this->SQL
-            ->Select('ac.CommentID', 'count', 'CountComments')
+            ->Select('ac.ArticleCommentID', 'count', 'CountArticleComments')
             ->From('ArticleComment ac')
             ->Where('ac.ArticleID', GetValue('ArticleID', $Comment));
 
@@ -327,6 +327,6 @@ class ArticleCommentModel extends Gdn_Model {
         return $this->SQL
             ->Get()
             ->FirstRow()
-            ->CountComments;
+            ->CountArticleComments;
     }
 }

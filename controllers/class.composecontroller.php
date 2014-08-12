@@ -295,14 +295,14 @@ class ComposeController extends Gdn_Controller {
         $this->SetData('Article', $Article, true);
 
         // Get category.
-        $Category = $this->ArticleCategoryModel->GetByID($Article->CategoryID);
+        $Category = $this->ArticleCategoryModel->GetByID($Article->ArticleCategoryID);
         $this->SetData('Category', $Category, true);
 
         $this->View = 'article';
         $this->Article($Article);
     }
 
-    public function Comment($ArticleID, $ParentCommentID = false) {
+    public function Comment($ArticleID, $ParentArticleCommentID = false) {
         $this->Title(T('Post Article Comment'));
 
         // Set required permission.
@@ -316,9 +316,9 @@ class ComposeController extends Gdn_Controller {
         $Article = $this->ArticleModel->GetByID($ArticleID);
 
         // Determine whether we are editing.
-        $CommentID = isset($this->Comment) && property_exists($this->Comment, 'CommentID') ? $this->Comment->CommentID : false;
-        $this->EventArguments['CommentID'] = &$CommentID;
-        $Editing = ($CommentID > 0);
+        $ArticleCommentID = isset($this->Comment) && property_exists($this->Comment, 'ArticleCommentID') ? $this->Comment->ArticleCommentID : false;
+        $this->EventArguments['ArticleCommentID'] = &$ArticleCommentID;
+        $Editing = ($ArticleCommentID > 0);
 
         // If closed, cancel and go to article.
         if ($Article && $Article->Closed == 1 && !$Editing && !$Session->CheckPermission('Articles.Articles.Close'))
@@ -326,7 +326,7 @@ class ComposeController extends Gdn_Controller {
 
         // Add hidden IDs to form.
         $this->Form->AddHidden('ArticleID', $ArticleID);
-        $this->Form->AddHidden('CommentID', $CommentID);
+        $this->Form->AddHidden('ArticleCommentID', $ArticleCommentID);
 
         // Check permissions.
         if ($Session->IsValid()) {
@@ -368,25 +368,25 @@ class ComposeController extends Gdn_Controller {
             $FormValues['ArticleID'] = $ArticleID;
             $this->Form->SetFormValue('ArticleID', $FormValues['ArticleID']);
 
-            // If the form didn't have ParentCommentID set, then set it to the method argument as a default.
-            if(!is_numeric($FormValues['ParentCommentID'])) {
-                $ParentCommentID = is_numeric($ParentCommentID) ? $ParentCommentID : null;
+            // If the form didn't have ParentArticleCommentID set, then set it to the method argument as a default.
+            if(!is_numeric($FormValues['ParentArticleCommentID'])) {
+                $ParentArticleCommentID = is_numeric($ParentArticleCommentID) ? $ParentArticleCommentID : null;
 
-                $FormValues['ParentCommentID'] = $ParentCommentID;
-                $this->Form->SetFormValue('ParentCommentID', $ParentCommentID);
+                $FormValues['ParentArticleCommentID'] = $ParentArticleCommentID;
+                $this->Form->SetFormValue('ParentArticleCommentID', $ParentArticleCommentID);
             }
 
             // Validate parent comment.
             $ParentComment = false;
-            if(is_numeric($FormValues['ParentCommentID'])) {
-                $ParentComment = $this->ArticleCommentModel->GetByID($FormValues['ParentCommentID']);
+            if(is_numeric($FormValues['ParentArticleCommentID'])) {
+                $ParentComment = $this->ArticleCommentModel->GetByID($FormValues['ParentArticleCommentID']);
 
                 // Parent comment doesn't exist.
                 if(!$ParentComment)
                     throw NotFoundException('Parent comment');
 
                 // Only allow one level of threading.
-                if(is_numeric($ParentComment->ParentCommentID) && ($ParentComment->ParentCommentID > 0))
+                if(is_numeric($ParentComment->ParentArticleCommentID) && ($ParentComment->ParentArticleCommentID > 0))
                     throw ForbiddenException('reply to a comment more than one level down');
             }
 
@@ -436,23 +436,23 @@ class ComposeController extends Gdn_Controller {
     /**
      * Edit a comment (wrapper for the Comment method).
      *
-     * @param int $CommentID Unique ID of the comment to edit.
+     * @param int $ArticleCommentID Unique ID of the comment to edit.
      */
-    public function EditComment($CommentID = '') {
-        if (!is_numeric($CommentID))
+    public function EditComment($ArticleCommentID = '') {
+        if (!is_numeric($ArticleCommentID))
             throw new InvalidArgumentException('The comment ID must be a numeric value.');
 
-        if ($CommentID > 0)
-            $this->Comment = $this->ArticleCommentModel->GetByID($CommentID);
+        if ($ArticleCommentID > 0)
+            $this->Comment = $this->ArticleCommentModel->GetByID($ArticleCommentID);
 
         $this->Form->SetFormValue('Format', GetValue('Format', $this->Comment));
 
         $this->View = 'editcomment';
 
-        $ParentCommentID = null;
-        if (!is_numeric($this->Comment->ParentCommentID) && ($this->Comment->ParentCommentID > 0))
-            $ParentCommentID = $this->Comment->ParentCommentID;
+        $ParentArticleCommentID = null;
+        if (!is_numeric($this->Comment->ParentArticleCommentID) && ($this->Comment->ParentArticleCommentID > 0))
+            $ParentArticleCommentID = $this->Comment->ParentArticleCommentID;
 
-        $this->Comment($this->Comment->ArticleID, $ParentCommentID);
+        $this->Comment($this->Comment->ArticleID, $ParentArticleCommentID);
     }
 }

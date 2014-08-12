@@ -20,8 +20,8 @@ if (!function_exists('ArticleUrl')) {
 }
 
 if (!function_exists('ArticleCommentUrl')) {
-  function ArticleCommentUrl($Article, $CommentID) {
-    return ArticleUrl($Article) . "/#Comment_$CommentID";
+  function ArticleCommentUrl($Article, $ArticleCommentID) {
+    return ArticleUrl($Article) . "/#Comment_$ArticleCommentID";
   }
 }
 

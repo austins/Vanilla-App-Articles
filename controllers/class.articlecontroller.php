@@ -70,7 +70,7 @@ class ArticleController extends Gdn_Controller {
             $this->Permission('Articles.Articles.View');
 
         // Get the category.
-        $this->Category = $this->ArticleCategoryModel->GetByID($this->Article->CategoryID);
+        $this->Category = $this->ArticleCategoryModel->GetByID($this->Article->ArticleCategoryID);
 
         // Get the comments.
         $this->Comments = $this->ArticleCommentModel->GetByArticleID($this->Article->ArticleID);
@@ -231,18 +231,18 @@ class ArticleController extends Gdn_Controller {
      * If the comment is the only one in the article, the article will
      * be deleted as well. This is a "hard" delete - it is removed from the database.
      *
-     * @param int $CommentID Unique comment ID.
+     * @param int $ArticleCommentID Unique comment ID.
      * @param string $TransientKey Single-use hash to prove intent.
      */
-    public function DeleteComment($CommentID = '', $TransientKey = '') {
+    public function DeleteComment($ArticleCommentID = '', $TransientKey = '') {
         $Session = Gdn::Session();
         $DefaultTarget = '/articles/';
-        $ValidCommentID = is_numeric($CommentID) && $CommentID > 0;
+        $ValidArticleCommentID = is_numeric($ArticleCommentID) && $ArticleCommentID > 0;
         $ValidUser = ($Session->UserID > 0) && $Session->ValidateTransientKey($TransientKey);
 
-        if ($ValidCommentID && $ValidUser) {
+        if ($ValidArticleCommentID && $ValidUser) {
             // Get comment and article data.
-            $Comment = $this->ArticleCommentModel->GetByID($CommentID);
+            $Comment = $this->ArticleCommentModel->GetByID($ArticleCommentID);
             $ArticleID = GetValue('ArticleID', $Comment);
             $Article = $this->ArticleModel->GetByID($ArticleID);
 
@@ -260,7 +260,7 @@ class ArticleController extends Gdn_Controller {
                     $this->Permission('Articles.Comments.Delete');
 
                 // Delete the comment
-                if (!$this->ArticleCommentModel->Delete($CommentID))
+                if (!$this->ArticleCommentModel->Delete($ArticleCommentID))
                     $this->Form->AddError('Failed to delete comment');
             } else {
                 $this->Form->AddError('Invalid comment');
@@ -278,7 +278,7 @@ class ArticleController extends Gdn_Controller {
         if ($this->Form->ErrorCount() > 0) {
             $this->SetJson('ErrorMessage', $this->Form->Errors());
         } else {
-            $this->JsonTarget("#Comment_$CommentID", '', 'SlideUp');
+            $this->JsonTarget("#Comment_$ArticleCommentID", '', 'SlideUp');
         }
 
         $this->Render();
@@ -288,11 +288,11 @@ class ArticleController extends Gdn_Controller {
     /**
      * Display article page starting with a particular comment.
      *
-     * @param int $CommentID Unique comment ID
+     * @param int $ArticleCommentID Unique comment ID
      */
-    public function Comment($CommentID) {
+    public function Comment($ArticleCommentID) {
         // Get the ArticleID
-        $Comment = $this->ArticleCommentModel->GetByID($CommentID);
+        $Comment = $this->ArticleCommentModel->GetByID($ArticleCommentID);
         if (!$Comment)
             throw NotFoundException('Article comment');
 

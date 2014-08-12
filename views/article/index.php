@@ -12,10 +12,10 @@ $Author = Gdn::UserModel()->GetID($Article->AttributionUserID);
 
 $Category = $this->Category;
 
-if ($Article->CountComments == 0)
+if ($Article->CountArticleComments == 0)
     $CommentCount = 'Comments';
 else
-    $CommentCount = Plural($Article->CountComments, T('1 Comment'), T('%d Comments'));
+    $CommentCount = Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
 ?>
 <article id="Article_<?php echo $Article->ArticleID; ?>" class="Article">
     <?php ShowArticleOptions($Article); ?>

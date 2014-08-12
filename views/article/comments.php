@@ -20,11 +20,11 @@ if ($this->Comments->NumRows() > 0):
                 if (is_numeric($Comment->InsertUserID))
                     $User = Gdn::UserModel()->GetID($Comment->InsertUserID);
 
-                $ParentCommentID = is_numeric($Comment->ParentCommentID) ? $Comment->ParentCommentID : false;
-                if($ParentCommentID)
+                $ParentArticleCommentID = is_numeric($Comment->ParentArticleCommentID) ? $Comment->ParentArticleCommentID : false;
+                if($ParentArticleCommentID)
                     $CssClass .= ' ItemCommentReply';
                 ?>
-                <li class="<?php echo $CssClass; ?>" id="Comment_<?php echo $Comment->CommentID; ?>">
+                <li class="<?php echo $CssClass; ?>" id="Comment_<?php echo $Comment->ArticleCommentID; ?>">
                     <div class="Comment">
                         <?php WriteCommentOptions($Comment); ?>
 
@@ -55,7 +55,7 @@ if ($this->Comments->NumRows() > 0):
 
                             <div class="Meta CommentMeta CommentInfo">
                             <span class="MItem DateCreated"><?php echo Anchor(Gdn_Format::Date($Comment->DateInserted,
-                                        'html'), ArticleCommentUrl($Article, $Comment->CommentID), 'Permalink',
+                                        'html'), ArticleCommentUrl($Article, $Comment->ArticleCommentID), 'Permalink',
                                     array('name' => 'Item_' . ($CurrentOffset), 'rel' => 'nofollow')); ?></span>
                                 <?php
                                 echo DateUpdated($Comment, array('<span class="MItem">', '</span>'));

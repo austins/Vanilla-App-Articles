@@ -31,12 +31,12 @@ if (is_object($OtherCategories)) {
         </li>
         <li id="ReplacementCategory">
             <?php
-            echo $this->Form->Label('Replacement Category', 'ReplacementCategoryID');
+            echo $this->Form->Label('Replacement Category', 'ReplacementArticleCategoryID');
             echo $this->Form->DropDown(
-                'ReplacementCategoryID',
+                'ReplacementArticleCategoryID',
                 $OtherCategories,
                 array(
-                    'ValueField' => 'CategoryID',
+                    'ValueField' => 'ArticleCategoryID',
                     'TextField' => 'Name',
                     'IncludeNull' => true
                 ));

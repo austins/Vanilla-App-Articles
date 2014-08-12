@@ -20,7 +20,7 @@ $Now = Gdn_Format::ToDateTime();
 // Insert first article category.
 $ArticleCategoryModel = new ArticleCategoryModel();
 if ($ArticleCategoryModel->GetCount() == 0) {
-    $FirstCategoryID = $ArticleCategoryModel->Save(array(
+    $FirstArticleCategoryID = $ArticleCategoryModel->Save(array(
         'Name' => 'Uncategorized',
         'UrlCode' => 'uncategorized',
         'Description' => 'Uncategorized articles.',
@@ -48,7 +48,7 @@ if ($ArticleModel->GetCount() == 0) {
         . " arcu, sed fermentum ipsum condimentum eget.";
 
     $ArticleModel->Save(array(
-        'CategoryID' => 1,
+        'ArticleCategoryID' => 1,
         'Name' => $FirstArticleName,
         'UrlCode' => Gdn_Format::Url($FirstArticleName),
         'Body' => $FirstArticleBody,

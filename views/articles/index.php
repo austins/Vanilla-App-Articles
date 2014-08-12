@@ -8,7 +8,7 @@ if(!function_exists('ShowArticleOptions')) {
 
 $Articles = $this->Data('Articles');
 
-$Category = isset($this->Category->CategoryID) ? $this->Category : false;
+$Category = isset($this->Category->ArticleCategoryID) ? $this->Category : false;
 
 if($Category) {
   echo Wrap($Category->Name, 'h1', array('class' => 'H'));
@@ -27,9 +27,9 @@ else {
     $ArticleUrl = ArticleUrl($Article);
     $Author = Gdn::UserModel()->GetID($Article->AttributionUserID);
 
-    $ArticleCategory = $this->ArticleCategoryModel->GetByID($Article->CategoryID);
+    $ArticleCategory = $this->ArticleCategoryModel->GetByID($Article->ArticleCategoryID);
 
-    $CommentCount = ($Article->CountComments == 0) ? 'Comments' : Plural($Article->CountComments, T('1 Comment'), T('%d Comments'));
+    $CommentCount = ($Article->CountArticleComments == 0) ? 'Comments' : Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
     ?>
     <article id="Article_<?php echo $Article->ArticleID; ?>" class="Article">
     <?php ShowArticleOptions($Article); ?>

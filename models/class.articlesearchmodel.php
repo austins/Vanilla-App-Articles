@@ -41,7 +41,7 @@ class ArticleSearchModel extends Gdn_Model {
 		
 		// Build base query
 		$this->SQL
-			->Select('a.ArticleID as PrimaryID, a.Name as Title, a.Excerpt as Summary, a.Format, a.CategoryID')
+			->Select('a.ArticleID as PrimaryID, a.Name as Title, a.Excerpt as Summary, a.Format, a.ArticleCategoryID')
 			->Select('a.UrlCode', "concat('/article/', year(a.DateInserted), '/', %s)", 'Url')
 			->Select('a.DateInserted')
 			->Select('a.AttributionUserID as UserID')
@@ -71,8 +71,8 @@ class ArticleSearchModel extends Gdn_Model {
 		
 		// Build base query
 		$this->SQL
-			->Select('ac.CommentID as PrimaryID, a.Name as Title, ac.Body as Summary, ac.Format, a.CategoryID')
-			->Select("'/article/comment/', ac.CommentID, '/#Comment_', ac.CommentID", "concat", 'Url')
+			->Select('ac.ArticleCommentID as PrimaryID, a.Name as Title, ac.Body as Summary, ac.Format, a.ArticleCategoryID')
+			->Select("'/article/comment/', ac.ArticleCommentID, '/#Comment_', ac.ArticleCommentID", "concat", 'Url')
 			->Select('ac.DateInserted')
 			->Select('ac.InsertUserID as UserID')
             ->Select("'ArticleComment'", '', 'RecordType')

@@ -20,92 +20,92 @@ class ArticleCategoryModel extends Gdn_Model {
             case 'CountArticles':
                 $this->Database->Query(DBAModel::GetCountSQL('count', 'ArticleCategory', 'Article'));
                 break;
-            case 'CountComments':
+            case 'CountArticleComments':
                 $this->Database->Query(DBAModel::GetCountSQL('sum', 'ArticleCategory', 'Article', $Column,
-                    'CountComments'));
+                    'CountArticleComments'));
                 break;
             case 'LastArticleID':
                 $this->Database->Query(DBAModel::GetCountSQL('max', 'ArticleCategory', 'Article'));
                 break;
-            case 'LastCommentID':
+            case 'LastArticleCommentID':
                 $Data = $this->SQL
-                    ->Select('a.CategoryID')
-                    ->Select('ac.CommentID', 'max', 'LastCommentID')
+                    ->Select('a.ArticleCategoryID')
+                    ->Select('ac.ArticleCommentID', 'max', 'LastArticleCommentID')
                     ->Select('a.ArticleID', 'max', 'LastArticleID')
-                    ->Select('ac.DateInserted', 'max', 'DateLastComment')
+                    ->Select('ac.DateInserted', 'max', 'DateLastArticleComment')
                     ->Select('a.DateInserted', 'max', 'DateLastArticle')
                     ->From('ArticleComment ac')
                     ->Join('Article a', 'a.ArticleID = ac.ArticleID')
-                    ->GroupBy('a.CategoryID')
+                    ->GroupBy('a.ArticleCategoryID')
                     ->Get()->ResultArray();
 
                 // Now we have to grab the discussions associated with these comments.
-                $CommentIDs = ConsolidateArrayValuesByKey($Data, 'LastCommentID');
+                $ArticleCommentIDs = ConsolidateArrayValuesByKey($Data, 'LastArticleCommentID');
 
                 // Grab the discussions for the comments.
                 $this->SQL
-                    ->Select('ac.CommentID, ac.ArticleID')
+                    ->Select('ac.ArticleCommentID, ac.ArticleID')
                     ->From('ArticleComment ac')
-                    ->WhereIn('ac.CommentID', $CommentIDs);
+                    ->WhereIn('ac.ArticleCommentID', $ArticleCommentIDs);
 
                 $Articles = $this->SQL->Get()->ResultArray();
-                $Articles = Gdn_DataSet::Index($Articles, array('CommentID'));
+                $Articles = Gdn_DataSet::Index($Articles, array('ArticleCommentID'));
 
                 foreach ($Data as $Row) {
-                    $CategoryID = (int)$Row['CategoryID'];
-                    $Category = $this->GetByID($CategoryID);
-                    $CommentID = $Row['LastCommentID'];
-                    $ArticleID = GetValueR("$CommentID.ArticleID", $Articles, null);
+                    $ArticleCategoryID = (int)$Row['ArticleCategoryID'];
+                    $Category = $this->GetByID($ArticleCategoryID);
+                    $ArticleCommentID = $Row['LastArticleCommentID'];
+                    $ArticleID = GetValueR("$ArticleCommentID.ArticleID", $Articles, null);
 
-                    $DateLastComment = Gdn_Format::ToTimestamp($Row['DateLastComment']);
+                    $DateLastArticleComment = Gdn_Format::ToTimestamp($Row['DateLastArticleComment']);
                     $DateLastArticle = Gdn_Format::ToTimestamp($Row['DateLastArticle']);
 
-                    $Set = array('LastCommentID' => $CommentID);
+                    $Set = array('LastArticleCommentID' => $ArticleCommentID);
 
                     if ($ArticleID) {
                         $LastArticleID = GetValue('LastArticleID', $Category);
 
-                        if ($DateLastComment >= $DateLastArticle) {
+                        if ($DateLastArticleComment >= $DateLastArticle) {
                             // The most recent article is from this comment.
                             $Set['LastArticleID'] = $ArticleID;
                         } else {
                             // The most recent discussion has no comments.
-                            $Set['LastCommentID'] = null;
+                            $Set['LastArticleCommentID'] = null;
                         }
                     } else {
                         // Something went wrong.
-                        $Set['LastCommentID'] = null;
+                        $Set['LastArticleCommentID'] = null;
                         $Set['LastArticleID'] = null;
                     }
 
-                    $this->SetField($CategoryID, $Set);
+                    $this->SetField($ArticleCategoryID, $Set);
                 }
 
                 break;
             case 'LastDateInserted':
                 $Categories = $this->SQL
-                    ->Select('ca.CategoryID')
+                    ->Select('ca.ArticleCategoryID')
                     ->Select('a.DateInserted', '', 'DateLastArticle')
-                    ->Select('ac.DateInserted', '', 'DateLastComment')
+                    ->Select('ac.DateInserted', '', 'DateLastArticleComment')
 
                     ->From('ArticleCategory ca')
                     ->Join('Article a', 'a.ArticleID = ca.LastArticleID')
-                    ->Join('ArticleComment ac', 'ac.CommentID = ca.LastCommentID')
+                    ->Join('ArticleComment ac', 'ac.ArticleCommentID = ca.LastArticleCommentID')
                     ->Get()->ResultArray();
 
                 foreach ($Categories as $Category) {
                     $DateLastArticle = GetValue('DateLastArticle', $Category);
-                    $DateLastComment = GetValue('DateLastComment', $Category);
+                    $DateLastArticleComment = GetValue('DateLastArticleComment', $Category);
 
-                    $MaxDate = $DateLastComment;
-                    if (is_null($DateLastComment) || $DateLastArticle > $MaxDate)
+                    $MaxDate = $DateLastArticleComment;
+                    if (is_null($DateLastArticleComment) || $DateLastArticle > $MaxDate)
                         $MaxDate = $DateLastArticle;
 
                     if (is_null($MaxDate))
                         continue;
 
-                    $CategoryID = (int)$Category['CategoryID'];
-                    $this->SetField($CategoryID, 'LastDateInserted', $MaxDate);
+                    $ArticleCategoryID = (int)$Category['ArticleCategoryID'];
+                    $this->SetField($ArticleCategoryID, 'LastDateInserted', $MaxDate);
                 }
 
                 break;
@@ -145,11 +145,11 @@ class ArticleCategoryModel extends Gdn_Model {
         return $Categories;
     }
 
-    public function GetByID($CategoryID) {
+    public function GetByID($ArticleCategoryID) {
         // Set up the query.
         $this->SQL->Select('ac.*')
             ->From('ArticleCategory ac')
-            ->Where('ac.CategoryID', $CategoryID);
+            ->Where('ac.ArticleCategoryID', $ArticleCategoryID);
 
         // Fetch data.
         $Category = $this->SQL->Get()->FirstRow();
@@ -175,31 +175,31 @@ class ArticleCategoryModel extends Gdn_Model {
      * @return void
      * @throws Exception // TODO update comment.
      * @param object $Category
-     * @param int $ReplacementCategoryID Unique ID of category all discussion are being move to.
+     * @param int $ReplacementArticleCategoryID Unique ID of category all discussion are being move to.
      */
-    public function Delete($Category, $ReplacementCategoryID) {
+    public function Delete($Category, $ReplacementArticleCategoryID) {
         // Don't do anything if the required category object & properties are not defined.
         if (!is_object($Category)
-            || !property_exists($Category, 'CategoryID')
+            || !property_exists($Category, 'ArticleCategoryID')
             || !property_exists($Category, 'Name')
-            || $Category->CategoryID <= 0
+            || $Category->ArticleCategoryID <= 0
         ) {
             throw new Exception(T('Invalid category for deletion.'));
         } else {
             // If there is a replacement category...
-            if ($ReplacementCategoryID > 0) {
+            if ($ReplacementArticleCategoryID > 0) {
                 // Update articles.
                 $this->SQL
                     ->Update('Article')
-                    ->Set('CategoryID', $ReplacementCategoryID)
-                    ->Where('CategoryID', $Category->CategoryID)
+                    ->Set('ArticleCategoryID', $ReplacementArticleCategoryID)
+                    ->Where('ArticleCategoryID', $Category->ArticleCategoryID)
                     ->Put();
 
                 // Update the article count.
                 $Count = $this->SQL
                     ->Select('ArticleID', 'count', 'ArticleCount')
                     ->From('Article')
-                    ->Where('CategoryID', $ReplacementCategoryID)
+                    ->Where('ArticleCategoryID', $ReplacementArticleCategoryID)
                     ->Get()
                     ->FirstRow()
                     ->ArticleCount;
@@ -209,7 +209,7 @@ class ArticleCategoryModel extends Gdn_Model {
 
                 $this->SQL
                     ->Update('ArticleCategory')->Set('CountArticles', $Count)
-                    ->Where('CategoryID', $ReplacementCategoryID)
+                    ->Where('ArticleCategoryID', $ReplacementArticleCategoryID)
                     ->Put();
             } else {
                 // Delete comments in this category.
@@ -217,31 +217,31 @@ class ArticleCategoryModel extends Gdn_Model {
                 $this->SQL
                    ->From('ArticleComment ac')
                    ->Join('Article a', 'ac.ArticleID = a.ArticleID')
-                   ->Where('a.ArticleID', $Category->CategoryID)
+                   ->Where('a.ArticleID', $Category->ArticleCategoryID)
                    ->Delete();
                 */
 
                 // Delete articles in this category
-                $this->SQL->Delete('Article', array('CategoryID' => $Category->CategoryID));
+                $this->SQL->Delete('Article', array('ArticleCategoryID' => $Category->ArticleCategoryID));
             }
 
             // Delete the category
-            $this->SQL->Delete('ArticleCategory', array('CategoryID' => $Category->CategoryID));
+            $this->SQL->Delete('ArticleCategory', array('ArticleCategoryID' => $Category->ArticleCategoryID));
         }
     }
 
-    public function SetRecentPost($CategoryID) {
+    public function SetRecentPost($ArticleCategoryID) {
         $Row = $this->SQL
-            ->GetWhere('Article', array('CategoryID' => $CategoryID), 'DateLastComment', 'desc', 1)
+            ->GetWhere('Article', array('ArticleCategoryID' => $ArticleCategoryID), 'DateLastArticleComment', 'desc', 1)
             ->FirstRow(DATASET_TYPE_ARRAY);
 
-        $Fields = array('LastCommentID' => NULL, 'LastArticleID' => NULL);
+        $Fields = array('LastArticleCommentID' => NULL, 'LastArticleID' => NULL);
 
         if ($Row) {
-            $Fields['LastCommentID'] = $Row['LastCommentID'];
+            $Fields['LastArticleCommentID'] = $Row['LastArticleCommentID'];
             $Fields['LastArticleID'] = $Row['ArticleID'];
         }
 
-        $this->SetField($CategoryID, $Fields);
+        $this->SetField($ArticleCategoryID, $Fields);
     }
 }

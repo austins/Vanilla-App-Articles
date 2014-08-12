@@ -30,7 +30,7 @@ if (!function_exists('ShowArticleOptions')) {
         // Can the user delete?
         if ($Session->CheckPermission('Articles.Articles.Delete')) {
             $ArticleCategoryModel = new ArticleCategoryModel();
-            $Category = $ArticleCategoryModel->GetByID(GetValue('CategoryID', $Article));
+            $Category = $ArticleCategoryModel->GetByID(GetValue('ArticleCategoryID', $Article));
 
             $Options['DeleteArticle'] = array(
                 'Label' => T('Delete'),
@@ -129,10 +129,10 @@ if (!function_exists('WriteArticleReactions')):
 
         $Session = Gdn::Session();
         $GuestCommenting = (C('Articles.Comments.AllowGuests', false) && !$Session->IsValid());
-        if (C('Articles.Comments.EnableThreadedComments', true) && !$Comment->ParentCommentID) {
+        if (C('Articles.Comments.EnableThreadedComments', true) && !$Comment->ParentArticleCommentID) {
             if ($Session->IsValid() || $GuestCommenting) {
                 echo Anchor('<span class="ReactSprite ReactReply"></span> Reply',
-                    '/compose/comment/' . $Comment->ArticleID . '/' . $Comment->CommentID,
+                    '/compose/comment/' . $Comment->ArticleID . '/' . $Comment->ArticleCommentID,
                     'ReactButton ReplyLink Visible');
             }
         }
@@ -147,14 +147,14 @@ if (!function_exists('GetCommentOptions')):
     function GetCommentOptions($Comment) {
         $Options = array();
 
-        if (!is_numeric(GetValue('CommentID', $Comment)))
+        if (!is_numeric(GetValue('ArticleCommentID', $Comment)))
             return $Options;
 
         $Sender = Gdn::Controller();
         $Session = Gdn::Session();
 
         $Article = & $Sender->Article;
-        $CategoryID = GetValue('CategoryID', $Article);
+        $ArticleCategoryID = GetValue('ArticleCategoryID', $Article);
 
         // Determine if we still have time to edit
         $EditContentTimeout = C('Garden.EditContentTimeout', -1);
@@ -174,13 +174,13 @@ if (!function_exists('GetCommentOptions')):
         // Can the user edit the comment?
         if (($CanEdit && $Session->UserID == $Comment->InsertUserID) || $Session->CheckPermission('Articles.Comments.Edit'))
             $Options['EditComment'] = array('Label' => T('Edit') . ' ' . $TimeLeft,
-                'Url' => '/articles/compose/editcomment/' . $Comment->CommentID, 'EditComment');
+                'Url' => '/articles/compose/editcomment/' . $Comment->ArticleCommentID, 'EditComment');
 
         // Can the user delete the comment?
         $SelfDeleting = ($CanEdit && $Session->UserID == $Comment->InsertUserID && C('Articles.Comments.AllowSelfDelete'));
         if ($SelfDeleting || $Session->CheckPermission('Articles.Comments.Delete'))
             $Options['DeleteComment'] = array('Label' => T('Delete'),
-                'Url' => '/articles/article/deletecomment/' . $Comment->CommentID . '/' . $Session->TransientKey()
+                'Url' => '/articles/article/deletecomment/' . $Comment->ArticleCommentID . '/' . $Session->TransientKey()
                     . '/?Target=' . urlencode('/article/' . Gdn_Format::Date($Article->DateInserted, '%Y') . '/'
                         . $Article->UrlCode), 'Class' => 'DeleteComment');
 

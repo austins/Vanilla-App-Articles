@@ -12,7 +12,7 @@ $Px = $Construct->DatabasePrefix();
 
 // Construct the ArticleCategory table.
 $Construct->Table('ArticleCategory');
-$Construct->PrimaryKey('CategoryID')
+$Construct->PrimaryKey('ArticleCategoryID')
     ->Column('Name', 'varchar(255)')
     ->Column('UrlCode', 'varchar(255)', false, 'unique')
     ->Column('Description', 'varchar(500)', true)
@@ -23,14 +23,14 @@ $Construct->PrimaryKey('CategoryID')
     ->Column('LastDateInserted', 'datetime', null)
     ->Column('CountArticles', 'int', 0)
     ->Column('LastArticleID', 'int', null)
-    ->Column('CountComments', 'int', 0)
-    ->Column('LastCommentID', 'int', null)
+    ->Column('CountArticleComments', 'int', 0)
+    ->Column('LastArticleCommentID', 'int', null)
     ->Set($Explicit, $Drop);
 
 // Construct the Article table.
 $Construct->Table('Article');
 $Construct->PrimaryKey('ArticleID')
-    ->Column('CategoryID', 'int', false, array('key', 'index.CategoryPages'))
+    ->Column('ArticleCategoryID', 'int', false, array('key', 'index.CategoryPages'))
     ->Column('Name', 'varchar(100)', false, 'fulltext')
     ->Column('UrlCode', 'varchar(255)', false, 'unique')
     ->Column('Body', 'longtext', false, 'fulltext')
@@ -46,22 +46,22 @@ $Construct->PrimaryKey('ArticleID')
     ->Column('UpdateUserID', 'int', true)
     ->Column('InsertIPAddress', 'varchar(15)', true)
     ->Column('UpdateIPAddress', 'varchar(15)', true)
-    ->Column('CountComments', 'int', 0)
-    ->Column('FirstCommentID', 'int', true)
-    ->Column('LastCommentID', 'int', true)
-    ->Column('DateLastComment', 'datetime', null, array('index', 'index.CategoryPages'))
-    ->Column('LastCommentUserID', 'int', true)
+    ->Column('CountArticleComments', 'int', 0)
+    ->Column('FirstArticleCommentID', 'int', true)
+    ->Column('LastArticleCommentID', 'int', true)
+    ->Column('DateLastArticleComment', 'datetime', null, array('index', 'index.CategoryPages'))
+    ->Column('LastArticleCommentUserID', 'int', true)
     ->Set($Explicit, $Drop);
 
 // Construct the ArticleComment table.
 $Construct->Table('ArticleComment');
-$Construct->PrimaryKey('CommentID')
+$Construct->PrimaryKey('ArticleCommentID')
     ->Column('ArticleID', 'int', false, 'index.1')
     ->Column('Body', 'text', false, 'fulltext')
     ->Column('Format', 'varchar(20)', true)
     ->Column('DateInserted', 'datetime', false, array('index.1', 'index'))
     ->Column('DateUpdated', 'datetime', true)
-    ->Column('ParentCommentID', 'int', true)
+    ->Column('ParentArticleCommentID', 'int', true)
     ->Column('InsertUserID', 'int', true)
     ->Column('UpdateUserID', 'int', true)
     ->Column('InsertIPAddress', 'varchar(39)', true)
