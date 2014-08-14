@@ -27,6 +27,7 @@ echo $this->Form->Errors();
             echo '</div>';
         }
         ?>
+
         <div class="P">
             <?php
             echo $this->Form->Label('Article Name', 'Name');
@@ -34,6 +35,7 @@ echo $this->Form->Errors();
                 array('class' => 'TextBoxWrapper'));
             ?>
         </div>
+
         <div id="UrlCode">
             <?php
             echo Wrap('URL Code', 'strong') . ': ';
@@ -43,18 +45,29 @@ echo $this->Form->Errors();
             echo Anchor(T('OK'), '#', 'Save SmallButton');
             ?>
         </div>
+
         <div class="P">
             <?php
             echo $this->Form->Label('Body', 'Body');
             echo $this->Form->BodyBox('Body', array('Table' => 'Article'));
             ?>
         </div>
+
+        <div class="P">
+            <?php
+            echo $this->Form->Label('Upload an Image', 'UploadImage');
+            echo $this->Form->ImageUpload('UploadImage');
+            echo $this->Form->Button('Upload Image');
+            ?>
+        </div>
+
         <div class="P">
             <?php
             echo $this->Form->Label('Excerpt (Optional)', 'Excerpt');
             echo $this->Form->BodyBox('Excerpt', array('Table' => 'Article'));
             ?>
         </div>
+
         <?php if (Gdn::Session()->CheckPermission('Articles.Articles.Edit')): ?>
             <div class="P">
                 <?php
@@ -64,6 +77,7 @@ echo $this->Form->Errors();
                 ?>
             </div>
         <?php endif; ?>
+
         <div class="P">
             <?php
             echo $this->Form->Label('Status', 'Status');

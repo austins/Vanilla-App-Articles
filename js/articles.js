@@ -320,7 +320,9 @@ jQuery(document).ready(function ($) {
                 $(frm).find(':submit').removeAttr("disabled");
             }
         });
+
         frm.triggerHandler('submit');
+
         return false;
     });
 
@@ -341,5 +343,40 @@ jQuery(document).ready(function ($) {
                 gdn.processTargets(json.Targets);
             }
         }
+    });
+
+    // Article media: image upload events.
+    // TODO: upload image JS.
+    $('#Form_UploadImage1').click(function(e) {
+        e.preventDefault();
+
+        var file = $('#Form_UploadImage').prop('files');
+
+        $.ajax({
+            url: gdn.url('/articles/compose/uploadimage'),
+            type: 'POST',
+            data: file,
+            cache: false,
+            dataType: 'json',
+            processData: false, // Don't process the files
+            contentType: false, // Set content type to false as jQuery will tell the server its a query string request
+            success: function(data, textStatus, jqXHR) {
+                if (typeof data.error === 'undefined') {
+                    // Success so call function to process the form
+                    console.log('Image upload successful!');
+                }
+                else {
+                    // Handle errors here
+                    console.log('ERRORS: ' + data.error);
+                }
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                // Handle errors here
+                console.log('ERRORS2: ' + textStatus);
+                // STOP LOADING SPINNER
+            }
+        });
+
+        return false;
     });
 });

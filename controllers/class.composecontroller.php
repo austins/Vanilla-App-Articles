@@ -9,7 +9,7 @@ class ComposeController extends Gdn_Controller {
     /**
      * Models to include.
      */
-    public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'ArticleCommentModel', 'Form');
+    public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'ArticleCommentModel', 'ArticleMediaModel', 'Form');
 
     /**
      * Include JS, CSS, and modules used by all methods.
@@ -155,6 +155,10 @@ class ComposeController extends Gdn_Controller {
 
         // Get categories.
         $Categories = $this->ArticleCategoryModel->Get();
+
+        if ($Categories->NumRows() === 0)
+            throw new Gdn_UserException(T('At least one article category must exist to compose an article.'));
+
         $this->SetData('Categories', $Categories, true);
 
         // Set status options.
@@ -189,6 +193,8 @@ class ComposeController extends Gdn_Controller {
         } else { // The form has been submitted.
             // Manually validate certain fields.
             $FormValues = $this->Form->FormValues();
+
+            $this->Form->ValidateRule('ArticleCategoryID', 'ValidateRequired', T('Article category is required.'));
 
             // Validate the URL code.
             // Set UrlCode to name of article if it's not defined.
@@ -300,6 +306,17 @@ class ComposeController extends Gdn_Controller {
 
         $this->View = 'article';
         $this->Article($Article);
+    }
+
+    public function UploadImage() {
+        list($FieldName) = $this->RequestArgs;
+
+        $this->DeliveryMethod(DELIVERY_METHOD_JSON);
+        $this->DeliveryType(DELIVERY_TYPE_VIEW);
+
+        $ImageData = Gdn::Request()->GetValueFrom(Gdn_Request::INPUT_FILES, 'UploadImage', false);
+
+        // TODO: upload image method.
     }
 
     public function Comment($ArticleID, $ParentArticleCommentID = false) {
