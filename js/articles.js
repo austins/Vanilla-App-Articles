@@ -346,37 +346,25 @@ jQuery(document).ready(function ($) {
     });
 
     // Article media: image upload events.
-    // TODO: upload image JS.
-    $('#Form_UploadImage1').click(function(e) {
-        e.preventDefault();
+    var currentArticleID = $('#Form_ComposeArticle').find('input:hidden[name$=ArticleID]');
+    $('#Form_UploadImage_New').ajaxfileupload({
+        'action': gdn.url('/articles/compose/uploadimage?DeliveryMethod=JSON&DeliveryType=VIEW'),
+        'params': {
+            'ArticleID': currentArticleID
+        },
+        'onComplete': function(response) {
+            var frm = $(this).closest('form');
+            var imagePath = gdn.url('/uploads' + response.Path);
 
-        var file = $('#Form_UploadImage').prop('files');
+            $('.TinyProgress').remove();
 
-        $.ajax({
-            url: gdn.url('/articles/compose/uploadimage'),
-            type: 'POST',
-            data: file,
-            cache: false,
-            dataType: 'json',
-            processData: false, // Don't process the files
-            contentType: false, // Set content type to false as jQuery will tell the server its a query string request
-            success: function(data, textStatus, jqXHR) {
-                if (typeof data.error === 'undefined') {
-                    // Success so call function to process the form
-                    console.log('Image upload successful!');
-                }
-                else {
-                    // Handle errors here
-                    console.log('ERRORS: ' + data.error);
-                }
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                // Handle errors here
-                console.log('ERRORS2: ' + textStatus);
-                // STOP LOADING SPINNER
-            }
-        });
-
-        return false;
+            console.log(response); // TODO: debug and test
+        },
+        'onStart': function() {
+            $(this).after('<span class="TinyProgress">&#160;</span>');
+        },
+        'onCancel': function() {
+            //console.log('no file selected');
+        }
     });
 });

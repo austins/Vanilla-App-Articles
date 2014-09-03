@@ -153,6 +153,8 @@ class ComposeController extends Gdn_Controller {
         // Set the model on the form.
         $this->Form->SetModel($this->ArticleModel);
 
+        $this->AddJsFile('jquery.ajaxfileupload.js');
+
         // Get categories.
         $Categories = $this->ArticleCategoryModel->Get();
 
@@ -309,14 +311,100 @@ class ComposeController extends Gdn_Controller {
     }
 
     public function UploadImage() {
-        list($FieldName) = $this->RequestArgs;
+        // Check for file data.
+        if (!$_FILES)
+            throw NotFoundException('Page');
 
+        // Check permission.
+        $Session = Gdn::Session();
+        if (!$Session->CheckPermission('Articles.Articles.Add'))
+            throw PermissionException('Articles.Articles.Add');
+
+        // Handle the file data.
         $this->DeliveryMethod(DELIVERY_METHOD_JSON);
         $this->DeliveryType(DELIVERY_TYPE_VIEW);
 
-        $ImageData = Gdn::Request()->GetValueFrom(Gdn_Request::INPUT_FILES, 'UploadImage', false);
+        /*
+         * $_FILES['UploadImage_New'] array format:
+         *  'name' => 'example.jpg',
+         *  'type' => 'image/jpeg',
+         *  'tmp_name' => 'C:\example\tmp\example.tmp' (temp. path on the user's computer to .tmp file)
+         *  'error' => 0 (valid data)
+         *  'size' => 15517 (bytes)
+         */
+        $UploadFieldName = 'UploadImage_New';
+        $ImageData = $_FILES[$UploadFieldName];
 
-        // TODO: upload image method.
+        // ArticleID is saved with media model if editing. ArticleID is null if new article.
+        // Null ArticleID is replaced by ArticleID when new article is saved.
+        $ArticleID = $_POST['ArticleID'];
+        if (!is_numeric($ArticleID) || ($ArticleID <= 0))
+            $ArticleID = null;
+
+        $isThumbnail = false; // TODO: Thumbnail support.
+
+        // Upload the image.
+        $UploadImage = new Gdn_UploadImage();
+        try {
+            $TmpFileName = $UploadImage->ValidateUpload($UploadFieldName);
+
+            // Generate the target image name.
+            $CurrentYear = date('Y');
+            $CurrentMonth = date('m');
+            $UploadPath = PATH_UPLOADS . '/articles/' . $CurrentYear . '/' . $CurrentMonth;
+            $TargetImage = $UploadImage->GenerateTargetName($UploadPath, 'jpg', false);
+            $Basename = pathinfo($TargetImage, PATHINFO_BASENAME);
+            $UploadsSubdir = '/articles/' . $CurrentYear . '/' . $CurrentMonth;
+
+            if($isThumbnail) {
+                $SaveHeight = 400;
+                $SaveWidth = 400;
+            } else {
+                $SaveHeight = null;
+                $SaveWidth = null;
+            }
+
+            // Save the uploaded image.
+            $Props = $UploadImage->SaveImageAs(
+                $TmpFileName,
+                $UploadsSubdir . '/' . $Basename,
+                $SaveHeight,
+                $SaveWidth, // change these configs and add quality etc.
+                array('OutputType' => 'jpg', 'ImageQuality' => C('Garden.UploadImage.Quality', 75))
+            );
+
+            $UploadedImagePath = sprintf($Props['SaveFormat'], $UploadsSubdir . '/' . $Basename);
+        } catch(Exception $ex) {
+            return false;
+        }
+
+        // Save the image.
+        $ImageProps = getimagesize($TargetImage);
+        $MediaValues = array(
+            'ArticleID' => $ArticleID,
+            'Name' => $Basename,
+            'Type' => $ImageProps['mime'],
+            'Size' => filesize($TargetImage),
+            'ImageWidth' => $ImageProps[0],
+            'ImageHeight' => $ImageProps[1],
+            'StorageMethod' => 'local',
+            'Path' => $UploadedImagePath,
+            'DateInserted' => Gdn_Format::ToDateTime(),
+            'InsertUserID' => $Session->UserID,
+        );
+
+        $MediaID = $this->ArticleMediaModel->Save($MediaValues);
+
+        // Return path to the uploaded image in format '/articles/year/month/filename.jpg'
+        $JsonData = array(
+            'MediaID' => $MediaID,
+            'Name' => $Basename,
+            'Path' => $UploadedImagePath
+        );
+
+        $JsonReturn = json_encode($JsonData);
+
+        die($JsonReturn);
     }
 
     public function Comment($ArticleID, $ParentArticleCommentID = false) {

@@ -10,7 +10,7 @@ ShowArticlesDashboardMenu($this->RequestMethod);
 $Categories = $this->Data('Categories');
 
 // Open the form.
-echo $this->Form->Open();
+echo $this->Form->Open(array('id' => 'Form_ComposeArticle'));
 echo $this->Form->Errors();
 ?>
     <div>
@@ -57,7 +57,6 @@ echo $this->Form->Errors();
             <?php
             echo $this->Form->Label('Upload an Image', 'UploadImage');
             echo $this->Form->ImageUpload('UploadImage');
-            echo $this->Form->Button('Upload Image');
             ?>
         </div>
 

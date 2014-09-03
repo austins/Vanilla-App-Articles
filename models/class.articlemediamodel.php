@@ -12,6 +12,4 @@ class ArticleMediaModel extends Gdn_Model {
     public function __construct() {
         parent::__construct('ArticleMedia');
     }
-
-
 }

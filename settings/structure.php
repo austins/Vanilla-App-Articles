@@ -81,12 +81,12 @@ $Construct->Table('ArticleMedia');
 $Construct->PrimaryKey('ArticleMediaID')
     ->Column('ArticleID', 'int(11)', true)
     ->Column('Name', 'varchar(255)')
+    ->Column('Path', 'varchar(255)')
     ->Column('Type', 'varchar(128)')
     ->Column('Size', 'int(11)')
     ->Column('ImageWidth', 'usmallint', null)
     ->Column('ImageHeight', 'usmallint', null)
     ->Column('StorageMethod', 'varchar(24)', 'local')
-    ->Column('Path', 'varchar(255)')
     ->Column('DateInserted', 'datetime')
     ->Column('InsertUserID', 'int(11)')
     ->Set($Explicit, $Drop);
