@@ -382,11 +382,11 @@ jQuery(document).ready(function ($) {
         var bodyFormat = $('#Form_Body').attr('Format');
 
         var imageCode = '';
-        switch (bodyFormat) {
-            case 'Markdown':
+        switch (bodyFormat.toLowerCase()) {
+            case 'markdown':
                 imageCode = '![](' + imageUrl + ')';
                 break;
-            case 'BBCode':
+            case 'bbcode':
                 imageCode = '[img]' + imageUrl + '[/img]';
                 break;
             default:
