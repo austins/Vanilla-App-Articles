@@ -13,6 +13,18 @@ class ArticleMediaModel extends Gdn_Model {
         parent::__construct('ArticleMedia');
     }
 
+    public function GetByID($ArticleMediaID) {
+        // Set up the query.
+        $this->SQL->Select('am.*')
+            ->From('ArticleMedia am')
+            ->Where('am.ArticleMediaID', $ArticleMediaID);
+
+        // Fetch data.
+        $Media = $this->SQL->Get()->FirstRow();
+
+        return $Media;
+    }
+
     public function GetByArticle($ArticleID) {
         // Set up the query.
         $this->SQL->Select('am.*')

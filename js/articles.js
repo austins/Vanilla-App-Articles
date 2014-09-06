@@ -432,7 +432,15 @@ jQuery(document).ready(function($) {
     $('.UploadedImageDelete').livequery('click', function(e) {
         e.preventDefault();
 
-        // TODO: UploadedImageDelete JS code.
+        var linkUrl = $(this).attr('href');
+
+        $.ajax({
+            url: linkUrl,
+            success: function(json) {
+                var ArticleMediaID = linkUrl.substring(linkUrl.lastIndexOf('/') + 1);
+                $('#ArticleMedia_' + ArticleMediaID).remove();
+            }
+        });
 
         return false;
     });

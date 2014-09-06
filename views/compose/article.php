@@ -68,11 +68,13 @@ echo $this->Form->Errors();
                         $UploadedImagesResult = $UploadedImages->Result();
 
                         foreach ($UploadedImages as $UploadedImage) {
-                            echo '<div id="ArticleMedia_' . response.ArticleMediaID . '" class="UploadedImageWrap">' .
-                                '<div class="UploadedImage"><img src="' . imagePath . '" alt="" /></div>' .
-                                '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' . imagePath . '">Insert into Post</a>' .
-                                '<br /><a class="UploadedImageDelete" href="' . gdn.url('/articles/compose/deleteimage/'
-                                    . response.ArticleMediaID) . '">Delete</a></div>';
+                            $ImagePath = Url('/uploads' . $UploadedImage->Path);
+
+                            echo '<div id="ArticleMedia_' . $UploadedImage->ArticleMediaID . '" class="UploadedImageWrap">' .
+                                '<div class="UploadedImage"><img src="' . $ImagePath . '" alt="" /></div>' .
+                                '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' . $ImagePath . '">Insert into Post</a>' .
+                                '<br /><a class="UploadedImageDelete" href="' . Url('/articles/compose/deleteimage/'
+                                    . $UploadedImage->ArticleMediaID) . '">Delete</a></div>';
                         }
                     }
                 }

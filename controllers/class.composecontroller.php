@@ -345,7 +345,7 @@ class ComposeController extends Gdn_Controller {
          *  'size' => 15517 (bytes)
          */
         $UploadFieldName = 'UploadImage_New';
-        $ImageData = $_FILES[$UploadFieldName];
+        //$ImageData = $_FILES[$UploadFieldName];
 
         // ArticleID is saved with media model if editing. ArticleID is null if new article.
         // Null ArticleID is replaced by ArticleID when new article is saved.
@@ -417,6 +417,33 @@ class ComposeController extends Gdn_Controller {
         $JsonReturn = json_encode($JsonData);
 
         die($JsonReturn);
+    }
+
+    public function DeleteImage($ArticleMediaID) {
+        if(!is_numeric($ArticleMediaID))
+            throw NotFoundException('Page');
+
+        // Check permission.
+        $Session = Gdn::Session();
+        if (!$Session->CheckPermission('Articles.Articles.Add'))
+            throw PermissionException('Articles.Articles.Add');
+
+        $Media = $this->ArticleMediaModel->GetByID($ArticleMediaID);
+        if(!$Media)
+            throw NotFoundException('Article media');
+
+        $this->_DeliveryMethod = DELIVERY_METHOD_JSON;
+        $this->_DeliveryType = DELIVERY_TYPE_VIEW;
+
+        // Delete the image from the database.
+        $Deleted = $this->ArticleMediaModel->Delete($ArticleMediaID);
+
+        // Delete the image file.
+        $ImagePath = PATH_UPLOADS . DS . GetValue('Path', $Media);
+        if(file_exists($ImagePath))
+            @unlink($ImagePath);
+
+        return $Deleted ? true : false; // $Deleted could be a query result, so just return a boolean.
     }
 
     public function Comment($ArticleID, $ParentArticleCommentID = false) {
