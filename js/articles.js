@@ -364,40 +364,42 @@ jQuery(document).ready(function($) {
     }
 
     var currentArticleID = gdn.definition('ArticleID', null);
-    $('#Form_UploadImage_New').ajaxfileupload({
-        'action': gdn.url('/articles/compose/uploadimage?DeliveryMethod=JSON&DeliveryType=VIEW'),
-        'params': {
-            'ArticleID': currentArticleID
-        },
-        'onComplete': function(response) {
-            $(this).replaceWith($(this).clone(true)); // Reset the file upload field.
+    if ($('#Form_UploadImage_New').length) {
+        $('#Form_UploadImage_New').ajaxfileupload({
+            'action': gdn.url('/articles/compose/uploadimage?DeliveryMethod=JSON&DeliveryType=VIEW'),
+            'params': {
+                'ArticleID': currentArticleID
+            },
+            'onComplete': function(response) {
+                $(this).replaceWith($(this).clone(true)); // Reset the file upload field.
 
-            var imagePath = gdn.url('/uploads' + response.Path);
+                var imagePath = gdn.url('/uploads' + response.Path);
 
-            // Show new image in form.
-            $('#UploadedImages').append('<div id="ArticleMedia_' + response.ArticleMediaID + '" class="UploadedImageWrap">' +
-                '<div class="UploadedImage"><img src="' + imagePath + '" alt="" /></div>' +
-                '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' + imagePath + '">Insert into Post</a>' +
-                '<br /><a class="UploadedImageDelete" href="' + gdn.url('/articles/compose/deleteimage/'
-                + response.ArticleMediaID) + '">Delete</a></div>');
+                // Show new image in form.
+                $('#UploadedImages').append('<div id="ArticleMedia_' + response.ArticleMediaID + '" class="UploadedImageWrap">' +
+                    '<div class="UploadedImage"><img src="' + imagePath + '" alt="" /></div>' +
+                    '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' + imagePath + '">Insert into Post</a>' +
+                    '<br /><a class="UploadedImageDelete" href="' + gdn.url('/articles/compose/deleteimage/'
+                    + response.ArticleMediaID) + '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div>');
 
-            // Add new image to hidden form field to be passed to the controller.
-            var UploadedImageIDs = CreateCustomElement('input', {
-                'type': 'hidden',
-                'name': 'UploadedImageIDs[]',
-                'value': response.ArticleMediaID
-            });
-            $('#Form_ComposeArticle').append(UploadedImageIDs);
+                // Add new image to hidden form field to be passed to the controller.
+                var UploadedImageIDs = CreateCustomElement('input', {
+                    'type': 'hidden',
+                    'name': 'UploadedImageIDs[]',
+                    'value': response.ArticleMediaID
+                });
+                $('#Form_ComposeArticle').append(UploadedImageIDs);
 
-            $('.TinyProgress').remove();
-        },
-        'onStart': function() {
-            $(this).after('<span class="TinyProgress">&#160;</span>');
-        },
-        'onCancel': function() {
-            //console.log('no file selected');
-        }
-    });
+                $('.TinyProgress').remove();
+            },
+            'onStart': function() {
+                $(this).after('<span class="TinyProgress">&#160;</span>');
+            },
+            'onCancel': function() {
+                //console.log('no file selected');
+            }
+        });
+    }
 
     $('.UploadedImageInsert').livequery('click', function(e) {
         e.preventDefault();
@@ -429,19 +431,16 @@ jQuery(document).ready(function($) {
         return false;
     });
 
-    $('.UploadedImageDelete').livequery('click', function(e) {
-        e.preventDefault();
-
-        var linkUrl = $(this).attr('href');
-
-        $.ajax({
-            url: linkUrl,
-            success: function(json) {
-                var ArticleMediaID = linkUrl.substring(linkUrl.lastIndexOf('/') + 1);
-                $('#ArticleMedia_' + ArticleMediaID).remove();
-            }
-        });
-
-        return false;
+    $('a.UploadedImageDelete').popup({
+        confirm: true,
+        confirmHeading: gdn.definition('ConfirmDeleteImageHeading', 'Delete Image'),
+        confirmText: gdn.definition('ConfirmDeleteImageText', 'Are you sure you want to delete this image?'),
+        followConfirm: false,
+        deliveryType: 'BOOL',
+        afterConfirm: function(json, sender) {
+            var linkUrl = jQuery(sender).attr('href').split('?')[0]; // Retrieve part of URL without query string.
+            var ArticleMediaID = linkUrl.substring(linkUrl.lastIndexOf('/') + 1);
+            $('#ArticleMedia_' + ArticleMediaID).remove();
+        }
     });
 });

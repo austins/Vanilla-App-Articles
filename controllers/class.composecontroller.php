@@ -420,7 +420,8 @@ class ComposeController extends Gdn_Controller {
     }
 
     public function DeleteImage($ArticleMediaID) {
-        if(!is_numeric($ArticleMediaID))
+        if(!is_numeric($ArticleMediaID)
+                || ($this->_DeliveryMethod != DELIVERY_METHOD_JSON) || ($this->_DeliveryType != DELIVERY_TYPE_BOOL))
             throw NotFoundException('Page');
 
         // Check permission.
@@ -433,7 +434,7 @@ class ComposeController extends Gdn_Controller {
             throw NotFoundException('Article media');
 
         $this->_DeliveryMethod = DELIVERY_METHOD_JSON;
-        $this->_DeliveryType = DELIVERY_TYPE_VIEW;
+        $this->_DeliveryType = DELIVERY_TYPE_BOOL;
 
         // Delete the image from the database.
         $Deleted = $this->ArticleMediaModel->Delete($ArticleMediaID);
@@ -443,7 +444,7 @@ class ComposeController extends Gdn_Controller {
         if(file_exists($ImagePath))
             @unlink($ImagePath);
 
-        return $Deleted ? true : false; // $Deleted could be a query result, so just return a boolean.
+        $this->Render('Blank', 'Utility', 'Dashboard');
     }
 
     public function Comment($ArticleID, $ParentArticleCommentID = false) {

@@ -74,7 +74,7 @@ echo $this->Form->Errors();
                                 '<div class="UploadedImage"><img src="' . $ImagePath . '" alt="" /></div>' .
                                 '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' . $ImagePath . '">Insert into Post</a>' .
                                 '<br /><a class="UploadedImageDelete" href="' . Url('/articles/compose/deleteimage/'
-                                    . $UploadedImage->ArticleMediaID) . '">Delete</a></div>';
+                                    . $UploadedImage->ArticleMediaID) . '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div>';
                         }
                     }
                 }
