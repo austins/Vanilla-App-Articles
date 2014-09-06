@@ -147,3 +147,8 @@ body.Articles.category .Article .Options > .ToggleFlyout.Open {
 #articles_compose_editarticle .P label.RadioLabel {
     font-weight: normal;
 }
+
+#UploadedImages .UploadedImageWrap {
+    display: inline-block;
+    margin-right: 20px;
+}

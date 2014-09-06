@@ -173,6 +173,7 @@ class ComposeController extends Gdn_Controller {
             // If editing...
             if ($Article) {
                 $this->AddDefinition('ArticleID', $Article->ArticleID);
+                $this->SetData('Article', $Article, true);
                 $this->Form->SetData($Article);
 
                 $this->Form->AddHidden('UrlCodeIsDefined', '1');
@@ -274,6 +275,13 @@ class ComposeController extends Gdn_Controller {
                         if (($InitialStatus != ArticleModel::STATUS_PUBLISHED)
                                 && ($NewArticle->Status == ArticleModel::STATUS_PUBLISHED)) {
                             $this->ArticleModel->SetField($ArticleID, 'DateInserted', Gdn_Format::ToDateTime());
+                        }
+                    } else {
+                        // If not editing.
+                        // Assign the new article's ID to any uploaded images.
+                        $UploadedImageIDs = $FormValues['UploadedImageIDs'];
+                        foreach($UploadedImageIDs as $ArticleMediaID) {
+                            $this->ArticleMediaModel->SetField($ArticleMediaID, 'ArticleID', $ArticleID);
                         }
                     }
 

@@ -1,6 +1,6 @@
-jQuery(document).ready(function ($) {
+jQuery(document).ready(function($) {
     // Map plain text category to url code
-    $("#Form_Name").keyup(function (event) {
+    $("#Form_Name").keyup(function(event) {
         if ($('#Form_UrlCodeIsDefined').val() == '0') {
             $('#UrlCode').show();
             var val = $(this).val().replace(/[ \/\\&.?;,<>'"]+/g, '-');
@@ -11,13 +11,13 @@ jQuery(document).ready(function ($) {
     });
     // Make sure not to override any values set by the user.
     $('#UrlCode').find('span').text($('#UrlCode').find('input').val());
-    $("#Form_UrlCode").focus(function () {
+    $("#Form_UrlCode").focus(function() {
         $('#Form_UrlCodeIsDefined').val('1')
     });
     $('#UrlCode input, #UrlCode a.Save').hide();
 
     // Reveal input when "change" button is clicked
-    $('#UrlCode a, #UrlCode span').click(function () {
+    $('#UrlCode a, #UrlCode span').click(function() {
         $('#UrlCode').find('input,span,a').toggle();
         $('#UrlCode').find('span').text($('#UrlCode').find('input').val());
         $('#UrlCode').find('input').focus();
@@ -26,7 +26,7 @@ jQuery(document).ready(function ($) {
 
     // /settings/articles/deletecategory/
     // Hide/reveal the delete options when the DeleteArticles checkbox is un/checked.
-    $('[name$=DeleteArticles]').click(function () {
+    $('[name$=DeleteArticles]').click(function() {
         if ($(this).attr('checked')) {
             $('#ReplacementCategory,#ReplacementWarning').slideDown('fast');
             $('#DeleteArticles').slideUp('fast');
@@ -46,7 +46,7 @@ jQuery(document).ready(function ($) {
     }
 
     // Enable multicomplete on selected inputs
-    $('.MultiComplete').livequery(function () {
+    $('.MultiComplete').livequery(function() {
         $(this).autocomplete(
             gdn.url('/dashboard/user/autocomplete/'),
             {
@@ -60,13 +60,13 @@ jQuery(document).ready(function ($) {
 
     // Auto size text boxes.
     if ($.autogrow)
-        $('textarea.TextBox').livequery(function () {
+        $('textarea.TextBox').livequery(function() {
             $(this).autogrow();
         });
 
     // Threaded comment replies.
     // Hide/reveal the comments when the comment link is clicked
-    $('a.ReplyLink').click(function (e) {
+    $('a.ReplyLink').click(function(e) {
         e.preventDefault();
 
         var commentBox = $('#CommentBox');
@@ -163,7 +163,9 @@ jQuery(document).ready(function ($) {
         frm.find('textarea').val('');
         frm.find('input:hidden[name$=ArticleCommentID]').val('');
         frm.find('div.Errors').remove();
-        $('div.Information').fadeOut('fast', function() {$(this).remove();});
+        $('div.Information').fadeOut('fast', function() {
+            $(this).remove();
+        });
         $(sender).closest('form').trigger('clearCommentForm');
     }
 
@@ -171,7 +173,9 @@ jQuery(document).ready(function ($) {
     if ($.morepager)
         $('.MorePager').morepager({
             pageContainerSelector: 'ul.Comments',
-            afterPageLoaded: function() {$(document).trigger('CommentPagingComplete');}
+            afterPageLoaded: function() {
+                $(document).trigger('CommentPagingComplete');
+            }
         });
 
     // Hijack comment form button clicks.
@@ -193,14 +197,14 @@ jQuery(document).ready(function ($) {
         // Post the form, and append the results to #Discussion, and erase the textbox
         var postValues = $(frm).serialize();
         postValues += '&DeliveryType=VIEW&DeliveryMethod=JSON'; // DELIVERY_TYPE_VIEW
-        postValues += '&Type='+type;
+        postValues += '&Type=' + type;
         var articleID = $(frm).find('[name$=ArticleID]');
         articleID = articleID.length > 0 ? articleID.val() : 0;
         var tKey = $(frm).find('[name$=TransientKey]');
         var prefix = tKey.attr('name').replace('TransientKey', '');
         // Get the last comment id on the page
         var comments = $('ul.Comments li.ItemComment');
-        var lastComment = $(comments).get(comments.length-1);
+        var lastComment = $(comments).get(comments.length - 1);
         var lastArticleCommentID = $(lastComment).attr('id');
         if (lastArticleCommentID)
             lastArticleCommentID = lastArticleCommentID.indexOf('Article_') == 0 ? 0 : lastArticleCommentID.replace('Comment_', '');
@@ -215,7 +219,7 @@ jQuery(document).ready(function ($) {
             action += '&';
 
         if (articleID > 0) {
-            action += 'articleid='+articleID;
+            action += 'articleid=' + articleID;
         }
 
         $(frm).find(':submit').attr('disabled', 'disabled');
@@ -304,7 +308,7 @@ jQuery(document).ready(function ($) {
                     // Set the discussionid on the form in case the discussion was created by adding the last comment
                     var articleID = $(frm).find('[name$=ArticleID]');
                     if (articleID.length == 0 && json.ArticleID) {
-                        $(frm).append('<input type="hidden" name="'+prefix+'ArticleID" value="'+json.ArticleID+'">');
+                        $(frm).append('<input type="hidden" name="' + prefix + 'ArticleID" value="' + json.ArticleID + '">');
                     }
 
                     // Let listeners know that the comment was added.
@@ -339,13 +343,26 @@ jQuery(document).ready(function ($) {
                 $.popup({}, json.ErrorMessage);
             } else {
                 // Remove the affected row
-                $(row).slideUp('fast', function() {$(this).remove();});
+                $(row).slideUp('fast', function() {
+                    $(this).remove();
+                });
                 gdn.processTargets(json.Targets);
             }
         }
     });
 
     // Article media: image upload events.
+    function CreateCustomElement(ElementType, SetOptions) {
+        var Element = document.createElement(ElementType);
+
+        for (var prop in SetOptions) {
+            var propval = SetOptions[prop];
+            Element.setAttribute(prop, propval);
+        }
+
+        return Element;
+    }
+
     var currentArticleID = gdn.definition('ArticleID', null);
     $('#Form_UploadImage_New').ajaxfileupload({
         'action': gdn.url('/articles/compose/uploadimage?DeliveryMethod=JSON&DeliveryType=VIEW'),
@@ -353,16 +370,24 @@ jQuery(document).ready(function ($) {
             'ArticleID': currentArticleID
         },
         'onComplete': function(response) {
-            $(this).replaceWith($(this).clone()); // Reset the file upload field.
+            $(this).replaceWith($(this).clone(true)); // Reset the file upload field.
 
-            var frm = $(this).closest('form');
             var imagePath = gdn.url('/uploads' + response.Path);
 
+            // Show new image in form.
             $('#UploadedImages').append('<div id="ArticleMedia_' + response.ArticleMediaID + '" class="UploadedImageWrap">' +
                 '<div class="UploadedImage"><img src="' + imagePath + '" alt="" /></div>' +
                 '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' + imagePath + '">Insert into Post</a>' +
                 '<br /><a class="UploadedImageDelete" href="' + gdn.url('/articles/compose/deleteimage/'
                 + response.ArticleMediaID) + '">Delete</a></div>');
+
+            // Add new image to hidden form field to be passed to the controller.
+            var UploadedImageIDs = CreateCustomElement('input', {
+                'type': 'hidden',
+                'name': 'UploadedImageIDs[]',
+                'value': response.ArticleMediaID
+            });
+            $('#Form_ComposeArticle').append(UploadedImageIDs);
 
             $('.TinyProgress').remove();
         },
