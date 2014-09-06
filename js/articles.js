@@ -346,19 +346,25 @@ jQuery(document).ready(function ($) {
     });
 
     // Article media: image upload events.
-    var currentArticleID = $('#Form_ComposeArticle').find('input:hidden[name$=ArticleID]');
+    var currentArticleID = gdn.definition('ArticleID', null);
     $('#Form_UploadImage_New').ajaxfileupload({
         'action': gdn.url('/articles/compose/uploadimage?DeliveryMethod=JSON&DeliveryType=VIEW'),
         'params': {
             'ArticleID': currentArticleID
         },
         'onComplete': function(response) {
+            $(this).replaceWith($(this).clone()); // Reset the file upload field.
+
             var frm = $(this).closest('form');
             var imagePath = gdn.url('/uploads' + response.Path);
 
-            $('.TinyProgress').remove();
+            $('#UploadedImages').append('<div id="ArticleMedia_' + response.ArticleMediaID + '" class="UploadedImageWrap">' +
+                '<div class="UploadedImage"><img src="' + imagePath + '" alt="" /></div>' +
+                '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' + imagePath + '">Insert into Post</a>' +
+                '<br /><a class="UploadedImageDelete" href="' + gdn.url('/articles/compose/deleteimage/'
+                + response.ArticleMediaID) + '">Delete</a></div>');
 
-            console.log(response); // TODO: debug and test
+            $('.TinyProgress').remove();
         },
         'onStart': function() {
             $(this).after('<span class="TinyProgress">&#160;</span>');
@@ -366,5 +372,43 @@ jQuery(document).ready(function ($) {
         'onCancel': function() {
             //console.log('no file selected');
         }
+    });
+
+    $('.UploadedImageInsert').livequery('click', function(e) {
+        e.preventDefault();
+
+        var linkUrl = $(this).attr('href');
+        var imageUrl = window.location.protocol + '//' + location.host + '/' + linkUrl;
+        var bodyFormat = $('#Form_Body').attr('Format');
+
+        var imageCode = '';
+        switch (bodyFormat) {
+            case 'Markdown':
+                imageCode = '![](' + imageUrl + ')';
+                break;
+            case 'BBCode':
+                imageCode = '[img]' + imageUrl + '[/img]';
+                break;
+            default:
+                imageCode = '<img src="' + imageUrl + '" alt="" />';
+                break;
+        }
+
+        var FormBodyVal = $('#Form_Body').val();
+
+        $('#Form_Body').val(FormBodyVal + imageCode);
+
+        if ($('#Form_Body').data('wysihtml5'))
+            $('#Form_Body').data('wysihtml5').editor.setValue(FormBodyVal + imageCode); // Wysihtml5 support.
+
+        return false;
+    });
+
+    $('.UploadedImageDelete').livequery('click', function(e) {
+        e.preventDefault();
+
+        // TODO: UploadedImageDelete JS code.
+
+        return false;
     });
 });

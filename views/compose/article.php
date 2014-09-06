@@ -58,6 +58,24 @@ echo $this->Form->Errors();
             echo $this->Form->Label('Upload an Image', 'UploadImage');
             echo $this->Form->ImageUpload('UploadImage');
             ?>
+
+            <div id="UploadedImages">
+                <?php
+                $UploadedImages = $this->Data('UploadedImages');
+
+                if ($UploadedImages->NumRows() > 0) {
+                    $UploadedImagesResult = $UploadedImages->Result();
+
+                    foreach ($UploadedImages as $UploadedImage) {
+                        echo '<div id="ArticleMedia_' . response.ArticleMediaID . '" class="UploadedImageWrap">' .
+                            '<div class="UploadedImage"><img src="' . imagePath . '" alt="" /></div>' .
+                            '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' . imagePath . '">Insert into Post</a>' .
+                            '<br /><a class="UploadedImageDelete" href="' . gdn.url('/articles/compose/deleteimage/'
+                                . response.ArticleMediaID) . '">Delete</a></div>';
+                    }
+                }
+                ?>
+            </div>
         </div>
 
         <div class="P">

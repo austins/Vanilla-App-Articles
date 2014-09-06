@@ -172,6 +172,7 @@ class ComposeController extends Gdn_Controller {
         if (!$this->Form->AuthenticatedPostBack()) {
             // If editing...
             if ($Article) {
+                $this->AddDefinition('ArticleID', $Article->ArticleID);
                 $this->Form->SetData($Article);
 
                 $this->Form->AddHidden('UrlCodeIsDefined', '1');
@@ -182,6 +183,9 @@ class ComposeController extends Gdn_Controller {
                 // If the user with AttributionUserID doesn't exist.
                 if (!$Author)
                     $Author = $UserModel->GetID($Article->InsertUserID);
+
+                $UploadedImages = $this->ArticleMediaModel->GetByArticle($Article->ArticleID);
+                $this->SetData('UploadedImages', $UploadedImages, true);
             } else {
                 // If not editing...
                 $this->Form->AddHidden('UrlCodeIsDefined', '0');
@@ -393,11 +397,11 @@ class ComposeController extends Gdn_Controller {
             'InsertUserID' => $Session->UserID,
         );
 
-        $MediaID = $this->ArticleMediaModel->Save($MediaValues);
+        $ArticleMediaID = $this->ArticleMediaModel->Save($MediaValues);
 
         // Return path to the uploaded image in format '/articles/year/month/filename.jpg'
         $JsonData = array(
-            'MediaID' => $MediaID,
+            'ArticleMediaID' => $ArticleMediaID,
             'Name' => $Basename,
             'Path' => $UploadedImagePath
         );
