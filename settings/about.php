@@ -5,7 +5,7 @@ if (!defined('APPLICATION'))
 // An associative array of information about this application.
 $ApplicationInfo['Articles'] = array(
     'Description' => 'Provides a way to create articles.',
-    'Version' => '0.0.0.1',
+    'Version' => '0.0.1',
     'Author' => 'Shadowdare',
     'AuthorUrl' => 'http://vanillaforums.org/profile/addons/16014/Shadowdare',
     'Url' => 'http://vanillaforums.org/addon/articles-application',
