@@ -185,10 +185,10 @@ class ComposeController extends Gdn_Controller {
                 if (!$Author)
                     $Author = $UserModel->GetID($Article->InsertUserID);
 
-                $UploadedImages = $this->ArticleMediaModel->GetByArticle($Article->ArticleID);
+                $UploadedImages = $this->ArticleMediaModel->GetByArticleID($Article->ArticleID);
                 $this->SetData('UploadedImages', $UploadedImages, true);
 
-                $UploadedThumbnail = $this->ArticleMediaModel->GetThumbnailByArticle($Article->ArticleID);
+                $UploadedThumbnail = $this->ArticleMediaModel->GetThumbnailByArticleID($Article->ArticleID);
                 $this->SetData('UploadedThumbnail', $UploadedThumbnail, true);
             } else {
                 // If not editing...

@@ -58,7 +58,7 @@ class ArticleCommentModel extends Gdn_Model {
         if (!is_numeric($ArticleID))
             throw new InvalidArgumentException('The article ID must be a numeric value.');
 
-        $Wheres = array('ac.ArticleID', $ArticleID);
+        $Wheres = array('ac.ArticleID' => $ArticleID);
 
         $Comments = $this->Get($Offset, $Limit, $Wheres);
 

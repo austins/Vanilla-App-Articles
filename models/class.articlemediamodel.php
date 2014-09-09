@@ -25,7 +25,7 @@ class ArticleMediaModel extends Gdn_Model {
         return $Media;
     }
 
-    public function GetByArticle($ArticleID) {
+    public function GetByArticleID($ArticleID) {
         // Set up the query.
         $this->SQL->Select('am.*')
             ->From('ArticleMedia am')
@@ -38,7 +38,7 @@ class ArticleMediaModel extends Gdn_Model {
         return $Media;
     }
 
-    public function GetThumbnailByArticle($ArticleID) {
+    public function GetThumbnailByArticleID($ArticleID) {
         // Set up the query.
         $this->SQL->Select('am.*')
             ->From('ArticleMedia am')

@@ -72,8 +72,36 @@ class ArticleController extends Gdn_Controller {
         // Get the category.
         $this->Category = $this->ArticleCategoryModel->GetByID($this->Article->ArticleCategoryID);
 
+        // Prepare comment arguments.
+        // Define the query offset and limit.
+        $Limit = C('Articles.Comments.PerPage', 30);
+        list($Offset, $Limit) = OffsetLimit($Page, $Limit);
+
+        $PageNumber = PageNumber($Offset, $Limit);
+        $this->SetData('Page', $PageNumber);
+
+        // Build a pager
+        $PagerFactory = new Gdn_PagerFactory();
+        $this->EventArguments['PagerType'] = 'Pager';
+        $this->FireEvent('BeforeBuildPager');
+        $this->Pager = $PagerFactory->GetPager($this->EventArguments['PagerType'], $this);
+        $this->Pager->ClientID = 'Pager';
+
+        $this->Pager->Configure(
+            $this->Offset,
+            $Limit,
+            $this->Article->CountComments,
+            array('ArticleUrl')
+        );
+        $this->Pager->Record = $this->Article;
+        PagerModule::Current($this->Pager);
+        $this->FireEvent('AfterBuildPager');
+
+        // Set canonical URL.
+        $this->CanonicalUrl(ArticleUrl($this->Article, PageNumber($Offset, $Limit, 0, false)));
+
         // Get the comments.
-        $this->Comments = $this->ArticleCommentModel->GetByArticleID($this->Article->ArticleID);
+        $this->Comments = $this->ArticleCommentModel->GetByArticleID($this->Article->ArticleID, $Offset, $Limit);
 
         // Validate slugs.
         $DateInsertedYear = Gdn_Format::Date($this->Article->DateInserted, '%Y');
@@ -97,8 +125,6 @@ class ArticleController extends Gdn_Controller {
         $this->View = 'index';
 
         $this->Render();
-
-        // TODO: PageNumber logic. Canonical URL.
     }
 
     protected function AddMetaTags() {
@@ -129,7 +155,7 @@ class ArticleController extends Gdn_Controller {
         $HeadModule->AddTag('meta', array('property' => 'article:section', 'content' => $this->Category->Name));
 
         // Image meta info
-        $Thumbnail = $this->ArticleMediaModel->GetThumbnailByArticle($Article->ArticleID);
+        $Thumbnail = $this->ArticleMediaModel->GetThumbnailByArticleID($Article->ArticleID);
         if ($Thumbnail) {
             $HeadModule->AddTag('meta', array('property' => 'og:image', 'content' => Url('/uploads' . $Thumbnail->Path, true)));
             $HeadModule->AddTag('meta', array('property' => 'og:image:width', 'content' => $Thumbnail->ImageWidth));

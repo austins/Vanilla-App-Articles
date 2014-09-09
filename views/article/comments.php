@@ -10,6 +10,15 @@ $CurrentOffset = 0;
 if ($this->Comments->NumRows() > 0):
     ?>
     <section id="Comments" class="DataBox DataBox-Comments">
+        <?php
+        // Pager
+        $this->Pager->Wrapper = '<span %1$s>%2$s</span>';
+        echo '<span class="BeforeCommentHeading">';
+        $this->FireEvent('BeforeCommentHeading');
+        echo $this->Pager->ToString('less');
+        echo '</span>';
+        ?>
+
         <h2 class="CommentHeading">Comments</h2>
         <ul class="MessageList DataList Comments">
             <?php
@@ -20,8 +29,9 @@ if ($this->Comments->NumRows() > 0):
                 if (is_numeric($Comment->InsertUserID))
                     $User = Gdn::UserModel()->GetID($Comment->InsertUserID);
 
-                $ParentArticleCommentID = is_numeric($Comment->ParentArticleCommentID) ? $Comment->ParentArticleCommentID : false;
-                if($ParentArticleCommentID)
+                $ParentArticleCommentID = is_numeric($Comment->ParentArticleCommentID) ?
+                    $Comment->ParentArticleCommentID : false;
+                if ($ParentArticleCommentID)
                     $CssClass .= ' ItemCommentReply';
                 ?>
                 <li class="<?php echo $CssClass; ?>" id="Comment_<?php echo $Comment->ArticleCommentID; ?>">
@@ -84,10 +94,24 @@ if ($this->Comments->NumRows() > 0):
                         </div>
                     </div>
                 </li>
-            <?php 
-              $CurrentOffset++;
+                <?php
+                $CurrentOffset++;
             } ?>
         </ul>
+        <?php
+        // Pager
+        $this->FireEvent('AfterComments');
+        if ($this->Pager->LastPage()) {
+            $LastCommentID = $this->AddDefinition('LastCommentID');
+            if (!$LastCommentID || $this->Data('Article')->LastCommentID > $LastCommentID)
+                $this->AddDefinition('LastCommentID', (int)$this->Data('Article')->LastCommentID);
+        }
+
+        echo '<div class="P PagerWrap">';
+        $this->Pager->Wrapper = '<div %1$s>%2$s</div>';
+        echo $this->Pager->ToString('more');
+        echo '</div>';
+        ?>
     </section>
 <?php
 endif;

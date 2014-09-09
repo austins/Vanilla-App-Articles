@@ -60,13 +60,13 @@ $Construct->PrimaryKey('ArticleCommentID')
     ->Column('Format', 'varchar(20)', true)
     ->Column('DateInserted', 'datetime', false, array('index.1', 'index'))
     ->Column('DateUpdated', 'datetime', true)
-    ->Column('ParentArticleCommentID', 'int', true)
     ->Column('InsertUserID', 'int', true)
     ->Column('UpdateUserID', 'int', true)
     ->Column('InsertIPAddress', 'varchar(39)', true)
     ->Column('UpdateIPAddress', 'varchar(39)', true)
     ->Column('GuestName', 'varchar(50)', true)
     ->Column('GuestEmail', 'varchar(200)', true)
+    ->Column('ParentArticleCommentID', 'int', true)
     ->Set($Explicit, $Drop);
 
 // Add extra columns to user table for tracking articles and comments.

@@ -30,7 +30,7 @@ if (count($Articles) == 0) {
         $CommentCount = ($Article->CountArticleComments == 0) ? 'Comments' :
             Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
 
-        $Thumbnail = $this->ArticleMediaModel->GetThumbnailByArticle($Article->ArticleID);
+        $Thumbnail = $this->ArticleMediaModel->GetThumbnailByArticleID($Article->ArticleID);
         ?>
         <article id="Article_<?php echo $Article->ArticleID; ?>" class="Article">
             <?php ShowArticleOptions($Article); ?>
