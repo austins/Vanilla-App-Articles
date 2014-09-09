@@ -364,6 +364,8 @@ jQuery(document).ready(function($) {
     }
 
     var currentArticleID = gdn.definition('ArticleID', null);
+
+    // Upload an image.
     if ($('#Form_UploadImage_New').length) {
         $('#Form_UploadImage_New').ajaxfileupload({
             'action': gdn.url('/articles/compose/uploadimage?DeliveryMethod=JSON&DeliveryType=VIEW'),
@@ -389,6 +391,45 @@ jQuery(document).ready(function($) {
                     'value': response.ArticleMediaID
                 });
                 $('#Form_ComposeArticle').append(UploadedImageIDs);
+
+                $('.TinyProgress').remove();
+            },
+            'onStart': function() {
+                $(this).after('<span class="TinyProgress">&#160;</span>');
+            },
+            'onCancel': function() {
+                //console.log('no file selected');
+            }
+        });
+    }
+
+    // Upload a thumbnail.
+    if ($('#Form_UploadThumbnail_New').length) {
+        $('#Form_UploadThumbnail_New').ajaxfileupload({
+            'action': gdn.url('/articles/compose/uploadimage?DeliveryMethod=JSON&DeliveryType=VIEW'),
+            'params': {
+                'ArticleID': currentArticleID,
+                'IsThumbnail': true
+            },
+            'onComplete': function(response) {
+                $(this).replaceWith($(this).clone(true)); // Reset the file upload field.
+                $(this).hide();
+
+                var imagePath = gdn.url('/uploads' + response.Path);
+
+                // Show new image in form.
+                $('#UploadedThumbnail').append('<div id="ArticleMedia_' + response.ArticleMediaID + '" class="UploadedImageWrap">' +
+                    '<div class="UploadedImage"><img src="' + imagePath + '" alt="" /></div>' +
+                    '<div class="UploadedImageActions"><a class="UploadedImageDelete" href="' + gdn.url('/articles/compose/deleteimage/'
+                    + response.ArticleMediaID) + '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div>');
+
+                // Add new image to hidden form field to be passed to the controller.
+                var UploadedThumbnailID = CreateCustomElement('input', {
+                    'type': 'hidden',
+                    'name': 'UploadedThumbnailID',
+                    'value': response.ArticleMediaID
+                });
+                $('#Form_ComposeArticle').append(UploadedThumbnailID);
 
                 $('.TinyProgress').remove();
             },
@@ -441,6 +482,11 @@ jQuery(document).ready(function($) {
             var linkUrl = jQuery(sender).attr('href').split('?')[0]; // Retrieve part of URL without query string.
             var ArticleMediaID = linkUrl.substring(linkUrl.lastIndexOf('/') + 1);
             $('#ArticleMedia_' + ArticleMediaID).remove();
+
+            if ($(this).parent().attr('id') == '#UploadedThumbnail') {
+                $('#UploadedThumbnailID').remove();
+                $('#Form_UploadThumbnail_New').show();
+            }
         }
     });
 });

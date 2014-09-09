@@ -9,7 +9,7 @@ class ArticleController extends Gdn_Controller {
     /**
      * Models to include.
      */
-    public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'ArticleCommentModel', 'Form');
+    public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'ArticleCommentModel', 'ArticleMediaModel', 'Form');
 
     public $Article = false;
     protected $Category = false;
@@ -88,52 +88,58 @@ class ArticleController extends Gdn_Controller {
 
         // Add the open graph tags
         $this->AddMetaTags();
-        
+
         // Set up comment form.
         $this->Form->SetModel($this->ArticleCommentModel);
         $this->Form->Action = Url('/compose/comment/' . $this->Article->ArticleID);
         $this->Form->AddHidden('ArticleID', $this->Article->ArticleID);
 
         $this->View = 'index';
-        
+
         $this->Render();
 
         // TODO: PageNumber logic. Canonical URL.
     }
-    
-    protected function AddMetaTags() {
-      $HeadModule =& $this->Head;
-      $Article = $this->Article;
 
-      $HeadModule->AddTag('meta', array('property' => 'og:type', 'content' => 'article'));
-      
-      if($Article->Excerpt != '') {
-        $this->Description(Gdn_Format::To($Article->Excerpt, $Article->Format));
-      }
-      else {
-        $this->Description(SliceParagraph(Gdn_Format::PlainText($Article->Body, $Article->Format), C('Articles.Excerpt.MaxLength')));
-      }
-      
-      $HeadModule->AddTag('meta', array('property' => 'article:published_time', 'content' => date(DATE_ISO8601, strtotime($Article->DateInserted))));
-      if($Article->DateUpdated) {
-        $HeadModule->AddTag('meta', array('property' => 'article:modified_time', 'content' => date(DATE_ISO8601, strtotime($Article->DateUpdated))));
-      }
-      
-      // TODO: Add expiration date meta
-      // $HeadModule->AddTag('meta', array('property' => 'article:expiration_time', 'content' => $Article->DateExpired));
-      
-      $HeadModule->AddTag('meta', array('property' => 'article:author', 'content' => Url('/profile/' . $Article->AuthorName, TRUE)));
-      $HeadModule->AddTag('meta', array('property' => 'article:section', 'content' => $this->Category->Name));
-      
-      // TODO: Add in image meta info
-      // $HeadModule->AddTag('meta', array('property' => 'og:image', 'content' => $Article->Photo));
-      // $HeadModule->AddTag('meta', array('property' => 'og:image:width', 'content' => $Article->PhotoWidth));
-      // $HeadModule->AddTag('meta', array('property' => 'og:image:height', 'content' => $Article->PhotoHeight));
-      
-      // TODO: Add article tags
-      // foreach($Article->Tags as $Tag) {
-      //   $HeadModule->AddTag('meta', array('property' => 'article:tag', 'content' => $Tag));
-      // }
+    protected function AddMetaTags() {
+        $HeadModule =& $this->Head;
+        $Article = $this->Article;
+
+        $HeadModule->AddTag('meta', array('property' => 'og:type', 'content' => 'article'));
+
+        if ($Article->Excerpt != '') {
+            $this->Description(Gdn_Format::To($Article->Excerpt, $Article->Format));
+        } else {
+            $this->Description(SliceParagraph(Gdn_Format::PlainText($Article->Body, $Article->Format),
+                C('Articles.Excerpt.MaxLength')));
+        }
+
+        $HeadModule->AddTag('meta', array('property' => 'article:published_time',
+            'content' => date(DATE_ISO8601, strtotime($Article->DateInserted))));
+        if ($Article->DateUpdated) {
+            $HeadModule->AddTag('meta', array('property' => 'article:modified_time',
+                'content' => date(DATE_ISO8601, strtotime($Article->DateUpdated))));
+        }
+
+        // TODO: Add expiration date meta (maybe)
+        // $HeadModule->AddTag('meta', array('property' => 'article:expiration_time', 'content' => $Article->DateExpired));
+
+        $HeadModule->AddTag('meta',
+            array('property' => 'article:author', 'content' => Url('/profile/' . $Article->AuthorName, true)));
+        $HeadModule->AddTag('meta', array('property' => 'article:section', 'content' => $this->Category->Name));
+
+        // Image meta info
+        $Thumbnail = $this->ArticleMediaModel->GetThumbnailByArticle($Article->ArticleID);
+        if ($Thumbnail) {
+            $HeadModule->AddTag('meta', array('property' => 'og:image', 'content' => Url('/uploads' . $Thumbnail->Path, true)));
+            $HeadModule->AddTag('meta', array('property' => 'og:image:width', 'content' => $Thumbnail->ImageWidth));
+            $HeadModule->AddTag('meta', array('property' => 'og:image:height', 'content' => $Thumbnail->ImageHeight));
+        }
+
+        // TODO: Add article tags (maybe)
+        // foreach($Article->Tags as $Tag) {
+        //   $HeadModule->AddTag('meta', array('property' => 'article:tag', 'content' => $Tag));
+        // }
     }
 
     private function SendOptions($Article) {

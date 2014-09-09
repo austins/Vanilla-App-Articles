@@ -61,6 +61,16 @@ body.Articles.Compose #Content {
     margin-bottom: 8px;
 }
 
+.Article {
+    position: relative;
+}
+
+.ArticleThumbnail {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
 .Meta-Article {
     color: #666;
     font-size: 11px;
@@ -148,7 +158,8 @@ body.Articles.category .Article .Options > .ToggleFlyout.Open {
     font-weight: normal;
 }
 
-#UploadedImages .UploadedImageWrap {
+#UploadedImages .UploadedImageWrap,
+#UploadedThumbnail .UploadedImageWrap{
     display: inline-block;
     margin-right: 20px;
 }

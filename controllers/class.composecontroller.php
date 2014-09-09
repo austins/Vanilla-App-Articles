@@ -187,6 +187,9 @@ class ComposeController extends Gdn_Controller {
 
                 $UploadedImages = $this->ArticleMediaModel->GetByArticle($Article->ArticleID);
                 $this->SetData('UploadedImages', $UploadedImages, true);
+
+                $UploadedThumbnail = $this->ArticleMediaModel->GetThumbnailByArticle($Article->ArticleID);
+                $this->SetData('UploadedThumbnail', $UploadedThumbnail, true);
             } else {
                 // If not editing...
                 $this->Form->AddHidden('UrlCodeIsDefined', '0');
@@ -283,6 +286,10 @@ class ComposeController extends Gdn_Controller {
                         foreach($UploadedImageIDs as $ArticleMediaID) {
                             $this->ArticleMediaModel->SetField($ArticleMediaID, 'ArticleID', $ArticleID);
                         }
+
+                        $UploadedThumbnailID = (int)$FormValues['UploadedThumbnailID'];
+                        if ($UploadedThumbnailID > 0)
+                            $this->ArticleMediaModel->SetField($UploadedThumbnailID, 'ArticleID', $ArticleID);
                     }
 
                     // Redirect to the article.
@@ -336,6 +343,12 @@ class ComposeController extends Gdn_Controller {
         $this->DeliveryMethod(DELIVERY_METHOD_JSON);
         $this->DeliveryType(DELIVERY_TYPE_VIEW);
 
+        // ArticleID is saved with media model if editing. ArticleID is null if new article.
+        // Null ArticleID is replaced by ArticleID when new article is saved.
+        $ArticleID = $_POST['ArticleID'];
+        if (!is_numeric($ArticleID) || ($ArticleID <= 0))
+            $ArticleID = null;
+
         /*
          * $_FILES['UploadImage_New'] array format:
          *  'name' => 'example.jpg',
@@ -344,16 +357,14 @@ class ComposeController extends Gdn_Controller {
          *  'error' => 0 (valid data)
          *  'size' => 15517 (bytes)
          */
-        $UploadFieldName = 'UploadImage_New';
         //$ImageData = $_FILES[$UploadFieldName];
-
-        // ArticleID is saved with media model if editing. ArticleID is null if new article.
-        // Null ArticleID is replaced by ArticleID when new article is saved.
-        $ArticleID = $_POST['ArticleID'];
-        if (!is_numeric($ArticleID) || ($ArticleID <= 0))
-            $ArticleID = null;
-
-        $isThumbnail = false; // TODO: Thumbnail support.
+        $isThumbnail = false;
+        if (isset($_FILES['UploadThumbnail_New'])) {
+            $UploadFieldName = 'UploadThumbnail_New';
+            $isThumbnail = true;
+        } else {
+            $UploadFieldName = 'UploadImage_New';
+        }
 
         // Upload the image.
         $UploadImage = new Gdn_UploadImage();
@@ -369,11 +380,11 @@ class ComposeController extends Gdn_Controller {
             $UploadsSubdir = '/articles/' . $CurrentYear . '/' . $CurrentMonth;
 
             if($isThumbnail) {
-                $SaveHeight = 400;
-                $SaveWidth = 400;
+                $SaveWidth = C('Articles.Articles.ThumbnailWidth', 260);
+                $SaveHeight = C('Articles.Articles.ThumbnailHeight', 146);
             } else {
-                $SaveHeight = null;
                 $SaveWidth = null;
+                $SaveHeight = null;
             }
 
             // Save the uploaded image.
@@ -400,6 +411,7 @@ class ComposeController extends Gdn_Controller {
             'ImageWidth' => $ImageProps[0],
             'ImageHeight' => $ImageProps[1],
             'StorageMethod' => 'local',
+            'IsThumbnail' => $isThumbnail,
             'Path' => $UploadedImagePath,
             'DateInserted' => Gdn_Format::ToDateTime(),
             'InsertUserID' => $Session->UserID,

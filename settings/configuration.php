@@ -4,5 +4,7 @@
 // All of the settings defined here can be overridden in the /conf/*.php files.
 
 $Configuration['Articles']['Excerpt']['MaxLength'] = 160;
+$Configuration['Articles']['Articles']['ThumbnailWidth'] = 260;
+$Configuration['Articles']['Articles']['ThumbnailHeight'] = 146;
 $Configuration['Articles']['Comments']['EnableThreadedComments'] = true;
 $Configuration['Articles']['Comments']['AllowGuests'] = false;

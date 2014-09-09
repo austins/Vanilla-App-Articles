@@ -9,7 +9,7 @@ class ArticlesController extends Gdn_Controller {
     /**
      * Models to include.
      */
-    public $Uses = array('ArticleModel', 'ArticleCategoryModel');
+    public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'ArticleMediaModel');
 
     protected $Category = false;
 

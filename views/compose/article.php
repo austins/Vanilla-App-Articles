@@ -84,6 +84,32 @@ echo $this->Form->Errors();
 
         <div class="P">
             <?php
+            echo $this->Form->Label('Upload a Thumbnail (' . C('Articles.Articles.ThumbnailWidth', 260)
+                . 'x' . C('Articles.Articles.ThumbnailHeight', 146) . ')', 'UploadThumbnail');
+            echo $this->Form->ImageUpload('UploadThumbnail');
+            ?>
+
+            <div id="UploadedThumbnail">
+                <?php
+                if ($this->Data('Article')) {
+                    $UploadedThumbnail = $this->Data('UploadedThumbnail');
+
+                    if ($UploadedThumbnail) {
+                        $ImagePath = Url('/uploads' . $UploadedThumbnail->Path);
+
+                        echo '<div id="ArticleMedia_' . $UploadedThumbnail->ArticleMediaID . '" class="UploadedImageWrap">' .
+                            '<div class="UploadedImage"><img src="' . $ImagePath . '" alt="" /></div>' .
+                            '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' . $ImagePath . '">Insert into Post</a>' .
+                            '<br /><a class="UploadedImageDelete" href="' . Url('/articles/compose/deleteimage/'
+                                . $UploadedThumbnail->ArticleMediaID) . '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div>';
+                    }
+                }
+                ?>
+            </div>
+        </div>
+
+        <div class="P">
+            <?php
             echo $this->Form->Label('Excerpt (Optional)', 'Excerpt');
             echo $this->Form->BodyBox('Excerpt', array('Table' => 'Article'));
             ?>
