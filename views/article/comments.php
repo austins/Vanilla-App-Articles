@@ -2,6 +2,7 @@
 if (!defined('APPLICATION'))
     exit();
 
+$Controller = Gdn::Controller();
 $Session = Gdn::Session();
 
 $Comments = $this->Comments->Result();
@@ -81,9 +82,16 @@ if ($this->Comments->NumRows() > 0):
                             <div class="Item-Body">
                                 <div class="Message">
                                     <?php
-                                    Gdn::Controller()->FireEvent('BeforeCommentBody');
-                                    echo Gdn_Format::To($Comment->Body, $Comment->Format);
-                                    Gdn::Controller()->FireEvent('AfterCommentFormat');
+                                    // DEPRECATED ARGUMENTS (as of 2.1)
+                                    // $Comment->FormatBody, Object, and Type event args
+                                    // added on 2014-09-12 for Emotify support.
+                                    $Comment->FormatBody = Gdn_Format::To($Comment->Body, $Comment->Format);
+                                    $Controller->EventArguments['Object'] = &$Comment;
+                                    $Controller->EventArguments['Type'] = 'ArticleComment';
+
+                                    $Controller->FireEvent('BeforeCommentBody');
+                                    echo $Comment->FormatBody;
+                                    $Controller->FireEvent('AfterCommentFormat');
                                     ?>
                                 </div>
                                 <?php
