@@ -88,9 +88,9 @@ class ArticleController extends Gdn_Controller {
         $this->Pager->ClientID = 'Pager';
 
         $this->Pager->Configure(
-            $this->Offset,
+            $Offset,
             $Limit,
-            $this->Article->CountComments,
+            $this->Article->CountArticleComments,
             array('ArticleUrl')
         );
         $this->Pager->Record = $this->Article;
