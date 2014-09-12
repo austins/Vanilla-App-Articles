@@ -111,7 +111,7 @@ echo $this->Form->Errors();
         <div class="P">
             <?php
             echo $this->Form->Label('Excerpt (Optional)', 'Excerpt');
-            echo $this->Form->BodyBox('Excerpt', array('Table' => 'Article'));
+            echo $this->Form->TextBox('Excerpt', array('MultiLine' => TRUE));
             ?>
         </div>
 
