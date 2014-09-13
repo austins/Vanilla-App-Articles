@@ -3,6 +3,14 @@ if (!defined('APPLICATION'))
     exit();
 
 if (!function_exists('ArticleUrl')) {
+    /**
+     * Get the URL of an article.
+     *
+     * @param mixed $Article
+     * @param int|string $Page
+     * @param bool $WithDomain
+     * @return string
+     */
     function ArticleUrl($Article, $Page = '', $WithDomain = true) {
         // If $Article type is an array, then cast it to an object.
         if (is_array($Article))
@@ -20,12 +28,26 @@ if (!function_exists('ArticleUrl')) {
 }
 
 if (!function_exists('ArticleCommentUrl')) {
-  function ArticleCommentUrl($Article, $ArticleCommentID) {
-    return ArticleUrl($Article) . "/#Comment_$ArticleCommentID";
-  }
+    /**
+     * Get the URL for an article comment.
+     *
+     * @param mixed $Article
+     * @param int $ArticleCommentID
+     * @return string
+     */
+    function ArticleCommentUrl($Article, $ArticleCommentID) {
+        return ArticleUrl($Article) . "/#Comment_$ArticleCommentID";
+    }
 }
 
 if (!function_exists('FormatArticleBody')) {
+    /**
+     * Formats the body string of an article.
+     *
+     * @param string $ArticleBody
+     * @param string $Format
+     * @return string
+     */
     function FormatArticleBody($ArticleBody, $Format = 'Html') {
         if (strcasecmp($Format, 'Html') == 0) {
             // Format links and links to videos.
@@ -51,6 +73,14 @@ if (!function_exists('FormatArticleBody')) {
 }
 
 if (!function_exists('ArticleCategoryUrl')) {
+    /**
+     * Get the URL of an article category.
+     *
+     * @param mixed $Category
+     * @param int|string $Page
+     * @param bool $WithDomain
+     * @return string
+     */
     function ArticleCategoryUrl($Category, $Page = '', $WithDomain = true) {
         // If $Article type is an array, then cast it to an object.
         if (is_array($Category))
