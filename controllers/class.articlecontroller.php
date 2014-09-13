@@ -45,7 +45,12 @@ class ArticleController extends Gdn_Controller {
     }
 
     /**
-     * The main method of this controller.
+     * Main method of an article.
+     *
+     * @param int $ArticleYear in YYYY format
+     * @param string $ArticleUrlCode is a unique code
+     * @param bool|object $Page is a page entity
+     * @throws NotFoundException if article not found
      */
     public function Index($ArticleYear, $ArticleUrlCode, $Page = false) {
         // Add module.
@@ -127,6 +132,9 @@ class ArticleController extends Gdn_Controller {
         $this->Render();
     }
 
+    /**
+     * Adds meta tags to a controller method.
+     */
     protected function AddMetaTags() {
         $HeadModule =& $this->Head;
         $Article = $this->Article;
@@ -147,9 +155,6 @@ class ArticleController extends Gdn_Controller {
                 'content' => date(DATE_ISO8601, strtotime($Article->DateUpdated))));
         }
 
-        // TODO: Add expiration date meta (maybe)
-        // $HeadModule->AddTag('meta', array('property' => 'article:expiration_time', 'content' => $Article->DateExpired));
-
         $HeadModule->AddTag('meta',
             array('property' => 'article:author', 'content' => Url('/profile/' . $Article->AuthorName, true)));
         $HeadModule->AddTag('meta', array('property' => 'article:section', 'content' => $this->Category->Name));
@@ -161,13 +166,13 @@ class ArticleController extends Gdn_Controller {
             $HeadModule->AddTag('meta', array('property' => 'og:image:width', 'content' => $Thumbnail->ImageWidth));
             $HeadModule->AddTag('meta', array('property' => 'og:image:height', 'content' => $Thumbnail->ImageHeight));
         }
-
-        // TODO: Add article tags (maybe)
-        // foreach($Article->Tags as $Tag) {
-        //   $HeadModule->AddTag('meta', array('property' => 'article:tag', 'content' => $Tag));
-        // }
     }
 
+    /**
+     * Sends options to a view via JSON.
+     *
+     * @param mixed $Article is an article entity
+     */
     private function SendOptions($Article) {
         require_once($this->FetchViewLocation('helper_functions', 'Article', 'Articles'));
 
@@ -188,6 +193,7 @@ class ArticleController extends Gdn_Controller {
      *
      * @param int $ArticleID Unique article ID.
      * @param bool $Close Whether or not to close the article.
+     * @param string $From Where the method is requested from.
      */
     public function Close($ArticleID, $Close = true, $From = 'list') {
         // Make sure we are posting back.
@@ -231,6 +237,13 @@ class ArticleController extends Gdn_Controller {
         $this->Render('Blank', 'Utility', 'Dashboard');
     }
 
+    /**
+     * Allows user to delete article.
+     *
+     * @param int $ArticleID
+     * @param string $Target
+     * @throws NotFoundException if article not found
+     */
     public function Delete($ArticleID, $Target = '') {
         $this->Permission('Articles.Articles.Delete');
 

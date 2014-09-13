@@ -76,6 +76,12 @@ class ComposeController extends Gdn_Controller {
         $this->Render();
     }
 
+    /**
+     * Retrieves status options for an article.
+     *
+     * @param bool|object $Article entity
+     * @return array
+     */
     private function GetArticleStatusOptions($Article = false) {
         $StatusOptions = array(
             ArticleModel::STATUS_DRAFT => T('Draft'),
@@ -90,6 +96,12 @@ class ComposeController extends Gdn_Controller {
         return $StatusOptions;
     }
 
+    /**
+     * Listing of articles.
+     *
+     * @param bool|object $Page entity
+     * @throws NotFoundException if no articles found
+     */
     public function Posts($Page = false) {
         $this->Title(T('Article Posts'));
 
@@ -141,6 +153,12 @@ class ComposeController extends Gdn_Controller {
         $this->Render();
     }
 
+    /**
+     * Allows the user to create an article.
+     *
+     * @param bool|object $Article entity
+     * @throws Gdn_UserException if a category isn't selected
+     */
     public function Article($Article = false) {
         // If not editing...
         if (!$Article) {
@@ -305,6 +323,13 @@ class ComposeController extends Gdn_Controller {
         $this->Render();
     }
 
+    /**
+     * Allows the user to edit an article.
+     * Wrapper for Article() method.
+     *
+     * @param bool|object $Article entity
+     * @throws NotFoundException if article not found
+     */
     public function EditArticle($ArticleID = false) {
         $this->Title(T('Edit Article'));
 
@@ -329,6 +354,13 @@ class ComposeController extends Gdn_Controller {
         $this->Article($Article);
     }
 
+    /**
+     * Allows the user to upload an image to an article via AJAX.
+     *
+     * @return false on failure
+     * @throws NotFoundException if no files posted
+     * @throws PermissionException if user doesn't have permission to upload
+     */
     public function UploadImage() {
         // Check for file data.
         if (!$_FILES)
@@ -431,6 +463,13 @@ class ComposeController extends Gdn_Controller {
         die($JsonReturn);
     }
 
+    /**
+     * Allows the user to delete an image from an article.
+     *
+     * @param int $ArticleMediaID
+     * @throws NotFoundException if invalid ArticleMediaID
+     * @throws PermissionException if user doesn't have permission to upload
+     */
     public function DeleteImage($ArticleMediaID) {
         if(!is_numeric($ArticleMediaID)
                 || ($this->_DeliveryMethod != DELIVERY_METHOD_JSON) || ($this->_DeliveryType != DELIVERY_TYPE_BOOL))
@@ -459,6 +498,14 @@ class ComposeController extends Gdn_Controller {
         $this->Render('Blank', 'Utility', 'Dashboard');
     }
 
+    /**
+     * Allows the user to comment on an article.
+     *
+     * @param int $ArticleID
+     * @param bool $ParentArticleCommentID
+     * @throws NotFoundException if ArticleID not found.
+     * @throws ForbiddenException if invalid reply
+     */
     public function Comment($ArticleID, $ParentArticleCommentID = false) {
         $this->Title(T('Post Article Comment'));
 

@@ -43,7 +43,10 @@ class ArticlesController extends Gdn_Controller {
     }
 
     /**
-     * The main method of this controller.
+     * Main listing of articles.
+     *
+     * @param bool|object $Page entity
+     * @throws NotFoundException if article not found
      */
     public function Index($Page = false) {
         if (Gdn::Router()->GetDestination('DefaultController') !== 'articles')
@@ -96,7 +99,10 @@ class ArticlesController extends Gdn_Controller {
     }
 
     /**
-     * The category method of this controller.
+     * Category filtered view of index.
+     *
+     * @param string $UrlCode
+     * @throws NotFoundException if article category not found
      */
     public function Category($UrlCode = '') {
         // Set required permission.
