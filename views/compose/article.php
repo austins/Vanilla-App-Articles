@@ -39,7 +39,7 @@ echo $this->Form->Errors();
         <div id="UrlCode">
             <?php
             echo Wrap('URL Code', 'strong') . ': ';
-            echo Wrap(htmlspecialchars($this->Form->val('UrlCode')));
+            echo Wrap(htmlspecialchars($this->Form->GetValue('UrlCode')));
             echo $this->Form->TextBox('UrlCode');
             echo Anchor(T('edit'), '#', 'Edit');
             echo Anchor(T('OK'), '#', 'Save SmallButton');

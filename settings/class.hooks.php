@@ -267,7 +267,7 @@ class ArticlesHooks extends Gdn_Plugin {
             if (!$Sender->Form->AuthenticatedPostBack()) {
                 $Sender->Form->SetFormValue('DeleteArticles', '1'); // Checked by default
             } else {
-                $ReplacementArticleCategoryID = $Sender->Form->val('ReplacementArticleCategoryID');
+                $ReplacementArticleCategoryID = $Sender->Form->GetValue('ReplacementArticleCategoryID');
                 $ReplacementCategory = $ArticleCategoryModel->GetByID($ReplacementArticleCategoryID);
                 // Error if:
                 // 1. The category being deleted is the last remaining category.
@@ -277,7 +277,7 @@ class ArticlesHooks extends Gdn_Plugin {
                 if ($Sender->Form->ErrorCount() == 0) {
                     // Go ahead and delete the category.
                     try {
-                        $ArticleCategoryModel->Delete($Category, $Sender->Form->val('ReplacementArticleCategoryID'));
+                        $ArticleCategoryModel->Delete($Category, $Sender->Form->GetValue('ReplacementArticleCategoryID'));
                     } catch (Exception $ex) {
                         $Sender->Form->AddError($ex);
                     }
