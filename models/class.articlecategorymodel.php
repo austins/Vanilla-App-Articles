@@ -13,6 +13,13 @@ class ArticleCategoryModel extends Gdn_Model {
         parent::__construct('ArticleCategory');
     }
 
+
+    /**
+     * Count recalculation. Called by DBAModel->Counts().
+     *
+     * @param $Column
+     * @return array
+     */
     public function Counts($Column) {
         $Result = array('Complete' => true);
 
@@ -145,6 +152,12 @@ class ArticleCategoryModel extends Gdn_Model {
         return $Categories;
     }
 
+    /**
+     * Get article category by ID.
+     *
+     * @param int $ArticleCategoryID
+     * @return bool|object
+     */
     public function GetByID($ArticleCategoryID) {
         // Set up the query.
         $this->SQL->Select('ac.*')
@@ -157,6 +170,12 @@ class ArticleCategoryModel extends Gdn_Model {
         return $Category;
     }
 
+    /**
+     * Get article category by URL code.
+     *
+     * @param string $ArticleCategoryID
+     * @return bool|object
+     */
     public function GetByUrlCode($CategoryUrlCode) {
         // Set up the query.
         $this->SQL->Select('ac.*')
@@ -173,7 +192,7 @@ class ArticleCategoryModel extends Gdn_Model {
      * Delete a single category and assign its articles to another.
      *
      * @return void
-     * @throws Exception // TODO update comment.
+     * @throws Exception on invalid category for deletion.
      * @param object $Category
      * @param int $ReplacementArticleCategoryID Unique ID of category all discussion are being move to.
      */
@@ -213,23 +232,27 @@ class ArticleCategoryModel extends Gdn_Model {
                     ->Put();
             } else {
                 // Delete comments in this category.
-                /* TODO: uncomment this code after adding comments feature.
                 $this->SQL
                    ->From('ArticleComment ac')
                    ->Join('Article a', 'ac.ArticleID = a.ArticleID')
                    ->Where('a.ArticleID', $Category->ArticleCategoryID)
                    ->Delete();
-                */
 
-                // Delete articles in this category
+                // Delete articles in this category.
                 $this->SQL->Delete('Article', array('ArticleCategoryID' => $Category->ArticleCategoryID));
             }
 
-            // Delete the category
+            // Finally, delete the category.
             $this->SQL->Delete('ArticleCategory', array('ArticleCategoryID' => $Category->ArticleCategoryID));
         }
     }
 
+    /**
+     * Determines and sets the most recent post fields
+     * for a specific article category ID.
+     *
+     * @param int $ArticleCategoryID
+     */
     public function SetRecentPost($ArticleCategoryID) {
         $Row = $this->SQL
             ->GetWhere('Article', array('ArticleCategoryID' => $ArticleCategoryID), 'DateLastArticleComment', 'desc', 1)

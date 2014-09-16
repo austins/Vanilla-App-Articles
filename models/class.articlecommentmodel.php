@@ -53,8 +53,17 @@ class ArticleCommentModel extends Gdn_Model {
         return $Comments;
     }
 
-    public function GetByArticleID($ArticleID, $Offset = 0, $Limit = false, $Wheres = null)
-    {
+    /**
+     * Get article comment by article ID.
+     *
+     * @param int $ArticleID
+     * @param int $Offset
+     * @param bool $Limit
+     * @param null|array $Wheres
+     * @return Gdn_DataSet
+     * @throws InvalidArgumentException on invalid article ID.
+     */
+    public function GetByArticleID($ArticleID, $Offset = 0, $Limit = false, $Wheres = null) {
         if (!is_numeric($ArticleID))
             throw new InvalidArgumentException('The article ID must be a numeric value.');
 
@@ -65,8 +74,17 @@ class ArticleCommentModel extends Gdn_Model {
         return $Comments;
     }
 
-    public function GetByID($ArticleCommentID, $Offset = 0, $Limit = false, $Wheres = null)
-    {
+    /**
+     * Get article comment by ID.
+     *
+     * @param $ArticleCommentID
+     * @param int $Offset
+     * @param bool $Limit
+     * @param null|array $Wheres
+     * @return bool
+     * @throws InvalidArgumentException on invalid comment ID.
+     */
+    public function GetByID($ArticleCommentID, $Offset = 0, $Limit = false, $Wheres = null) {
         if (!is_numeric($ArticleCommentID))
             throw new InvalidArgumentException('The comment ID must be a numeric value.');
 
@@ -80,7 +98,8 @@ class ArticleCommentModel extends Gdn_Model {
     /**
      * Select the data for a single comment.
      *
-     * @param bool $FireEvent Kludge to fix VanillaCommentReplies plugin.
+     * @param bool $FireEvent
+     * @param bool $Join
      */
     public function PrepareCommentQuery($FireEvent = true, $Join = true) {
         $this->SQL->Select('ac.*')
@@ -99,7 +118,7 @@ class ArticleCommentModel extends Gdn_Model {
                 ->Join('User uu', 'ac.UpdateUserID = uu.UserID', 'left');
         }
 
-        if($FireEvent)
+        if ($FireEvent)
             $this->FireEvent('AfterCommentQuery');
     }
 
@@ -201,7 +220,7 @@ class ArticleCommentModel extends Gdn_Model {
      * @returns true on successful delete; false if comment ID doesn't exist.
      */
     public function Delete($ArticleCommentID, $Options = array()) {
-        $this->EventArguments['ArticleCommentID'] = &$ArticleCommentID;
+        $this->EventArguments['ArticleCommentID'] = & $ArticleCommentID;
 
         $Comment = $this->GetByID($ArticleCommentID);
         if (!$Comment)
@@ -234,6 +253,16 @@ class ArticleCommentModel extends Gdn_Model {
         return true;
     }
 
+    /**
+     * Update comment count for a specific article.
+     *
+     * If a comment entity is passed as a parameter, then that comment ID
+     * will be set for the article's last comment fields.
+     *
+     * @param mixed $Article
+     * @param bool|object $Comment
+     * @return bool
+     */
     public function UpdateCommentCount($Article, $Comment = false) {
         $ArticleID = GetValue('ArticleID', $Article, false);
 
@@ -254,13 +283,13 @@ class ArticleCommentModel extends Gdn_Model {
         $Fields = array(
             'CountArticleComments' => $CountArticleComments,
             'FirstArticleCommentID' => $this->SQL
-                                    ->Select('ac.ArticleCommentID')
-                                    ->From('ArticleComment ac')
-                                    ->OrderBy('ac.ArticleCommentID', 'asc')
-                                    ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT)->ArticleCommentID,
-            'LastArticleCommentID' => $Comment->ArticleCommentID,
-            'DateLastArticleComment' => $Comment->DateInserted,
-            'LastArticleCommentUserID' => $Comment->InsertUserID
+                    ->Select('ac.ArticleCommentID')
+                    ->From('ArticleComment ac')
+                    ->OrderBy('ac.ArticleCommentID', 'asc')
+                    ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT)->ArticleCommentID,
+            'LastArticleCommentID' => val('ArticleCommentID', $Comment, null),
+            'DateLastArticleComment' => val('DateInserted', $Comment, null),
+            'LastArticleCommentUserID' => val('InsertUserID', $Comment, null)
         );
 
         $ArticleModel = new ArticleModel();
@@ -270,6 +299,12 @@ class ArticleCommentModel extends Gdn_Model {
         $ArticleModel->UpdateArticleCount($Article->ArticleCategoryID, $Article);
     }
 
+    /**
+     * Update a user's comment count.
+     *
+     * @param int $UserID
+     * @return bool
+     */
     public function UpdateUserCommentCount($UserID) {
         if (!is_numeric($UserID))
             return false;
