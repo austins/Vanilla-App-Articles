@@ -181,7 +181,7 @@ class ArticleModel extends Gdn_Model {
         $this->DefineSchema();
 
         // See if a primary key value was posted and decide how to save
-        $PrimaryKeyVal = GetValue($this->PrimaryKey, $FormPostValues, false);
+        $PrimaryKeyVal = val($this->PrimaryKey, $FormPostValues, false);
         $Insert = $PrimaryKeyVal === false ? true : false;
         if ($Insert) {
             $this->AddInsertFields($FormPostValues);
@@ -206,10 +206,10 @@ class ArticleModel extends Gdn_Model {
 
                 // Update article count for affected category and user.
                 $Article = $this->GetByID($PrimaryKeyVal);
-                $ArticleCategoryID = GetValue('ArticleCategoryID', $Article, false);
+                $ArticleCategoryID = val('ArticleCategoryID', $Article, false);
 
                 $this->UpdateArticleCount($ArticleCategoryID, $Article);
-                $this->UpdateUserArticleCount(GetValue('AttributionUserID', $Article, false));
+                $this->UpdateUserArticleCount(val('AttributionUserID', $Article, false));
             }
         } else {
             $PrimaryKeyVal = false;
@@ -223,7 +223,7 @@ class ArticleModel extends Gdn_Model {
         if (is_numeric($Where))
             $Where = array($this->PrimaryKey => $Where);
 
-        $ArticleToDelete = $this->GetByID(GetValue($this->PrimaryKey, $Where, false));
+        $ArticleToDelete = $this->GetByID(val($this->PrimaryKey, $Where, false));
 
         if ($ResetData)
             $Result = $this->SQL->Delete($this->Name, $Where, $Limit);
@@ -240,7 +240,7 @@ class ArticleModel extends Gdn_Model {
 
             // Update article count for affected category and user.
             $this->UpdateArticleCount($ArticleToDelete->ArticleCategoryID, $LastArticle);
-            $this->UpdateUserArticleCount(GetValue('AttributionUserID', $ArticleToDelete, false));
+            $this->UpdateUserArticleCount(val('AttributionUserID', $ArticleToDelete, false));
 
             // See if LastDateInserted should be the latest comment.
             $LastComment = $this->SQL
@@ -261,7 +261,7 @@ class ArticleModel extends Gdn_Model {
     }
 
     public function UpdateArticleCount($ArticleCategoryID, $Article = false) {
-        $ArticleID = GetValue('ArticleID', $Article, false);
+        $ArticleID = val('ArticleID', $Article, false);
 
         if (!is_numeric($ArticleCategoryID) && !is_numeric($ArticleID))
             return false;
@@ -277,19 +277,19 @@ class ArticleModel extends Gdn_Model {
         if (!$CategoryData)
             return false;
 
-        $CountArticles = (int)GetValue('CountArticles', $CategoryData, 0);
+        $CountArticles = (int)val('CountArticles', $CategoryData, 0);
 
         $ArticleCategoryModel = new ArticleCategoryModel();
 
         $Fields = array(
-            'LastDateInserted' => GetValue('DateInserted', $Article, false),
+            'LastDateInserted' => val('DateInserted', $Article, false),
             'CountArticles' => $CountArticles,
             'LastArticleID' => $ArticleID,
-            'CountArticleComments' => (int)GetValue('CountArticleComments', $CategoryData, 0),
-            'LastArticleCommentID' => (int)GetValue('LastArticleCommentID', $CategoryData, 0)
+            'CountArticleComments' => (int)val('CountArticleComments', $CategoryData, 0),
+            'LastArticleCommentID' => (int)val('LastArticleCommentID', $CategoryData, 0)
         );
 
-        $Wheres = array('ArticleCategoryID' => GetValue('ArticleCategoryID', $Article, false));
+        $Wheres = array('ArticleCategoryID' => val('ArticleCategoryID', $Article, false));
 
         $ArticleCategoryModel->Update($Fields, $Wheres, false);
     }

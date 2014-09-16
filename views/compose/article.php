@@ -22,7 +22,7 @@ echo $this->Form->Errors();
                 'IncludeNull' => true,
                 'ValueField' => 'ArticleCategoryID',
                 'TextField' => 'Name',
-                'Value' => GetValue('ArticleCategoryID', $this->Category)
+                'Value' => val('ArticleCategoryID', $this->Category)
             ));
             echo '</div>';
         }
@@ -39,7 +39,7 @@ echo $this->Form->Errors();
         <div id="UrlCode">
             <?php
             echo Wrap('URL Code', 'strong') . ': ';
-            echo Wrap(htmlspecialchars($this->Form->GetValue('UrlCode')));
+            echo Wrap(htmlspecialchars($this->Form->val('UrlCode')));
             echo $this->Form->TextBox('UrlCode');
             echo Anchor(T('edit'), '#', 'Edit');
             echo Anchor(T('OK'), '#', 'Save SmallButton');

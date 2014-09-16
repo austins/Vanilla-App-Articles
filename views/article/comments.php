@@ -54,9 +54,9 @@ if ($this->Comments->NumRows() > 0):
                             </span>
                             <span class="AuthorInfo">
                                 <?php
-                                echo ' ' . WrapIf(htmlspecialchars(GetValue('Title', $User)), 'span',
+                                echo ' ' . WrapIf(htmlspecialchars(val('Title', $User)), 'span',
                                         array('class' => 'MItem AuthorTitle'));
-                                echo ' ' . WrapIf(htmlspecialchars(GetValue('Location', $User)), 'span',
+                                echo ' ' . WrapIf(htmlspecialchars(val('Location', $User)), 'span',
                                         array('class' => 'MItem AuthorLocation'));
 
                                 $this->FireEvent('AuthorInfo');

@@ -267,7 +267,7 @@ class ArticlesHooks extends Gdn_Plugin {
             if (!$Sender->Form->AuthenticatedPostBack()) {
                 $Sender->Form->SetFormValue('DeleteArticles', '1'); // Checked by default
             } else {
-                $ReplacementArticleCategoryID = $Sender->Form->GetValue('ReplacementArticleCategoryID');
+                $ReplacementArticleCategoryID = $Sender->Form->val('ReplacementArticleCategoryID');
                 $ReplacementCategory = $ArticleCategoryModel->GetByID($ReplacementArticleCategoryID);
                 // Error if:
                 // 1. The category being deleted is the last remaining category.
@@ -277,7 +277,7 @@ class ArticlesHooks extends Gdn_Plugin {
                 if ($Sender->Form->ErrorCount() == 0) {
                     // Go ahead and delete the category.
                     try {
-                        $ArticleCategoryModel->Delete($Category, $Sender->Form->GetValue('ReplacementArticleCategoryID'));
+                        $ArticleCategoryModel->Delete($Category, $Sender->Form->val('ReplacementArticleCategoryID'));
                     } catch (Exception $ex) {
                         $Sender->Form->AddError($ex);
                     }
@@ -503,8 +503,8 @@ class ArticlesHooks extends Gdn_Plugin {
      * @param UserModel $Sender UserModel.
      */
     public function UserModel_BeforeDeleteUser_Handler($Sender) {
-        $UserID = GetValue('UserID', $Sender->EventArguments);
-        $Options = GetValue('Options', $Sender->EventArguments, array());
+        $UserID = val('UserID', $Sender->EventArguments);
+        $Options = val('Options', $Sender->EventArguments, array());
         $Options = is_array($Options) ? $Options : array();
         $Content =& $Sender->EventArguments['Content'];
 
@@ -522,7 +522,7 @@ class ArticlesHooks extends Gdn_Plugin {
         $SQL = Gdn::SQL();
 
         // Comment deletion depends on method selected.
-        $DeleteMethod = GetValue('DeleteMethod', $Options, 'delete');
+        $DeleteMethod = val('DeleteMethod', $Options, 'delete');
         if ($DeleteMethod == 'delete') {
             // Clear out the last posts to the categories.
             $SQL->Update('ArticleCategory c')

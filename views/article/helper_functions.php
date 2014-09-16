@@ -30,7 +30,7 @@ if (!function_exists('ShowArticleOptions')) {
         // Can the user delete?
         if ($Session->CheckPermission('Articles.Articles.Delete')) {
             $ArticleCategoryModel = new ArticleCategoryModel();
-            $Category = $ArticleCategoryModel->GetByID(GetValue('ArticleCategoryID', $Article));
+            $Category = $ArticleCategoryModel->GetByID(val('ArticleCategoryID', $Article));
 
             $Options['DeleteArticle'] = array(
                 'Label' => T('Delete'),
@@ -49,7 +49,7 @@ if (!function_exists('ShowArticleOptions')) {
             echo Sprite('SpFlyoutHandle', 'Arrow');
             echo '<ul class="Flyout MenuItems" style="display: none;">';
             foreach ($Options as $Code => $Option) {
-                echo Wrap(Anchor($Option['Label'], $Option['Url'], GetValue('Class', $Option, $Code)), 'li');
+                echo Wrap(Anchor($Option['Label'], $Option['Url'], val('Class', $Option, $Code)), 'li');
             }
             echo '</ul>';
             echo '</span>';
@@ -147,14 +147,14 @@ if (!function_exists('GetCommentOptions')):
     function GetCommentOptions($Comment) {
         $Options = array();
 
-        if (!is_numeric(GetValue('ArticleCommentID', $Comment)))
+        if (!is_numeric(val('ArticleCommentID', $Comment)))
             return $Options;
 
         $Sender = Gdn::Controller();
         $Session = Gdn::Session();
 
         $Article = & $Sender->Article;
-        $ArticleCategoryID = GetValue('ArticleCategoryID', $Article);
+        $ArticleCategoryID = val('ArticleCategoryID', $Article);
 
         // Determine if we still have time to edit
         $EditContentTimeout = C('Garden.EditContentTimeout', -1);
@@ -204,7 +204,7 @@ if (!function_exists('WriteCommentOptions')):
             echo Sprite('SpFlyoutHandle', 'Arrow');
             echo '<ul class="Flyout MenuItems">';
             foreach ($Options as $Code => $Option) {
-                echo Wrap(Anchor($Option['Label'], $Option['Url'], GetValue('Class', $Option, $Code)),
+                echo Wrap(Anchor($Option['Label'], $Option['Url'], val('Class', $Option, $Code)),
                     'li');
             }
             echo '</ul>';

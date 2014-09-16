@@ -281,7 +281,7 @@ class ComposeController extends Gdn_Controller {
                     if ($Article) {
                         // If the author has changed from the initial article, then update the counts
                         // for the initial author after the article has been saved.
-                        $InitialAttributionUserID = GetValue('AttributionUserID', $Article, false);
+                        $InitialAttributionUserID = val('AttributionUserID', $Article, false);
 
                         if ($InitialAttributionUserID != $Author->UserID) {
                             $this->ArticleModel->UpdateUserArticleCount($InitialAttributionUserID);
@@ -291,7 +291,7 @@ class ComposeController extends Gdn_Controller {
                         }
 
                         // If the status has changed from non-published to published, then update the DateInserted date.
-                        $InitialStatus = GetValue('Status', $Article, false);
+                        $InitialStatus = val('Status', $Article, false);
 
                         if (($InitialStatus != ArticleModel::STATUS_PUBLISHED)
                                 && ($NewArticle->Status == ArticleModel::STATUS_PUBLISHED)) {
@@ -491,7 +491,7 @@ class ComposeController extends Gdn_Controller {
         $Deleted = $this->ArticleMediaModel->Delete($ArticleMediaID);
 
         // Delete the image file.
-        $ImagePath = PATH_UPLOADS . DS . GetValue('Path', $Media);
+        $ImagePath = PATH_UPLOADS . DS . val('Path', $Media);
         if(file_exists($ImagePath))
             @unlink($ImagePath);
 
@@ -649,7 +649,7 @@ class ComposeController extends Gdn_Controller {
         if ($ArticleCommentID > 0)
             $this->Comment = $this->ArticleCommentModel->GetByID($ArticleCommentID);
 
-        $this->Form->SetFormValue('Format', GetValue('Format', $this->Comment));
+        $this->Form->SetFormValue('Format', val('Format', $this->Comment));
 
         $this->View = 'editcomment';
 

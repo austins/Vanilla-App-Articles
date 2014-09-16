@@ -70,7 +70,7 @@ class ArticleCategoryModel extends Gdn_Model {
                     $Set = array('LastArticleCommentID' => $ArticleCommentID);
 
                     if ($ArticleID) {
-                        $LastArticleID = GetValue('LastArticleID', $Category);
+                        $LastArticleID = val('LastArticleID', $Category);
 
                         if ($DateLastArticleComment >= $DateLastArticle) {
                             // The most recent article is from this comment.
@@ -101,8 +101,8 @@ class ArticleCategoryModel extends Gdn_Model {
                     ->Get()->ResultArray();
 
                 foreach ($Categories as $Category) {
-                    $DateLastArticle = GetValue('DateLastArticle', $Category);
-                    $DateLastArticleComment = GetValue('DateLastArticleComment', $Category);
+                    $DateLastArticle = val('DateLastArticle', $Category);
+                    $DateLastArticleComment = val('DateLastArticleComment', $Category);
 
                     $MaxDate = $DateLastArticleComment;
                     if (is_null($DateLastArticleComment) || $DateLastArticle > $MaxDate)

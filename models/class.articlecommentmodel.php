@@ -165,7 +165,7 @@ class ArticleCommentModel extends Gdn_Model {
         $this->DefineSchema();
 
         // See if a primary key value was posted and decide how to save
-        $PrimaryKeyVal = GetValue($this->PrimaryKey, $FormPostValues, false);
+        $PrimaryKeyVal = val($this->PrimaryKey, $FormPostValues, false);
         $Insert = $PrimaryKeyVal === false ? true : false;
         if ($Insert) {
             $this->AddInsertFields($FormPostValues);
@@ -193,7 +193,7 @@ class ArticleCommentModel extends Gdn_Model {
                     ->Limit(1)->Get()->FirstRow(DATASET_TYPE_OBJECT);
 
                 $ArticleModel = new ArticleModel();
-                $Article = $ArticleModel->GetByID(GetValue('ArticleID', $FormPostValues, false));
+                $Article = $ArticleModel->GetByID(val('ArticleID', $FormPostValues, false));
 
                 $this->UpdateCommentCount($Article, $Comment);
 
@@ -229,8 +229,8 @@ class ArticleCommentModel extends Gdn_Model {
         $this->FireEvent('DeleteComment');
 
         // Log the deletion.
-        $Log = GetValue('Log', $Options, 'Delete');
-        LogModel::Insert($Log, 'ArticleComment', $Comment, GetValue('LogOptions', $Options, array()));
+        $Log = val('Log', $Options, 'Delete');
+        LogModel::Insert($Log, 'ArticleComment', $Comment, val('LogOptions', $Options, array()));
 
         $this->SQL->Delete('ArticleComment', array('ArticleCommentID' => $ArticleCommentID));
 
@@ -246,7 +246,7 @@ class ArticleCommentModel extends Gdn_Model {
         $this->UpdateCommentCount($Article, $LastComment);
 
         // Update the comment count for the user if this isn't a guest comment.
-        $InsertUserID = GetValue('InsertUserID', $Comment, false);
+        $InsertUserID = val('InsertUserID', $Comment, false);
         if (is_numeric($InsertUserID))
             $this->UpdateUserCommentCount($InsertUserID);
 
@@ -264,7 +264,7 @@ class ArticleCommentModel extends Gdn_Model {
      * @return bool
      */
     public function UpdateCommentCount($Article, $Comment = false) {
-        $ArticleID = GetValue('ArticleID', $Article, false);
+        $ArticleID = val('ArticleID', $Article, false);
 
         if (!is_numeric($ArticleID))
             return false;
@@ -278,7 +278,7 @@ class ArticleCommentModel extends Gdn_Model {
         if (!$ArticleData)
             return false;
 
-        $CountArticleComments = (int)GetValue('CountArticleComments', $ArticleData, 0);
+        $CountArticleComments = (int)val('CountArticleComments', $ArticleData, 0);
 
         $Fields = array(
             'CountArticleComments' => $CountArticleComments,
@@ -336,7 +336,7 @@ class ArticleCommentModel extends Gdn_Model {
         $this->SQL
             ->Select('ac.ArticleCommentID', 'count', 'CountArticleComments')
             ->From('ArticleComment ac')
-            ->Where('ac.ArticleID', GetValue('ArticleID', $Comment));
+            ->Where('ac.ArticleID', val('ArticleID', $Comment));
 
         $this->SQL->BeginWhereGroup();
 
