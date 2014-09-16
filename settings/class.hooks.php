@@ -611,6 +611,11 @@ class ArticlesHooks extends Gdn_Plugin {
             ->Put();
     }
 
+    /**
+     * Adds count jobs for the DbaModel.
+     *
+     * @param DbaController $Sender
+     */
     public function DbaController_CountJobs_Handler($Sender) {
         $Counts = array(
             'Article' => array('CountArticleComments', 'FirstArticleCommentID', 'LastArticleCommentID', 'DateLastArticleComment', 'LastArticleCommentUserID'),

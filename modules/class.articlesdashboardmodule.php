@@ -1,4 +1,4 @@
-<?php
+`+<?php
 if (!defined('APPLICATION'))
     exit();
 
@@ -10,15 +10,25 @@ class ArticlesDashboardModule extends Gdn_Module {
         parent::__construct($Sender);
     }
 
+    /**
+     * Returns the asset name that the panel will be displayed to.
+     *
+     * @return string
+     */
     public function AssetTarget() {
         return 'Panel';
     }
 
+    /**
+     * Returns the module as a string.
+     *
+     * @return string
+     */
     public function ToString() {
         $Controller = Gdn::Controller();
         $Session = Gdn::Session();
 
-        $Controller->EventArguments['ArticlesDashboardModule'] = & $this;
+        $Controller->EventArguments['ArticlesDashboardModule'] = &$this;
         $Controller->FireEvent('BeforeArticlesDashboardModuleButton');
 
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
