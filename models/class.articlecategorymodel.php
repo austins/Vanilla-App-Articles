@@ -17,7 +17,7 @@ class ArticleCategoryModel extends Gdn_Model {
     /**
      * Count recalculation. Called by DBAModel->Counts().
      *
-     * @param $Column
+     * @param string $Column
      * @return array
      */
     public function Counts($Column) {

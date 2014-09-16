@@ -17,6 +17,15 @@ class ArticleModel extends Gdn_Model {
         parent::__construct('Article');
     }
 
+    /**
+     * Count recalculation. Called by DBAModel->Counts().
+     *
+     * @param string $Column
+     * @param int $From ID range begin inclusive.
+     * @param int $To ID range end inclusive.
+     * @param int $Max ID range max inclusive.
+     * @return array
+     */
     public function Counts($Column, $From = false, $To = false, $Max = false) {
         $Result = array('Complete' => true);
 
@@ -124,6 +133,12 @@ class ArticleModel extends Gdn_Model {
         return $Articles;
     }
 
+    /**
+     * Get an article by ID.
+     *
+     * @param int $ArticleID
+     * @return bool|object
+     */
     public function GetByID($ArticleID) {
         // Set up the query.
         $this->SQL->Select('a.*')
@@ -139,6 +154,12 @@ class ArticleModel extends Gdn_Model {
         return $Article;
     }
 
+    /**
+     * Get an article by ID.
+     *
+     * @param string $ArticleUrlCode
+     * @return bool|object
+     */
     public function GetByUrlCode($ArticleUrlCode) {
         // Set up the query.
         $this->SQL->Select('a.*')
@@ -154,6 +175,15 @@ class ArticleModel extends Gdn_Model {
         return $Article;
     }
 
+    /**
+     * Get articles for a user by user ID.
+     *
+     * @param int $UserID
+     * @param int $Offset
+     * @param bool|int $Limit
+     * @param null|array $Wheres
+     * @return bool|object
+     */
     public function GetByUser($UserID, $Offset = 0, $Limit = false, $Wheres = null) {
         if (!$Wheres)
             $Wheres = array();
@@ -218,12 +248,21 @@ class ArticleModel extends Gdn_Model {
         return $PrimaryKeyVal;
     }
 
-    // TODO: Update delete method remove related article material, etc.
+    /**
+     * Delete an article and its comments, then update counts accordingly.
+     *
+     * @param string $Where
+     * @param bool $Limit
+     * @param bool $ResetData
+     * @return bool|Gdn_DataSet|string
+     */
     public function Delete($Where = '', $Limit = false, $ResetData = false) {
         if (is_numeric($Where))
             $Where = array($this->PrimaryKey => $Where);
 
-        $ArticleToDelete = $this->GetByID(val($this->PrimaryKey, $Where, false));
+        $ArticleID = val($this->PrimaryKey, $Where, false);
+
+        $ArticleToDelete = $this->GetByID($ArticleID);
 
         if ($ResetData)
             $Result = $this->SQL->Delete($this->Name, $Where, $Limit);
@@ -231,6 +270,13 @@ class ArticleModel extends Gdn_Model {
             $Result = $this->SQL->NoReset()->Delete($this->Name, $Where, $Limit);
 
         if ($ArticleToDelete && $Result) {
+            // Delete comments for this article.
+            $this->SQL
+                ->From('ArticleComment ac')
+                ->Join('Article a', 'ac.ArticleID = a.ArticleID')
+                ->Where('a.ArticleID', $ArticleID)
+                ->Delete();
+
             // Get the newest article in the table to set the LastDateInserted and LastArticleID accordingly.
             $LastArticle = $this->SQL
                 ->Select('a.*')
@@ -260,6 +306,13 @@ class ArticleModel extends Gdn_Model {
         return $Result;
     }
 
+    /**
+     * Update related counts for an article.
+     *
+     * @param int $ArticleCategoryID
+     * @param bool $Article
+     * @return bool
+     */
     public function UpdateArticleCount($ArticleCategoryID, $Article = false) {
         $ArticleID = val('ArticleID', $Article, false);
 
@@ -294,6 +347,12 @@ class ArticleModel extends Gdn_Model {
         $ArticleCategoryModel->Update($Fields, $Wheres, false);
     }
 
+    /**
+     * Update a user's article count.
+     *
+     * @param int $UserID
+     * @return bool
+     */
     public function UpdateUserArticleCount($UserID) {
         if (!is_numeric($UserID))
             return false;
@@ -307,6 +366,12 @@ class ArticleModel extends Gdn_Model {
         Gdn::UserModel()->SetField($UserID, 'CountArticles', $CountArticles);
     }
 
+    /**
+     * Creates an activity post for an article.
+     *
+     * @param array $Fields
+     * @param bool $Insert
+     */
     private function AddActivity($Fields, $Insert) {
         // Determine whether to add a new activity.
         if ($Insert && ($Fields['Status'] === self::STATUS_PUBLISHED)) {

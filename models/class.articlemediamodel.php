@@ -13,6 +13,12 @@ class ArticleMediaModel extends Gdn_Model {
         parent::__construct('ArticleMedia');
     }
 
+    /**
+     * Get article media by ID.
+     *
+     * @param int $ArticleMediaID
+     * @return bool|object
+     */
     public function GetByID($ArticleMediaID) {
         // Set up the query.
         $this->SQL->Select('am.*')
@@ -25,6 +31,12 @@ class ArticleMediaModel extends Gdn_Model {
         return $Media;
     }
 
+    /**
+     * Get multiple article media by article ID.
+     *
+     * @param int $ArticleID
+     * @return bool|object
+     */
     public function GetByArticleID($ArticleID) {
         // Set up the query.
         $this->SQL->Select('am.*')
@@ -38,6 +50,12 @@ class ArticleMediaModel extends Gdn_Model {
         return $Media;
     }
 
+    /**
+     * Get thumbnail by article ID.
+     *
+     * @param int $ArticleID
+     * @return bool|object
+     */
     public function GetThumbnailByArticleID($ArticleID) {
         // Set up the query.
         $this->SQL->Select('am.*')
