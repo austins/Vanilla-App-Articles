@@ -54,7 +54,7 @@ if ($ArticleModel->GetCount() == 0) {
         'Body' => $FirstArticleBody,
         'Excerpt' => "This is the first article's excerpt. Read on to see more.",
         'Format' => 'Html',
-        'Status' => 'published',
+        'Status' => ArticleModel::STATUS_PUBLISHED,
         'DateInserted' => $Now,
         'AttributionUserID' => $SystemUserID,
         'InsertUserID' => $SystemUserID,
