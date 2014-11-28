@@ -42,44 +42,41 @@ if (count($Articles) == 0) {
                 echo '<div class="ArticleThumbnail">';
                 echo Anchor(Img($ThumbnailPath, array('title' => $Article->Name)), $ArticleUrl);
                 echo '</div>';
-
-                // Create padding for the image to be in its own column next to the article teaser container.
-                echo '<div class="ArticleInner" style="margin-left: ' . ($Thumbnail->ImageWidth + 15) . 'px;">';
-            } else {
-                echo '<div class="ArticleInner">';
             }
+
+            echo '<div class="ArticleInner">';
             ?>
-                <header>
-                    <h2 class="ArticleTitle"><?php echo Anchor($Article->Name, $ArticleUrl); ?></h2>
+            <header>
+                <h2 class="ArticleTitle"><?php echo Anchor($Article->Name, $ArticleUrl); ?></h2>
 
-                    <div class="Meta Meta-Article">
-                        <?php
-                        Gdn::Controller()->FireEvent('BeforeArticleMeta');
+                <div class="Meta Meta-Article">
+                    <?php
+                    Gdn::Controller()->FireEvent('BeforeArticleMeta');
 
-                        echo ArticleTag($Article, 'Closed', 'Closed');
+                    echo ArticleTag($Article, 'Closed', 'Closed');
 
-                        Gdn::Controller()->FireEvent('AfterArticleLabels');
-                        ?>
-                        <span
-                            class="MItem MCount ArticleCategory"><?php echo Anchor($ArticleCategory->Name,
-                                ArticleCategoryUrl($ArticleCategory));
-                            ?></span>
+                    Gdn::Controller()->FireEvent('AfterArticleLabels');
+                    ?>
+                    <span
+                        class="MItem MCount ArticleCategory"><?php echo Anchor($ArticleCategory->Name,
+                            ArticleCategoryUrl($ArticleCategory));
+                        ?></span>
           <span
               class="MItem MCount ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
                   '%e %B %Y - %l:%M %p');
               ?></span>
-                        <span class="MItem MCount ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
+                    <span class="MItem MCount ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
           <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCount, $ArticleUrl . '/#Comments');
               ?></span>
-                    </div>
-                </header>
-
-                <div class="ArticleBody">
-                    <?php
-                    $ArticleBody = ($Article->Excerpt != "") ? $Article->Excerpt : $Article->Body;
-                    echo FormatArticleBody($ArticleBody, $Article->Format);
-                    ?>
                 </div>
+            </header>
+
+            <div class="ArticleBody">
+                <?php
+                $ArticleBody = ($Article->Excerpt != "") ? $Article->Excerpt : $Article->Body;
+                echo FormatArticleBody($ArticleBody, $Article->Format);
+                ?>
+            </div>
             </div>
         </article>
     <?php
