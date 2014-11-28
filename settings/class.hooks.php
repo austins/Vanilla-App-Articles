@@ -357,6 +357,7 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->SetData('Articles', $Articles);
 
         $Sender->ArticleCategoryModel = new ArticleCategoryModel();
+        $Sender->ArticleMediaModel = new ArticleMediaModel();
 
         // Build a pager
         $PagerFactory = new Gdn_PagerFactory();
@@ -390,6 +391,7 @@ class ArticlesHooks extends Gdn_Plugin {
         }
 
         // Render the ProfileController
+        $Sender->AddCssFile('articles.css', 'articles');
         $Sender->Render();
     }
 
