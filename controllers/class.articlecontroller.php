@@ -40,6 +40,8 @@ class ArticleController extends Gdn_Controller {
         // Add modules.
         $this->AddModule('GuestModule');
         $this->AddModule('SignedInModule');
+        $this->AddModule('ArticlesDashboardModule');
+        $this->AddModule('RecentActivityModule');
 
         parent::Initialize();
     }
@@ -53,9 +55,6 @@ class ArticleController extends Gdn_Controller {
      * @throws NotFoundException if article not found
      */
     public function Index($ArticleYear, $ArticleUrlCode, $Page = false) {
-        // Add module.
-        $this->AddModule('ArticlesDashboardModule');
-
         // Get the article.
         $this->Article = $this->ArticleModel->GetByUrlCode($ArticleUrlCode);
 

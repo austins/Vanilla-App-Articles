@@ -38,6 +38,8 @@ class ArticlesController extends Gdn_Controller {
         // Add modules.
         $this->AddModule('GuestModule');
         $this->AddModule('SignedInModule');
+        $this->AddModule('ArticlesDashboardModule');
+        $this->AddModule('RecentActivityModule');
 
         parent::Initialize();
     }
@@ -56,9 +58,6 @@ class ArticlesController extends Gdn_Controller {
 
         // Set required permission.
         $this->Permission('Articles.Articles.View');
-
-        // Add module.
-        $this->AddModule('ArticlesDashboardModule');
 
         // Get total article count.
         $CountArticles = $this->ArticleModel->GetCount();
@@ -107,9 +106,6 @@ class ArticlesController extends Gdn_Controller {
     public function Category($UrlCode = '') {
         // Set required permission.
         $this->Permission('Articles.Articles.View');
-
-        // Add module.
-        $this->AddModule('ArticlesDashboardModule');
 
         // Get the category.
         if ($UrlCode != '')
