@@ -463,8 +463,8 @@ class ArticlesHooks extends Gdn_Plugin {
       $UserID = $Sender->User->UserID;
       $UserMetaModel = Gdn::UserMetaModel();
       $UserMeta = $UserMetaModel->GetUserMeta($UserID);
-      $Sender->Form->SetValue('AuthorDisplayName', $UserMeta['AuthorDisplayName']);
-      $Sender->Form->SetValue('AuthorBio', $UserMeta['AuthorBio']);      
+      $Sender->Form->SetValue('Articles.AuthorDisplayName', $UserMeta['Articles.AuthorDisplayName']);
+      $Sender->Form->SetValue('Articles.AuthorBio', $UserMeta['Articles.AuthorBio']);
     }
     
     /**
@@ -475,13 +475,13 @@ class ArticlesHooks extends Gdn_Plugin {
     public function ProfileController_EditMyAccountAfter_Handler($Sender) {
       if(Gdn::Session()->CheckPermission(array('Garden.Users.Edit','Articles.Articles.Add'), false)) {
         echo Wrap(
-          $Sender->Form->Label('Author Display Name', 'AuthorDisplayName') .
-          $Sender->Form->Textbox('AuthorDisplayName'),
+          $Sender->Form->Label('Author Display Name', 'Articles.AuthorDisplayName') .
+          $Sender->Form->Textbox('Articles.AuthorDisplayName'),
           'li');
         
         echo Wrap(
-          $Sender->Form->Label('Author Bio', 'AuthorBio') .
-          $Sender->Form->Textbox('AuthorBio', array('multiline' => TRUE)),
+          $Sender->Form->Label('Author Bio', 'Articles.AuthorBio') .
+          $Sender->Form->Textbox('Articles.AuthorBio', array('multiline' => TRUE)),
           'li');
       }
     }
@@ -494,7 +494,7 @@ class ArticlesHooks extends Gdn_Plugin {
     public function UserModel_AfterSave_Handler($Sender) {
       $UserID = val('UserID', $Sender->EventArguments);
       $FormValues = val('FormPostValues', $Sender->EventArguments, array());
-      $AuthorInfo = array_intersect_key($FormValues, array('AuthorDisplayName' => 1, 'AuthorBio' => 1));
+      $AuthorInfo = array_intersect_key($FormValues, array('Articles.AuthorDisplayName' => 1, 'Articles.AuthorBio' => 1));
       
       foreach($AuthorInfo as $k => $v) {
         Gdn::UserMetaModel()->SetUserMeta($UserID, $k, $v);

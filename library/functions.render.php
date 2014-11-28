@@ -96,3 +96,17 @@ if (!function_exists('ArticleCategoryUrl')) {
         return Url($Result, $WithDomain);
     }
 }
+
+if (!function_exists('ArticleAuthorAnchor')) {
+    /**
+     * Get the URL for the author of an article.
+     */
+    function ArticleAuthorAnchor($User, $CssClass = null, $Options = null) {
+        $AuthorMeta = UserModel::GetMeta($User->UserID, 'Articles.%', 'Articles.');
+
+        if ($AuthorMeta['AuthorDisplayName'] != "")
+            $Options = ['Text' => $AuthorMeta['AuthorDisplayName']];
+
+        return UserAnchor($User, $CssClass, $Options);
+    }
+}

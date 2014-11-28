@@ -27,7 +27,7 @@ ShowArticlesDashboardMenu($this->RequestMethod);
                     echo '<div class="ArticleMeta">';
                     echo '<span class="ArticleDate">' . Gdn_Format::Date($Article->DateInserted,
                             '%e %B %Y - %l:%M %p') . '</span>';
-                    echo '<span class="ArticleAuthor">' . UserAnchor($Author) . '</span>';
+                    echo '<span class="ArticleAuthor">' . ArticleAuthorAnchor($Author) . '</span>';
                     echo '</div>';
                     echo '</li>';
                 }
@@ -67,7 +67,7 @@ ShowArticlesDashboardMenu($this->RequestMethod);
                         echo '<div class="ArticleMeta">';
                         echo '<span class="ArticleDate">' . Gdn_Format::Date($Article->DateInserted,
                                 '%e %B %Y - %l:%M %p') . '</span>';
-                        echo '<span class="ArticleAuthor">' . UserAnchor($Author) . '</span>';
+                        echo '<span class="ArticleAuthor">' . ArticleAuthorAnchor($Author) . '</span>';
                         echo '</div>';
                         echo '</li>';
                     }
