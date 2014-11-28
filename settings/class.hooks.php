@@ -91,7 +91,7 @@ class ArticlesHooks extends Gdn_Plugin {
 
         $ConfigModule->Initialize(array(
             'Articles.Comments.EnableThreadedComments' => array(
-               'LabelCode' => 'Enable threaded comment replies?',
+               'LabelCode' => 'Enable threaded (one level) comment replies?',
                'Control'   => 'Checkbox'
             ),
             'Articles.Comments.AllowGuests' => array(
