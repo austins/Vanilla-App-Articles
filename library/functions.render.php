@@ -102,11 +102,33 @@ if (!function_exists('ArticleAuthorAnchor')) {
      * Get the URL for the author of an article.
      */
     function ArticleAuthorAnchor($User, $CssClass = null, $Options = null) {
+        static $NameUnique = NULL;
+        if ($NameUnique === NULL)
+            $NameUnique = C('Garden.Registration.NameUnique');
+
+        if (is_array($CssClass)) {
+            $Options = $CssClass;
+            $CssClass = NULL;
+        } elseif (is_string($Options))
+            $Options = array('Px' => $Options);
+
+        $Px = GetValue('Px', $Options, '');
+
+        $Name = GetValue($Px.'Name', $User, T('Unknown'));
+        $UserID = GetValue($Px.'UserID', $User, 0);
+
         $AuthorMeta = UserModel::GetMeta($User->UserID, 'Articles.%', 'Articles.');
-
         if ($AuthorMeta['AuthorDisplayName'] != "")
-            $Options = ['Text' => $AuthorMeta['AuthorDisplayName']];
+            $Text = $AuthorMeta['AuthorDisplayName'];
+        else
+            $Text = GetValue('Text', $Options, htmlspecialchars($Name)); // Allow anchor text to be overridden.
 
-        return UserAnchor($User, $CssClass, $Options);
+        $Attributes = array(
+            'class' => $CssClass,
+            'rel' => GetValue('Rel', $Options)
+        );
+
+        $UserUrl = 'profile/articles/' . $UserID . '/' . $Name;
+        return '<a href="'.htmlspecialchars(Url($UserUrl)).'"'.Attribute($Attributes).'>'.$Text.'</a>';
     }
 }
