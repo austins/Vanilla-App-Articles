@@ -568,6 +568,9 @@ class ComposeController extends Gdn_Controller {
             // Validate fields.
             $FormValues = $this->Form->FormValues();
 
+            $Type = GetIncomingValue('Type');
+            $Preview = ($Type == 'Preview');
+
             $this->Form->ValidateRule('Body', 'ValidateRequired');
 
             // Set article ID.
@@ -627,13 +630,28 @@ class ComposeController extends Gdn_Controller {
                 $this->ErrorMessage($this->Form->Errors());
             } else {
                 // There are no form errors.
-                if ($this->Form->Save($FormValues)) {
+                if ($Preview) {
+                    // If this was a preview click, create a comment shell with the values for this comment
+                    $this->Comment = new stdClass();
+                    $this->Comment->InsertUserID = $Session->User->UserID;
+                    $this->Comment->InsertName = $Session->User->Name;
+                    $this->Comment->InsertPhoto = $Session->User->Photo;
+                    $this->Comment->DateInserted = Gdn_Format::Date();
+                    $this->Comment->Body = ArrayValue('Body', $FormValues, '');
+
+                    if ($this->_DeliveryType == DELIVERY_TYPE_ALL) {
+                        $this->AddAsset('Content', $this->FetchView('preview'));
+                        $this->Comment->Format = GetValue('Format', $FormValues, C('Garden.InputFormatter'));
+                    } else {
+                        $this->View = 'preview';
+                    }
+                } else if ($this->Form->Save($FormValues)) {
                     $this->RedirectUrl = ArticleUrl($Article);
                 }
             }
         }
 
-        if (!$Editing)
+        if (!$Editing && !$Preview)
             $this->View = 'comment';
 
         $this->Render();

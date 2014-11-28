@@ -308,6 +308,24 @@ jQuery(document).ready(function($) {
         return false;
     });
 
+    // Reveal the textarea and hide previews.
+    $('a.WriteButton, a.Cancel').livequery('click', function() {
+        if ($(this).hasClass('WriteButton')) {
+            var frm = $(this).parents('.MessageForm').find('form');
+            frm.trigger('WriteButtonClick', [frm]);
+
+            // Reveal the "Preview" button and hide this one
+            $(this).parents('.CommentForm').find('.PreviewButton').show();
+            $(this).hide();
+        }
+
+        resetCommentForm(this);
+        if ($(this).hasClass('Cancel'))
+            clearCommentForm(this);
+
+        return false;
+    });
+
     // Delete comment
     $('a.DeleteComment').popup({
         confirm: true,
