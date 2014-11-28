@@ -27,8 +27,9 @@ if (count($Articles) == 0) {
 
         $ArticleCategory = $this->ArticleCategoryModel->GetByID($Article->ArticleCategoryID);
 
-        $CommentCount = ($Article->CountArticleComments == 0) ? 'Comments' :
+        $CommentCountText = ($Article->CountArticleComments == 0) ? 'Comments' :
             Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
+        $CommentCountAnchor = ($Article->CountArticleComments == 0) ? '#CommentBox' : '#Comments';
 
         $Thumbnail = $this->ArticleMediaModel->GetThumbnailByArticleID($Article->ArticleID);
         ?>
@@ -65,7 +66,7 @@ if (count($Articles) == 0) {
                   '%e %B %Y - %l:%M %p');
               ?></span>
                     <span class="MItem MCount ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
-          <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCount, $ArticleUrl . '/#Comments');
+          <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText, $ArticleUrl . '/' . $CommentCountAnchor);
               ?></span>
                 </div>
             </header>

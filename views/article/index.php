@@ -13,9 +13,11 @@ $Author = Gdn::UserModel()->GetID($Article->AttributionUserID);
 $Category = $this->Category;
 
 if ($Article->CountArticleComments == 0)
-    $CommentCount = 'Comments';
+    $CommentCountText = 'Comments';
 else
-    $CommentCount = Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
+    $CommentCountText = Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
+
+$CommentCountAnchor = ($Article->CountArticleComments == 0) ? '#CommentBox' : '#Comments';
 ?>
 <article id="Article_<?php echo $Article->ArticleID; ?>" class="Article">
     <?php ShowArticleOptions($Article); ?>
@@ -38,8 +40,8 @@ else
                         class="MItem MCount ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
                             '%e %B %Y - %l:%M %p'); ?></span>
             <span class="MItem MCount ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
-            <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCount,
-                    $ArticleUrl . '/#Comments'); ?></span>
+            <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText,
+                    $ArticleUrl . '/' . $CommentCountAnchor); ?></span>
         </div>
     </header>
 

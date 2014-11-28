@@ -33,7 +33,7 @@ else {
 
         $Category = $this->ArticleCategoryModel->GetByID($Article->ArticleCategoryID);
 
-        $CommentCount = ($Article->CountArticleComments == 0) ? '0 Comments'
+        $CommentCountText = ($Article->CountArticleComments == 0) ? '0 Comments'
             : Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
 
         $CssClass = 'Item ItemArticle';
@@ -71,7 +71,7 @@ else {
                             '%e %B %Y - %l:%M %p'); ?></span>
                     <span class="MItem MCount ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
                     <span
-                        class="MItem MCount ArticleComments"><?php echo Anchor($CommentCount,
+                        class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText,
                             $ArticleUrl . '#comments'); ?></span>
                 </div>
             </div>
