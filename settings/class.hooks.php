@@ -143,6 +143,7 @@ class ArticlesHooks extends Gdn_Plugin {
 
         // Add asset.
         $Sender->AddJsFile('articles.js', 'articles');
+        $Sender->AddJsFile('articles.settings.js', 'articles');
 
         // Set up the article category model.
         $Sender->Form = new Gdn_Form();
@@ -239,6 +240,7 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->Title(T('Delete Article Category'));
         $Sender->AddSideMenu('/settings/articles/categories/');
         $Sender->AddJsFile('articles.js', 'articles');
+        $Sender->AddJsFile('articles.settings.js', 'articles');
 
         // Get category ID.
         $ArticleCategoryID = false;

@@ -30,6 +30,7 @@ class ComposeController extends Gdn_Controller {
         $this->AddJsFile('jquery.autocomplete.js');
         $this->AddJsFile('global.js');
         $this->AddJsFile('articles.js');
+        $this->AddJsFile('articles.compose.js');
 
         // Add CSS files.
         $this->AddCssFile('style.css');
