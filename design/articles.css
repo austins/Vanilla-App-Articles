@@ -54,3 +54,8 @@ body.Articles.category .Article .Options > .ToggleFlyout.Open {
     font-size: 15px;
     font-weight: bold;
 }
+
+.Item .Options {
+    position: relative;
+    z-index: 500;
+}
