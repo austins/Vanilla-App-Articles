@@ -1,22 +1,27 @@
 .Article {
     clear: both;
-    padding-bottom: 20px;
+    padding-bottom: 10px;
     border-bottom: 1px solid #DDD;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
 .Article:first-child {
     clear: none;
 }
 
+.Article:last-child {
+    border-bottom: 0;
+    margin-bottom: 0;
+}
+
 .ArticleThumbnail {
     float: left;
+    margin-right: 15px;
 }
 
 .ArticleInner {
     display: block;
     overflow: hidden;
-    padding-left: 15px;
 }
 
 .Meta-Article {

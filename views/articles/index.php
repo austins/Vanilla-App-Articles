@@ -43,9 +43,8 @@ if (count($Articles) == 0) {
                 echo Anchor(Img($ThumbnailPath, array('title' => $Article->Name)), $ArticleUrl);
                 echo '</div>';
             }
-
-            echo '<div class="ArticleInner">';
             ?>
+            <div class="ArticleInner">
             <header>
                 <h2 class="ArticleTitle"><?php echo Anchor($Article->Name, $ArticleUrl); ?></h2>
 
@@ -77,7 +76,10 @@ if (count($Articles) == 0) {
                 echo FormatArticleBody($ArticleBody, $Article->Format);
                 ?>
             </div>
+
             </div>
+
+            <div class="ClearFix"></div>
         </article>
     <?php
     endforeach;
