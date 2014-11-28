@@ -34,6 +34,7 @@ class ComposeController extends Gdn_Controller {
         // Add CSS files.
         $this->AddCssFile('style.css');
         $this->AddCssFile('articles.css');
+        $this->AddCssFile('articles.compose.css');
 
         // Add modules.
         $this->AddModule('GuestModule');
