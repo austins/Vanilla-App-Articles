@@ -16,7 +16,7 @@ if ($Category) {
 
 if (count($Articles) == 0) {
     if ($Category) {
-        echo Wrap(T('No articles have been published in this category.'), 'div');
+        echo Wrap(T('No articles have been published in this category yet.'), 'div');
     } else {
         echo Wrap(T('No articles have been published yet.'), 'div');
     }
