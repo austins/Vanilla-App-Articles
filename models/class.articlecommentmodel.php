@@ -177,9 +177,6 @@ class ArticleCommentModel extends Gdn_Model {
         if ($this->Validate($FormPostValues, $Insert) === true) {
             $Fields = $this->Validation->ValidationFields();
 
-            // Add the activity.
-            $this->AddActivity($Fields, $Insert);
-
             $Fields = RemoveKeyFromArray($Fields, $this->PrimaryKey); // Don't try to insert or update the primary key
             if ($Insert === false) {
                 // Updating.
@@ -197,6 +194,10 @@ class ArticleCommentModel extends Gdn_Model {
 
                 $ArticleModel = new ArticleModel();
                 $Article = $ArticleModel->GetByID(val('ArticleID', $FormPostValues, false));
+
+                // Add the activity.
+                $ArticleName = $Article->Name;
+                $this->AddActivity($Fields, $Insert, $PrimaryKeyVal, $ArticleName);
 
                 $this->UpdateCommentCount($Article, $Comment);
 
@@ -216,14 +217,13 @@ class ArticleCommentModel extends Gdn_Model {
      *
      * @param array $Fields
      * @param bool $Insert
+     * @param int $ArticleCommentID
+     * @param string $ArticleName
      */
-    private function AddActivity($Fields, $Insert) {
+    private function AddActivity($Fields, $Insert, $ArticleCommentID, $ArticleName) {
         // Only add a new activity if the comment is new and not a threaded reply.
         if (!$Insert || ($Fields['ParentArticleCommentID'] > 0))
             return;
-
-        $ArticleModel = new ArticleModel();
-        $Article = $ArticleModel->GetByID($Fields['ArticleID']);
 
         $ActivityModel = new ActivityModel();
         $Activity = array(
@@ -233,8 +233,8 @@ class ArticleCommentModel extends Gdn_Model {
             'HeadlineFormat' => '{ActivityUserID,user} commented on the "<a href="{Url,html}">{Data.Name}</a>" article.',
             'Story' => SliceParagraph(Gdn_Format::PlainText($Fields['Body'], $Fields['Format']),
                 C('Articles.Excerpt.MaxLength', 160)),
-            'Route' => '/article/comment/' . $Fields['ArticleCommentID'] . '/#Comment_' . $Fields['ArticleCommentID'],
-            'Data' => array('Name' => $Article['Name'])
+            'Route' => '/article/comment/' . $ArticleCommentID . '/#Comment_' . $ArticleCommentID,
+            'Data' => array('Name' => $ArticleName)
         );
         $ActivityModel->Save($Activity);
     }
