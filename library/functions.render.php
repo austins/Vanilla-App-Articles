@@ -36,7 +36,7 @@ if (!function_exists('ArticleCommentUrl')) {
      * @return string
      */
     function ArticleCommentUrl($Article, $ArticleCommentID) {
-        return "/article/comment/$ArticleCommentID/#Comment_$ArticleCommentID";
+        return Url("/article/comment/$ArticleCommentID/#Comment_$ArticleCommentID", true);
     }
 }
 
