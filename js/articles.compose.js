@@ -21,7 +21,9 @@ jQuery(document).ready(function($) {
                 'ArticleID': currentArticleID
             },
             'onComplete': function(response) {
-                $(this).replaceWith($(this).clone(true)); // Reset the file upload field.
+                // Reset the file upload field.
+                $(this).wrap('<form>').closest('form').get(0).reset();
+                $(this).unwrap();
 
                 var imagePath = gdn.url('/uploads' + response.Path);
 
@@ -60,7 +62,10 @@ jQuery(document).ready(function($) {
                 'IsThumbnail': true
             },
             'onComplete': function(response) {
-                $(this).replaceWith($(this).clone(true)); // Reset the file upload field.
+                // Reset the file upload field.
+                $(this).wrap('<form>').closest('form').get(0).reset();
+                $(this).unwrap();
+                
                 $(this).hide();
 
                 var imagePath = gdn.url('/uploads' + response.Path);
