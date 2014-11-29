@@ -38,8 +38,8 @@
 }
 
 .ArticleBody .VideoWrap {
-    display: table;
-    margin: 0 auto;
+    display: block;
+    text-align: center;
 }
 
 body.Articles.index .Article .Options > .ToggleFlyout,
