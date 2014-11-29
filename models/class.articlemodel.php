@@ -395,7 +395,7 @@ class ArticleModel extends Gdn_Model {
                 $ActivityStory = Gdn_Format::To($Fields['Excerpt'], $Fields['Format']);
             } else {
                 $ActivityStory = SliceParagraph(Gdn_Format::PlainText($Fields['Body'], $Fields['Format']),
-                    C('Articles.Excerpt.MaxLength'));
+                    C('Articles.Excerpt.MaxLength', 160));
             }
 
             $ActivityModel = new ActivityModel();
