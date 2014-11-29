@@ -645,8 +645,11 @@ class ComposeController extends Gdn_Controller {
                     } else {
                         $this->View = 'preview';
                     }
-                } else if ($this->Form->Save($FormValues)) {
-                    $this->RedirectUrl = ArticleUrl($Article);
+                } else {
+                    $CommentID = $this->Form->Save($FormValues);
+
+                    if ($CommentID)
+                        $this->RedirectUrl = ArticleCommentUrl($Article, $CommentID);
                 }
             }
         }
