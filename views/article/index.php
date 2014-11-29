@@ -41,7 +41,7 @@ $CommentCountAnchor = ($Article->CountArticleComments == 0) ? '#CommentBox' : '#
                             '%e %B %Y - %l:%M %p'); ?></span>
             <span class="MItem MCount ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
             <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText,
-                    $ArticleUrl . '/' . $CommentCountAnchor); ?></span>
+                    $ArticleUrl . $CommentCountAnchor); ?></span>
         </div>
     </header>
 

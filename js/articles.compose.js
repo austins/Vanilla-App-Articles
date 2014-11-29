@@ -65,7 +65,7 @@ jQuery(document).ready(function($) {
                 // Reset the file upload field.
                 $(this).wrap('<form>').closest('form').get(0).reset();
                 $(this).unwrap();
-                
+
                 $(this).hide();
 
                 var imagePath = gdn.url('/uploads' + response.Path);

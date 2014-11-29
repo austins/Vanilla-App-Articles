@@ -66,7 +66,7 @@ if (count($Articles) == 0) {
                   '%e %B %Y - %l:%M %p');
               ?></span>
                     <span class="MItem MCount ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
-          <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText, $ArticleUrl . '/' . $CommentCountAnchor);
+          <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText, $ArticleUrl . $CommentCountAnchor);
               ?></span>
                 </div>
             </header>
