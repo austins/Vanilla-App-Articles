@@ -231,8 +231,8 @@ class ArticleCommentModel extends Gdn_Model {
             'ActivityUserID' => $Fields['InsertUserID'],
             'NotifyUserID' => ActivityModel::NOTIFY_PUBLIC,
             'HeadlineFormat' => '{ActivityUserID,user} commented on the "<a href="{Url,html}">{Data.Name}</a>" article.',
-            'Story' => SliceParagraph(Gdn_Format::PlainText($Fields['Body'], $Fields['Format']),
-                C('Articles.Excerpt.MaxLength', 160)),
+            //'Story' => SliceParagraph(Gdn_Format::PlainText($Fields['Body'], $Fields['Format']),
+            //    C('Articles.Excerpt.MaxLength', 160)),
             'Route' => '/article/comment/' . $ArticleCommentID . '/#Comment_' . $ArticleCommentID,
             'Data' => array('Name' => $ArticleName)
         );

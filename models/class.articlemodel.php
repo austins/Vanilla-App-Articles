@@ -404,7 +404,7 @@ class ArticleModel extends Gdn_Model {
                 'ActivityUserID' => $Fields['AttributionUserID'],
                 'NotifyUserID' => ActivityModel::NOTIFY_PUBLIC,
                 'HeadlineFormat' => '{ActivityUserID,user} posted the "<a href="{Url,html}">{Data.Name}</a>" article.',
-                'Story' => $ActivityStory,
+                //'Story' => $ActivityStory,
                 'Route' => '/article/' . Gdn_Format::Date($Fields['DateInserted'], '%Y') . '/' . $Fields['UrlCode'],
                 'Data' => array('Name' => $Fields['Name'])
             );
