@@ -75,6 +75,9 @@ class ArticleController extends Gdn_Controller {
 
         // Get the category.
         $this->Category = $this->ArticleCategoryModel->GetByID($this->Article->ArticleCategoryID);
+        $this->SetData('Breadcrumbs', array(
+            array('Name' => $this->Category->Name, 'Url' => ArticleCategoryUrl($this->Category))
+        ));
 
         // Prepare comment arguments.
         // Define the query offset and limit.
