@@ -99,7 +99,7 @@ jQuery(document).ready(function($) {
         e.preventDefault();
 
         var linkUrl = $(this).attr('href');
-        var imageUrl = window.location.protocol + '//' + location.host + '/' + linkUrl;
+        var imageUrl = window.location.protocol + '//' + location.host + linkUrl;
         var bodyFormat = $('#Form_Body').attr('Format');
 
         var imageCode = '';
