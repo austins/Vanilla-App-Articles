@@ -117,6 +117,17 @@ $PermissionModel->Save(array(
     'Articles.Comments.Add' => 0
 ));
 
+// Set initial role permissions for the Moderator role.
+$PermissionModel->Save(array(
+    'Role' => 'Moderator',
+    'Articles.Articles.Add' => 1,
+    'Articles.Articles.Close' => 1,
+    'Articles.Articles.Delete' => 1,
+    'Articles.Articles.Edit' => 1,
+    'Articles.Comments.Delete' => 1,
+    'Articles.Comments.Edit' => 1
+));
+
 // Set initial role permissions for the Administrator role.
 $PermissionModel->Save(array(
     'Role' => 'Administrator',
