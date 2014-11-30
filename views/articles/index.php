@@ -29,7 +29,6 @@ if (count($Articles) == 0) {
 
         $CommentCountText = ($Article->CountArticleComments == 0) ? 'Comments' :
             Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
-        $CommentCountAnchor = ($Article->CountArticleComments == 0) ? '#CommentBox' : '#Comments';
 
         $Thumbnail = $this->ArticleMediaModel->GetThumbnailByArticleID($Article->ArticleID);
         ?>
@@ -66,7 +65,7 @@ if (count($Articles) == 0) {
                   '%e %B %Y - %l:%M %p');
               ?></span>
                     <span class="MItem MCount ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
-          <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText, $ArticleUrl . $CommentCountAnchor);
+          <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText, $ArticleUrl . '#comments');
               ?></span>
                 </div>
             </header>

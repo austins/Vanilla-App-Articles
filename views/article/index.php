@@ -16,8 +16,6 @@ if ($Article->CountArticleComments == 0)
     $CommentCountText = 'Comments';
 else
     $CommentCountText = Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
-
-$CommentCountAnchor = ($Article->CountArticleComments == 0) ? '#CommentBox' : '#Comments';
 ?>
 <article id="Article_<?php echo $Article->ArticleID; ?>" class="Article">
     <?php ShowArticleOptions($Article); ?>
@@ -41,14 +39,17 @@ $CommentCountAnchor = ($Article->CountArticleComments == 0) ? '#CommentBox' : '#
                             '%e %B %Y - %l:%M %p'); ?></span>
             <span class="MItem MCount ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
             <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText,
-                    $ArticleUrl . $CommentCountAnchor); ?></span>
+                    $ArticleUrl . '#comments'); ?></span>
         </div>
     </header>
 
     <div class="ArticleBody"><?php echo FormatArticleBody($Article->Body, $Article->Format); ?></div>
 </article>
 
+<section id="comments">
 <?php
 include $this->FetchViewLocation('comments', 'article', 'Articles');
 
 ShowCommentForm();
+?>
+</section>

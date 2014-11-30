@@ -10,7 +10,7 @@ $Article = $this->Article;
 $CurrentOffset = 0;
 if ($this->Comments->NumRows() > 0):
     ?>
-    <section id="Comments" class="DataBox DataBox-Comments">
+    <div class="DataBox DataBox-Comments">
         <?php
         // Pager
         $this->Pager->Wrapper = '<span %1$s>%2$s</span>';
@@ -120,6 +120,6 @@ if ($this->Comments->NumRows() > 0):
         echo $this->Pager->ToString('more');
         echo '</div>';
         ?>
-    </section>
+    </div>
 <?php
 endif;
