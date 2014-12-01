@@ -103,10 +103,13 @@ class ArticlesController extends Gdn_Controller {
      * @param string $UrlCode
      * @throws NotFoundException if article category not found
      */
-    public function Category($UrlCode = '') {
+    public function Category($UrlCode = '', $Page = false) {
         // Set required permission.
         $this->Permission('Articles.Articles.View');
 
+        list($Offset, $Limit) = OffsetLimit($Page, C('Articles.Articles.PerPage', 12));
+        $Page = PageNumber($Offset, $Limit);
+        
         // Get the category.
         if ($UrlCode != '')
             $this->Category = $this->ArticleCategoryModel->GetByUrlCode($UrlCode);
@@ -118,13 +121,27 @@ class ArticlesController extends Gdn_Controller {
         $this->Title($this->Category->Name);
 
         // Get published articles.
-        $Offset = 0;
-        $Limit = false;
         $Wheres = array(
-            'a.Status' => ArticleModel::STATUS_PUBLISHED,
-            'a.ArticleCategoryID' => $this->Category->ArticleCategoryID
+            'Status' => ArticleModel::STATUS_PUBLISHED,
+            'ArticleCategoryID' => $this->Category->ArticleCategoryID
         );
         $this->SetData('Articles', $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result());
+        // Get total article count.
+        $CountArticles = $this->ArticleModel->GetCount($Wheres);
+        $this->SetData('CountArticles', $CountArticles);
+        // Build a pager
+        $PagerFactory = new Gdn_PagerFactory();
+        $this->EventArguments['PagerType'] = 'Pager';
+        $this->FireEvent('BeforeBuildPager');
+        $this->Pager = $PagerFactory->GetPager($this->EventArguments['PagerType'], $this);
+        $this->Pager->ClientID = 'Pager';
+        $this->Pager->Configure($Offset, $Limit, $CountArticles, 'articles/category/'.$UrlCode.'/%1$s');
+        if (!$this->Data('_PagerUrl')) {
+          $this->SetData('_PagerUrl', 'articles/category/'.$UrlCode.'/{Page}');
+        }
+        $this->SetData('_Page', $Page);
+        $this->SetData('_Limit', $Limit);
+        $this->FireEvent('AfterBuildPager');
 
         Gdn_Theme::Section('CategoryArticleList');
         $this->View = 'index';
