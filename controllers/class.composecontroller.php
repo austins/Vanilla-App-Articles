@@ -277,16 +277,16 @@ class ComposeController extends Gdn_Controller {
             if ($Preview) {
                 $this->Article = new stdClass();
                 $this->Article->Name = $this->Form->GetValue('Name', '');
-                $this->Comment = new stdClass();
-                $this->Comment->InsertUserID = $Session->User->UserID;
-                $this->Comment->InsertName = $Session->User->Name;
-                $this->Comment->InsertPhoto = $Session->User->Photo;
-                $this->Comment->DateInserted = Gdn_Format::Date();
-                $this->Comment->Body = ArrayValue('Body', $FormValues, '');
-                $this->Comment->Format = GetValue('Format', $FormValues, C('Garden.InputFormatter'));
+                $this->Preview = new stdClass();
+                $this->Preview->InsertUserID = $Session->User->UserID;
+                $this->Preview->InsertName = $Session->User->Name;
+                $this->Preview->InsertPhoto = $Session->User->Photo;
+                $this->Preview->DateInserted = Gdn_Format::Date();
+                $this->Preview->Body = ArrayValue('Body', $FormValues, '');
+                $this->Preview->Format = GetValue('Format', $FormValues, C('Garden.InputFormatter'));
 
                 $this->EventArguments['Article'] = &$this->Article;
-                $this->EventArguments['Comment'] = &$this->Comment;
+                $this->EventArguments['Preview'] = &$this->Preview;
                 $this->FireEvent('BeforeArticlePreview');
 
                 if ($this->_DeliveryType == DELIVERY_TYPE_ALL) {
@@ -656,16 +656,16 @@ class ComposeController extends Gdn_Controller {
                 // There are no form errors.
                 if ($Preview) {
                     // If this was a preview click, create a comment shell with the values for this comment
-                    $this->Comment = new stdClass();
-                    $this->Comment->InsertUserID = $Session->User->UserID;
-                    $this->Comment->InsertName = $Session->User->Name;
-                    $this->Comment->InsertPhoto = $Session->User->Photo;
-                    $this->Comment->DateInserted = Gdn_Format::Date();
-                    $this->Comment->Body = ArrayValue('Body', $FormValues, '');
+                    $this->Preview = new stdClass();
+                    $this->Preview->InsertUserID = $Session->User->UserID;
+                    $this->Preview->InsertName = $Session->User->Name;
+                    $this->Preview->InsertPhoto = $Session->User->Photo;
+                    $this->Preview->DateInserted = Gdn_Format::Date();
+                    $this->Preview->Body = ArrayValue('Body', $FormValues, '');
 
                     if ($this->_DeliveryType == DELIVERY_TYPE_ALL) {
                         $this->AddAsset('Content', $this->FetchView('preview'));
-                        $this->Comment->Format = GetValue('Format', $FormValues, C('Garden.InputFormatter'));
+                        $this->Preview->Format = GetValue('Format', $FormValues, C('Garden.InputFormatter'));
                     } else {
                         $this->View = 'preview';
                     }
