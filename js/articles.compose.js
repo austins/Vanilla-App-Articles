@@ -182,17 +182,9 @@ jQuery(document).ready(function($) {
                 if (json.FormSaved == false) {
                     $(frm).prepend(json.ErrorMessages);
                     json.ErrorMessages = null;
-                } else if (preview) {
+                } else {
                     // Pop up the new preview.
                     $.popup({}, json.Data);
-                } else {
-                    if (json.RedirectUrl) {
-                        $(frm).triggerHandler('complete');
-                        // Redirect to the new article
-                        document.location = json.RedirectUrl;
-                    } else {
-                        $('#Content').html(json.Data);
-                    }
                 }
                 gdn.inform(json);
             },
