@@ -144,11 +144,11 @@ class ArticleController extends Gdn_Controller {
         $HeadModule->AddTag('meta', array('property' => 'og:type', 'content' => 'article'));
 
         if ($Article->Excerpt != '') {
-            $this->Description(Gdn_Format::To($Article->Excerpt, $Article->Format));
+            $Description = Gdn_Format::To($Article->Excerpt, $Article->Format);
         } else {
-            $this->Description(SliceParagraph(Gdn_Format::PlainText($Article->Body, $Article->Format),
-                C('Articles.Excerpt.MaxLength')));
+            $Description = SliceParagraph(Gdn_Format::PlainText($Article->Body, $Article->Format), C('Articles.Excerpt.MaxLength'));
         }
+        $this->Description($Description);
 
         $HeadModule->AddTag('meta', array('property' => 'article:published_time',
             'content' => date(DATE_ISO8601, strtotime($Article->DateInserted))));
@@ -171,6 +171,10 @@ class ArticleController extends Gdn_Controller {
             $HeadModule->AddTag('meta', array('property' => 'og:image:width', 'content' => $Image->ImageWidth));
             $HeadModule->AddTag('meta', array('property' => 'og:image:height', 'content' => $Image->ImageHeight));
         }
+        
+        // Twitter card
+        $HeadModule->AddTag('meta', array('property' => 'twitter:card', 'content' => 'summary'));
+        $HeadModule->AddTag('meta', array('property' => 'twitter:description', 'content' => $Description));
     }
 
     /**
