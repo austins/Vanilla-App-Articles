@@ -312,26 +312,30 @@ class ArticlesHooks extends Gdn_Plugin {
             $UserID = $Sender->User->UserID;
 
             // Add the article tab
-            $ArticlesLabel = Sprite('SpArticles') . ' ' . T('Articles');
+            if (($Sender->User->CountArticles > 0) || Gdn::UserModel()->CheckPermission($Sender->User, 'Articles.Articles.Add')) {
+                $ArticlesLabel = Sprite('SpArticles') . ' ' . T('Articles');
 
-            if (C('Articles.Profile.ShowCounts', true))
-                $ArticlesLabel .= '<span class="Aside">' . CountString(GetValueR('User.CountArticles', $Sender,
-                        null), "/profile/count/articles?userid=$UserID") . '</span>';
+                if (C('Articles.Profile.ShowCounts', true))
+                    $ArticlesLabel .= '<span class="Aside">' . CountString(GetValueR('User.CountArticles', $Sender,
+                            null), "/profile/count/articles?userid=$UserID") . '</span>';
 
-            $Sender->AddProfileTab(T('Articles'),
-                'profile/articles/' . $Sender->User->UserID . '/' . rawurlencode($Sender->User->Name), 'Articles',
-                $ArticlesLabel);
+                $Sender->AddProfileTab(T('Articles'),
+                    'profile/articles/' . $Sender->User->UserID . '/' . rawurlencode($Sender->User->Name), 'Articles',
+                    $ArticlesLabel);
+            }
 
             // Add the article comments tab
-            $ArticleCommentsLabel = Sprite('SpArticleComments') . ' ' . T('Article Comments');
+            if (($Sender->User->CountArticleComments > 0) || Gdn::UserModel()->CheckPermission($Sender->User, 'Articles.Comments.Add')) {
+                $ArticleCommentsLabel = Sprite('SpArticleComments') . ' ' . T('Article Comments');
 
-            if (C('Articles.Profile.ShowCounts', true))
-                $ArticleCommentsLabel .= '<span class="Aside">' . CountString(GetValueR('User.CountArticleComments',
-                        $Sender, null), "/profile/count/articlecomments?userid=$UserID") . '</span>';
+                if (C('Articles.Profile.ShowCounts', true))
+                    $ArticleCommentsLabel .= '<span class="Aside">' . CountString(GetValueR('User.CountArticleComments',
+                            $Sender, null), "/profile/count/articlecomments?userid=$UserID") . '</span>';
 
-            $Sender->AddProfileTab(T('Article Comments'),
-                'profile/articlecomments/' . $Sender->User->UserID . '/' . rawurlencode($Sender->User->Name),
-                'Article Comments', $ArticleCommentsLabel);
+                $Sender->AddProfileTab(T('Article Comments'),
+                    'profile/articlecomments/' . $Sender->User->UserID . '/' . rawurlencode($Sender->User->Name),
+                    'Article Comments', $ArticleCommentsLabel);
+            }
 
             // Add the article tab's CSS and Javascript.
             $Sender->AddJsFile('jquery.gardenmorepager.js');
@@ -345,6 +349,16 @@ class ArticlesHooks extends Gdn_Plugin {
      * @param ProfileController $Sender
      */
     public function ProfileController_Articles_Create($Sender, $UserReference = '', $Username = '', $Page = '', $UserID = '') {
+        // User must have at least one article or have permission to add articles for this page to be viewable.
+        if (is_numeric($UserReference))
+            $User = Gdn::UserModel()->GetID($UserReference);
+        else if (is_string($UserReference))
+            $User = Gdn::UserModel()->GetByUsername($UserReference);
+
+        $UserCanAddArticle = Gdn::UserModel()->CheckPermission($User, 'Articles.Articles.Add');
+        if ($User && (!$UserCanAddArticle || (!$UserCanAddArticle && ($User->CountArticles == 0))))
+            Redirect(UserUrl($User));
+
         $Sender->EditMode(false);
 
         // Tell the ProfileController what tab to load
@@ -407,6 +421,16 @@ class ArticlesHooks extends Gdn_Plugin {
      */
     public function ProfileController_ArticleComments_Create($Sender, $UserReference = '', $Username = '',
                                                              $Page = '', $UserID = '') {
+        // User must have at least one comment or have permission to add comments for this page to be viewable.
+        if (is_numeric($UserReference))
+            $User = Gdn::UserModel()->GetID($UserReference);
+        else if (is_string($UserReference))
+            $User = Gdn::UserModel()->GetByUsername($UserReference);
+
+        $UserCanAddComment = Gdn::UserModel()->CheckPermission($User, 'Articles.Comments.Add');
+        if ($User && (!$UserCanAddComment || (!$UserCanAddComment && ($User->CountArticleComments == 0))))
+            Redirect(UserUrl($User));
+
         $Sender->EditMode(false);
 
         // Tell the ProfileController what tab to load
