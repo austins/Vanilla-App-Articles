@@ -31,7 +31,7 @@ if ($this->Comments->NumRows() > 0):
                     $User = Gdn::UserModel()->GetID($Comment->InsertUserID);
 
                 // Get user meta for articles app.
-                $UserMeta = Gdn::UserModel()->GetMeta($Sender->User->UserID, 'Articles.%', 'Articles.');
+                $UserMeta = Gdn::UserModel()->GetMeta($User->UserID, 'Articles.%', 'Articles.');
                 if (is_array($UserMeta)) {
                     $AuthorDisplayName = $UserMeta['AuthorDisplayName'];
                 }
