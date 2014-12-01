@@ -143,8 +143,8 @@ jQuery(document).ready(function($) {
         }
     });
 
-    // Hijack article compose form button clicks
-    $('#Form_ComposeArticle :submit').live('click', function() {
+    // Hijack article compose form preview button click
+    $('#Form_ComposeArticle #Form_Preview:submit').live('click', function() {
         var btn = this;
         var frm = $(btn).parents('form').get(0);
 
@@ -152,7 +152,6 @@ jQuery(document).ready(function($) {
         $(frm).triggerHandler('BeforeArticleSubmit', [frm, btn]);
 
         var inpArticleID = $(frm).find(':hidden[name$=ArticleID]');
-        var preview = $(btn).attr('name') == $('#Form_Preview').attr('name') ? true : false;
         var postValues = $(frm).serialize();
         postValues += '&DeliveryType=VIEW&DeliveryMethod=JSON'; // DELIVERY_TYPE_VIEW
         postValues += '&' + btn.name + '=' + btn.value;
@@ -186,7 +185,7 @@ jQuery(document).ready(function($) {
                 } else if (preview) {
                     // Pop up the new preview.
                     $.popup({}, json.Data);
-                } else if (!draft) {
+                } else {
                     if (json.RedirectUrl) {
                         $(frm).triggerHandler('complete');
                         // Redirect to the new article

@@ -340,10 +340,11 @@ class ComposeController extends Gdn_Controller {
                     else
                         $this->RedirectUrl = ArticleUrl($NewArticle, '', true);
                 }
-
-                $this->View = 'article';
             }
         }
+
+        if (!$Preview)
+            $this->View = 'article';
 
         $this->Render();
     }
