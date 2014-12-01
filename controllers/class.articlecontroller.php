@@ -162,11 +162,14 @@ class ArticleController extends Gdn_Controller {
         $HeadModule->AddTag('meta', array('property' => 'article:section', 'content' => $this->Category->Name));
 
         // Image meta info
-        $Thumbnail = $this->ArticleMediaModel->GetThumbnailByArticleID($Article->ArticleID);
-        if ($Thumbnail) {
-            $HeadModule->AddTag('meta', array('property' => 'og:image', 'content' => Url('/uploads' . $Thumbnail->Path, true)));
-            $HeadModule->AddTag('meta', array('property' => 'og:image:width', 'content' => $Thumbnail->ImageWidth));
-            $HeadModule->AddTag('meta', array('property' => 'og:image:height', 'content' => $Thumbnail->ImageHeight));
+        $Image = $this->ArticleMediaModel->GetThumbnailByArticleID($Article->ArticleID);
+        if(!$Image) {
+          $Image = $this->ArticleMediaModel->GetByArticleID($Article->ArticleID)->FirstRow();
+        }
+        if ($Image) {
+            $HeadModule->AddTag('meta', array('property' => 'og:image', 'content' => Url('/uploads' . $Image->Path, true)));
+            $HeadModule->AddTag('meta', array('property' => 'og:image:width', 'content' => $Image->ImageWidth));
+            $HeadModule->AddTag('meta', array('property' => 'og:image:height', 'content' => $Image->ImageHeight));
         }
     }
 
