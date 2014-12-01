@@ -144,7 +144,7 @@ class ArticleController extends Gdn_Controller {
         $HeadModule->AddTag('meta', array('property' => 'og:type', 'content' => 'article'));
 
         if ($Article->Excerpt != '') {
-            $Description = Gdn_Format::To($Article->Excerpt, $Article->Format);
+            $Description = Gdn_Format::PlainText($Article->Excerpt, $Article->Format);
         } else {
             $Description = SliceParagraph(Gdn_Format::PlainText($Article->Body, $Article->Format), C('Articles.Excerpt.MaxLength'));
         }
@@ -173,8 +173,18 @@ class ArticleController extends Gdn_Controller {
         }
         
         // Twitter card
-        $HeadModule->AddTag('meta', array('property' => 'twitter:card', 'content' => 'summary'));
-        $HeadModule->AddTag('meta', array('property' => 'twitter:description', 'content' => $Description));
+        $HeadModule->AddTag('meta', array('name' => 'twitter:card', 'content' => 'summary'));
+
+        $TwitterUsername = trim(C('Articles.TwitterUsername', ''));
+        if ($TwitterUsername != '')
+            $HeadModule->AddTag('meta', array('name' => 'twitter:site', 'content' => '@' . $TwitterUsername));
+
+        $HeadModule->AddTag('meta', array('name' => 'twitter:title', 'content' => $Article->Name));
+        $HeadModule->AddTag('meta', array('name' => 'twitter:description', 'content' => $Description));
+
+        if ($Image) {
+            $HeadModule->AddTag('meta', array('name' => 'twitter:image', 'content' => Url('/uploads' . $Image->Path, true)));
+        }
     }
 
     /**

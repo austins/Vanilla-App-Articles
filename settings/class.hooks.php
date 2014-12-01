@@ -97,6 +97,10 @@ class ArticlesHooks extends Gdn_Plugin {
             'Articles.Comments.AllowGuests' => array(
                 'LabelCode' => 'Allow guest commenting?',
                 'Control'   => 'Checkbox'
+            ),
+            'Articles.TwitterUsername' => array(
+                'LabelCode' => 'Enter a Twitter username associated with this website to be used for Twitter card meta tags (optional):',
+                'Control'   => 'TextBox'
             )
         ));
 
