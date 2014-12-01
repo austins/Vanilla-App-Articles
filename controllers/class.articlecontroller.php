@@ -158,7 +158,7 @@ class ArticleController extends Gdn_Controller {
         }
 
         $HeadModule->AddTag('meta',
-            array('property' => 'article:author', 'content' => Url('/profile/' . $Article->AuthorName, true)));
+            array('property' => 'article:author', 'content' => Url('profile/articles/' . $Article->AttributionUserID . '/' . $Article->AuthorName, true)));
         $HeadModule->AddTag('meta', array('property' => 'article:section', 'content' => $this->Category->Name));
 
         // Image meta info
