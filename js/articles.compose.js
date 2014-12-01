@@ -32,7 +32,7 @@ jQuery(document).ready(function($) {
                 '<div class="UploadedImage"><img src="' + imagePath + '" alt="" /></div>' +
                 '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' + imagePath + '">Insert into Post</a>' +
                 '<br /><a class="UploadedImageDelete" href="' + gdn.url('/articles/compose/deleteimage/'
-                + response.ArticleMediaID) + '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div>');
+                + response.ArticleMediaID) + '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>');
 
                 // Add new image to hidden form field to be passed to the controller.
                 var UploadedImageIDs = CreateCustomElement('input', {
@@ -74,7 +74,7 @@ jQuery(document).ready(function($) {
                 $('#UploadedThumbnail').append('<div id="ArticleMedia_' + response.ArticleMediaID + '" class="UploadedImageWrap">' +
                 '<div class="UploadedImage"><img src="' + imagePath + '" alt="" /></div>' +
                 '<div class="UploadedImageActions"><a class="UploadedImageDelete" href="' + gdn.url('/articles/compose/deleteimage/'
-                + response.ArticleMediaID) + '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div>');
+                + response.ArticleMediaID) + '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>');
 
                 // Add new image to hidden form field to be passed to the controller.
                 var UploadedThumbnailID = CreateCustomElement('input', {
