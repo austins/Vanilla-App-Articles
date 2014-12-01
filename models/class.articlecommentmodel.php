@@ -182,6 +182,12 @@ class ArticleCommentModel extends Gdn_Model {
                 // Updating.
                 $this->Update($Fields, array($this->PrimaryKey => $PrimaryKeyVal));
             } else {
+                // Check for spam
+                $Spam = SpamModel::IsSpam('Comment', $Fields);
+                if($Spam) {
+                  return SPAM;
+                }
+                
                 // Inserting.
                 $PrimaryKeyVal = $this->Insert($Fields);
 
