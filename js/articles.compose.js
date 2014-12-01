@@ -142,4 +142,66 @@ jQuery(document).ready(function($) {
             }
         }
     });
+
+    // Hijack article compose form button clicks
+    $('#Form_ComposeArticle :submit').live('click', function() {
+        var btn = this;
+        var frm = $(btn).parents('form').get(0);
+
+        // Handler before submitting
+        $(frm).triggerHandler('BeforeArticleSubmit', [frm, btn]);
+
+        var inpArticleID = $(frm).find(':hidden[name$=ArticleID]');
+        var preview = $(btn).attr('name') == $('#Form_Preview').attr('name') ? true : false;
+        var postValues = $(frm).serialize();
+        postValues += '&DeliveryType=VIEW&DeliveryMethod=JSON'; // DELIVERY_TYPE_VIEW
+        postValues += '&' + btn.name + '=' + btn.value;
+        gdn.disable(btn);
+
+        $.ajax({
+            type: "POST",
+            url: $(frm).attr('action'),
+            data: postValues,
+            dataType: 'json',
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+                $('div.Popup').remove();
+                $.popup({}, XMLHttpRequest.responseText);
+            },
+            success: function(json) {
+                json = $.postParseJson(json);
+
+                // Remove any old popups
+                $('div.Popup').remove();
+
+                // Assign the article id to the form if it was defined
+                if (json.ArticleID != null)
+                    $(inpArticleID).val(json.ArticleID);
+
+                // Remove any old errors from the form
+                $(frm).find('div.Errors').remove();
+
+                if (json.FormSaved == false) {
+                    $(frm).prepend(json.ErrorMessages);
+                    json.ErrorMessages = null;
+                } else if (preview) {
+                    // Pop up the new preview.
+                    $.popup({}, json.Data);
+                } else if (!draft) {
+                    if (json.RedirectUrl) {
+                        $(frm).triggerHandler('complete');
+                        // Redirect to the new article
+                        document.location = json.RedirectUrl;
+                    } else {
+                        $('#Content').html(json.Data);
+                    }
+                }
+                gdn.inform(json);
+            },
+            complete: function(XMLHttpRequest, textStatus) {
+                gdn.enable(btn);
+            }
+        });
+        $(frm).triggerHandler('submit');
+        return false;
+    });
 });

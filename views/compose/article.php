@@ -136,8 +136,16 @@ echo $this->Form->Errors();
 
     <div class="Buttons">
         <?php
+        $this->FireEvent('BeforeFormButtons');
+
         echo $this->Form->Button((property_exists($this, 'Article')) ? 'Save' : 'Post Article',
             array('class' => 'Button Primary ArticleButton'));
+
+        echo $this->Form->Button('Preview', array('class' => 'Button PreviewButton'));
+
+        echo Anchor(T('Cancel'), '/compose/posts', 'Button ComposeCancel');
+
+        $this->FireEvent('AfterFormButtons');
         ?>
     </div>
 <?php

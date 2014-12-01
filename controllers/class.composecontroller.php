@@ -272,7 +272,29 @@ class ComposeController extends Gdn_Controller {
 
             $this->Form->SetFormValue('AttributionUserID', (int)$Author->UserID);
 
-            if ($this->Form->ErrorCount() == 0) {
+            // If this was a preview click, create an article shell with the values for this article.
+            $Preview = $this->Form->ButtonExists('Preview') ? true : false;
+            if ($Preview) {
+                $this->Article = new stdClass();
+                $this->Article->Name = $this->Form->GetValue('Name', '');
+                $this->Comment = new stdClass();
+                $this->Comment->InsertUserID = $Session->User->UserID;
+                $this->Comment->InsertName = $Session->User->Name;
+                $this->Comment->InsertPhoto = $Session->User->Photo;
+                $this->Comment->DateInserted = Gdn_Format::Date();
+                $this->Comment->Body = ArrayValue('Body', $FormValues, '');
+                $this->Comment->Format = GetValue('Format', $FormValues, C('Garden.InputFormatter'));
+
+                $this->EventArguments['Article'] = &$this->Article;
+                $this->EventArguments['Comment'] = &$this->Comment;
+                $this->FireEvent('BeforeArticlePreview');
+
+                if ($this->_DeliveryType == DELIVERY_TYPE_ALL) {
+                    $this->AddAsset('Content', $this->FetchView('preview'));
+                } else {
+                    $this->View = 'preview';
+                }
+            } else if ($this->Form->ErrorCount() == 0) {
                 $ArticleID = $this->Form->Save($FormValues);
 
                 // If the article was saved successfully.
@@ -318,10 +340,11 @@ class ComposeController extends Gdn_Controller {
                     else
                         $this->RedirectUrl = ArticleUrl($NewArticle, '', true);
                 }
+
+                $this->View = 'article';
             }
         }
 
-        $this->View = 'article';
         $this->Render();
     }
 
