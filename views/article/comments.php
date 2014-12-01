@@ -30,6 +30,12 @@ if ($this->Comments->NumRows() > 0):
                 if (is_numeric($Comment->InsertUserID))
                     $User = Gdn::UserModel()->GetID($Comment->InsertUserID);
 
+                // Get user meta for articles app.
+                $UserMeta = Gdn::UserModel()->GetMeta($Sender->User->UserID, 'Articles.%', 'Articles.');
+                if (is_array($UserMeta)) {
+                    $AuthorDisplayName = $UserMeta['AuthorDisplayName'];
+                }
+
                 $ParentArticleCommentID = is_numeric($Comment->ParentArticleCommentID) ?
                     $Comment->ParentArticleCommentID : false;
                 if ($ParentArticleCommentID)
@@ -46,6 +52,10 @@ if ($this->Comments->NumRows() > 0):
                                 if ($User) {
                                     echo UserPhoto($User);
                                     echo UserAnchor($User, 'Username');
+
+                                    if (($AuthorDisplayName != '') && ($AuthorDisplayName != $User->Name))
+                                        echo ' (' . $AuthorDisplayName . ')';
+
                                     $this->FireEvent('AuthorPhoto');
                                 } else {
                                     echo Wrap($Comment->GuestName, 'span', array('class' => 'Username GuestName'));

@@ -503,7 +503,7 @@ class ArticlesHooks extends Gdn_Plugin {
             return;
 
         // Display author display name.
-        if ($UserMeta['AuthorDisplayName'] != '') {
+        if (($UserMeta['AuthorDisplayName'] != '') && ($Sender->User->Name != $UserMeta['AuthorDisplayName'])) {
             echo ' <dt class="Articles Profile AuthorDisplayName">' . T('Author Display Name') . '</dt> ';
             echo ' <dd class="Articles Profile AuthorDisplayName">' . Gdn_Format::Html($UserMeta['AuthorDisplayName']) . '</dd> ';
         }
@@ -514,8 +514,7 @@ class ArticlesHooks extends Gdn_Plugin {
      *
      * @param UserModel $Sender UserModel
      */
-    public
-    function UserModel_AfterSave_Handler($Sender) {
+    public function UserModel_AfterSave_Handler($Sender) {
         $UserID = val('UserID', $Sender->EventArguments);
         $FormValues = val('FormPostValues', $Sender->EventArguments, array());
         $AuthorInfo = array_intersect_key($FormValues,
@@ -531,8 +530,7 @@ class ArticlesHooks extends Gdn_Plugin {
      *
      * @param UserModel $Sender UserModel.
      */
-    public
-    function UserModel_BeforeDeleteUser_Handler($Sender) {
+    public function UserModel_BeforeDeleteUser_Handler($Sender) {
         $UserID = val('UserID', $Sender->EventArguments);
         $Options = val('Options', $Sender->EventArguments, array());
         $Options = is_array($Options) ? $Options : array();
@@ -548,8 +546,7 @@ class ArticlesHooks extends Gdn_Plugin {
      * @param array $Options An array of options:
      *  - DeleteMethod: One of delete, wipe, or null
      */
-    private
-    function DeleteUserData($UserID, $Options = array(), &$Data = null) {
+    private function DeleteUserData($UserID, $Options = array(), &$Data = null) {
         $SQL = Gdn::SQL();
 
         // Comment deletion depends on method selected.
@@ -648,8 +645,7 @@ class ArticlesHooks extends Gdn_Plugin {
      *
      * @param DbaController $Sender
      */
-    public
-    function DbaController_CountJobs_Handler($Sender) {
+    public function DbaController_CountJobs_Handler($Sender) {
         $Counts = array(
             'Article' => array('CountArticleComments', 'FirstArticleCommentID', 'LastArticleCommentID',
                 'DateLastArticleComment', 'LastArticleCommentUserID'),
