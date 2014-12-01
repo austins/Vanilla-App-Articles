@@ -40,12 +40,12 @@ class ArticlesHooks extends Gdn_Plugin {
             SaveToConfig($Save);
         }
     }
-    
+
     /**
-    * Add the article search to the search.
-    *
-    * @param object $Sender SearchModel
-    */
+     * Add the article search to the search.
+     *
+     * @param object $Sender SearchModel
+     */
     public function SearchModel_Search_Handler($Sender) {
         $SearchModel = new ArticleSearchModel();
         $SearchModel->Search($Sender);
@@ -68,7 +68,7 @@ class ArticlesHooks extends Gdn_Plugin {
      */
     public function Base_GetAppSettingsMenuItems_Handler($Sender) {
         $GroupName = 'Articles';
-        $Menu = & $Sender->EventArguments['SideMenu'];
+        $Menu = &$Sender->EventArguments['SideMenu'];
 
         $Menu->AddItem($GroupName, $GroupName, false, array('class' => $GroupName));
         $Menu->AddLink($GroupName, T('Settings'), '/settings/articles', 'Garden.Settings.Manage');
@@ -91,16 +91,16 @@ class ArticlesHooks extends Gdn_Plugin {
 
         $ConfigModule->Initialize(array(
             'Articles.Comments.EnableThreadedComments' => array(
-               'LabelCode' => 'Enable threaded (one level) comment replies?',
-               'Control'   => 'Checkbox'
+                'LabelCode' => 'Enable threaded (one level) comment replies?',
+                'Control' => 'Checkbox'
             ),
             'Articles.Comments.AllowGuests' => array(
                 'LabelCode' => 'Allow guest commenting?',
-                'Control'   => 'Checkbox'
+                'Control' => 'Checkbox'
             ),
             'Articles.TwitterUsername' => array(
                 'LabelCode' => 'Enter a Twitter username associated with this website to be used for Twitter card meta tags (optional):',
-                'Control'   => 'TextBox'
+                'Control' => 'TextBox'
             )
         ));
 
@@ -283,7 +283,8 @@ class ArticlesHooks extends Gdn_Plugin {
                 if ($Sender->Form->ErrorCount() == 0) {
                     // Go ahead and delete the category.
                     try {
-                        $ArticleCategoryModel->Delete($Category, $Sender->Form->GetValue('ReplacementArticleCategoryID'));
+                        $ArticleCategoryModel->Delete($Category,
+                            $Sender->Form->GetValue('ReplacementArticleCategoryID'));
                     } catch (Exception $ex) {
                         $Sender->Form->AddError($ex);
                     }
@@ -460,49 +461,69 @@ class ArticlesHooks extends Gdn_Plugin {
 
     /**
      * Load author meta into the form when editing.
-     * 
+     *
      * @param ProfileController $Sender ProfileController
      */
     public function ProfileController_BeforeEdit_Handler($Sender) {
-      $UserID = $Sender->User->UserID;
-      $UserMetaModel = Gdn::UserMetaModel();
-      $UserMeta = $UserMetaModel->GetUserMeta($UserID);
-      $Sender->Form->SetValue('Articles.AuthorDisplayName', $UserMeta['Articles.AuthorDisplayName']);
-      $Sender->Form->SetValue('Articles.AuthorBio', $UserMeta['Articles.AuthorBio']);
+        $UserID = $Sender->User->UserID;
+        $UserMetaModel = Gdn::UserMetaModel();
+        $UserMeta = $UserMetaModel->GetUserMeta($UserID);
+        $Sender->Form->SetValue('Articles.AuthorDisplayName', $UserMeta['Articles.AuthorDisplayName']);
+        $Sender->Form->SetValue('Articles.AuthorBio', $UserMeta['Articles.AuthorBio']);
     }
-    
+
     /**
      * Display author meta inputs when editing.
-     * 
+     *
      * @param ProfileController $Sender ProfileController
      */
     public function ProfileController_EditMyAccountAfter_Handler($Sender) {
-      if(Gdn::Session()->CheckPermission(array('Garden.Users.Edit','Articles.Articles.Add'), false)) {
-        echo Wrap(
-          $Sender->Form->Label('Author Display Name', 'Articles.AuthorDisplayName') .
-          $Sender->Form->Textbox('Articles.AuthorDisplayName'),
-          'li');
-        
-        echo Wrap(
-          $Sender->Form->Label('Author Bio', 'Articles.AuthorBio') .
-          $Sender->Form->Textbox('Articles.AuthorBio', array('multiline' => TRUE)),
-          'li');
-      }
+        if (Gdn::Session()->CheckPermission(array('Garden.Users.Edit', 'Articles.Articles.Add'), false)) {
+            echo Wrap(
+                $Sender->Form->Label('Author Display Name', 'Articles.AuthorDisplayName') .
+                $Sender->Form->Textbox('Articles.AuthorDisplayName'),
+                'li');
+
+            echo Wrap(
+                $Sender->Form->Label('Author Bio', 'Articles.AuthorBio') .
+                $Sender->Form->Textbox('Articles.AuthorBio', array('multiline' => true)),
+                'li');
+        }
     }
-    
+
+    /**
+     * Display custom fields on profile.
+     *
+     * @param ProfileController $Sender ProfileController
+     */
+    public function UserInfoModule_OnBasicInfo_Handler($Sender) {
+        // Get the custom fields.
+        $UserMeta = Gdn::UserModel()->GetMeta($Sender->User->UserID, 'Articles.%', 'Articles.');
+        if (!is_array($UserMeta))
+            return;
+
+        // Display author display name.
+        if ($UserMeta['AuthorDisplayName'] != '') {
+            echo ' <dt class="Articles Profile AuthorDisplayName">' . T('Author Display Name') . '</dt> ';
+            echo ' <dd class="Articles Profile AuthorDisplayName">' . Gdn_Format::Html($UserMeta['AuthorDisplayName']) . '</dd> ';
+        }
+    }
+
     /**
      * Save the author meta if it exists.
-     * 
+     *
      * @param UserModel $Sender UserModel
      */
-    public function UserModel_AfterSave_Handler($Sender) {
-      $UserID = val('UserID', $Sender->EventArguments);
-      $FormValues = val('FormPostValues', $Sender->EventArguments, array());
-      $AuthorInfo = array_intersect_key($FormValues, array('Articles.AuthorDisplayName' => 1, 'Articles.AuthorBio' => 1));
-      
-      foreach($AuthorInfo as $k => $v) {
-        Gdn::UserMetaModel()->SetUserMeta($UserID, $k, $v);
-      }
+    public
+    function UserModel_AfterSave_Handler($Sender) {
+        $UserID = val('UserID', $Sender->EventArguments);
+        $FormValues = val('FormPostValues', $Sender->EventArguments, array());
+        $AuthorInfo = array_intersect_key($FormValues,
+            array('Articles.AuthorDisplayName' => 1, 'Articles.AuthorBio' => 1));
+
+        foreach ($AuthorInfo as $k => $v) {
+            Gdn::UserMetaModel()->SetUserMeta($UserID, $k, $v);
+        }
     }
 
     /**
@@ -510,7 +531,8 @@ class ArticlesHooks extends Gdn_Plugin {
      *
      * @param UserModel $Sender UserModel.
      */
-    public function UserModel_BeforeDeleteUser_Handler($Sender) {
+    public
+    function UserModel_BeforeDeleteUser_Handler($Sender) {
         $UserID = val('UserID', $Sender->EventArguments);
         $Options = val('Options', $Sender->EventArguments, array());
         $Options = is_array($Options) ? $Options : array();
@@ -518,7 +540,7 @@ class ArticlesHooks extends Gdn_Plugin {
 
         $this->DeleteUserData($UserID, $Options, $Content);
     }
-    
+
     /**
      * Delete all of the Articles related information for a specific user.
      *
@@ -526,7 +548,8 @@ class ArticlesHooks extends Gdn_Plugin {
      * @param array $Options An array of options:
      *  - DeleteMethod: One of delete, wipe, or null
      */
-    private function DeleteUserData($UserID, $Options = array(), &$Data = null) {
+    private
+    function DeleteUserData($UserID, $Options = array(), &$Data = null) {
         $SQL = Gdn::SQL();
 
         // Comment deletion depends on method selected.
@@ -569,7 +592,8 @@ class ArticlesHooks extends Gdn_Plugin {
 
             foreach ($CommentCounts as $Row) {
                 $SQL->Put('Article',
-                    array('CountArticleComments' => $Row['CountArticleComments'] + 1, 'LastArticleCommentID' => $Row['LastArticleCommentID']),
+                    array('CountArticleComments' => $Row['CountArticleComments'] + 1,
+                        'LastArticleCommentID' => $Row['LastArticleCommentID']),
                     array('ArticleID' => $Row['ArticleID']));
             }
 
@@ -624,32 +648,35 @@ class ArticlesHooks extends Gdn_Plugin {
      *
      * @param DbaController $Sender
      */
-    public function DbaController_CountJobs_Handler($Sender) {
+    public
+    function DbaController_CountJobs_Handler($Sender) {
         $Counts = array(
-            'Article' => array('CountArticleComments', 'FirstArticleCommentID', 'LastArticleCommentID', 'DateLastArticleComment', 'LastArticleCommentUserID'),
-            'ArticleCategory' => array('CountArticles', 'CountArticleComments', 'LastArticleID', 'LastArticleCommentID', 'LastDateInserted')
+            'Article' => array('CountArticleComments', 'FirstArticleCommentID', 'LastArticleCommentID',
+                'DateLastArticleComment', 'LastArticleCommentUserID'),
+            'ArticleCategory' => array('CountArticles', 'CountArticleComments', 'LastArticleID', 'LastArticleCommentID',
+                'LastDateInserted')
         );
 
         foreach ($Counts as $Table => $Columns) {
             foreach ($Columns as $Column) {
                 $Name = "Recalculate $Table.$Column";
-                $Url = "/dba/counts.json?".http_build_query(array('table' => $Table, 'column' => $Column));
+                $Url = "/dba/counts.json?" . http_build_query(array('table' => $Table, 'column' => $Column));
 
                 $Sender->Data['Jobs'][$Name] = $Url;
             }
         }
     }
 
-// TODO: The search/results.php view outputs a UserAnchor; the guest name gets linked to a profile.
-//    // Set the username of article guest comment search results to the GuestName.
-//    public function SearchController_BeforeItemContent_Handler($Sender) {
-//        $Row = &$Sender->EventArguments['Row'];
-//
-//        if (($Row->RecordType === 'ArticleComment') && !$Row->UserID) {
-//            $ArticleCommentModel = new ArticleCommentModel();
-//            $Comment = $ArticleCommentModel->GetByID($Row->PrimaryID);
-//
-//            $Row->Name = $Comment->GuestName;
-//        }
-//    }
+    // TODO: The search/results.php view outputs a UserAnchor; the guest name gets linked to a profile.
+    //    // Set the username of article guest comment search results to the GuestName.
+    //    public function SearchController_BeforeItemContent_Handler($Sender) {
+    //        $Row = &$Sender->EventArguments['Row'];
+    //
+    //        if (($Row->RecordType === 'ArticleComment') && !$Row->UserID) {
+    //            $ArticleCommentModel = new ArticleCommentModel();
+    //            $Comment = $ArticleCommentModel->GetByID($Row->PrimaryID);
+    //
+    //            $Row->Name = $Comment->GuestName;
+    //        }
+    //    }
 }
