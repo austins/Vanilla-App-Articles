@@ -391,12 +391,12 @@ class ArticleModel extends Gdn_Model {
         }
 
         if ($InsertActivity) {
-            if ($Fields['Excerpt'] != '') {
-                $ActivityStory = Gdn_Format::To($Fields['Excerpt'], $Fields['Format']);
-            } else {
-                $ActivityStory = SliceParagraph(Gdn_Format::PlainText($Fields['Body'], $Fields['Format']),
-                    C('Articles.Excerpt.MaxLength', 160));
-            }
+//            if ($Fields['Excerpt'] != '') {
+//                $ActivityStory = Gdn_Format::To($Fields['Excerpt'], $Fields['Format']);
+//            } else {
+//                $ActivityStory = SliceParagraph(Gdn_Format::PlainText($Fields['Body'], $Fields['Format']),
+//                    C('Articles.Excerpt.MaxLength', 160));
+//            }
 
             $ActivityModel = new ActivityModel();
             $Activity = array(
@@ -406,6 +406,8 @@ class ArticleModel extends Gdn_Model {
                 'HeadlineFormat' => '{ActivityUserID,user} posted the "<a href="{Url,html}">{Data.Name}</a>" article.',
                 //'Story' => $ActivityStory,
                 'Route' => '/article/' . Gdn_Format::Date($Fields['DateInserted'], '%Y') . '/' . $Fields['UrlCode'],
+                'RecordType' => 'Article',
+                'RecordID' => $Fields['ArticleID'],
                 'Data' => array('Name' => $Fields['Name'])
             );
             $ActivityModel->Save($Activity);

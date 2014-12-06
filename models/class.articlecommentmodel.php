@@ -240,6 +240,8 @@ class ArticleCommentModel extends Gdn_Model {
             //'Story' => SliceParagraph(Gdn_Format::PlainText($Fields['Body'], $Fields['Format']),
             //    C('Articles.Excerpt.MaxLength', 160)),
             'Route' => '/article/comment/' . $ArticleCommentID . '/#Comment_' . $ArticleCommentID,
+            'RecordType' => 'ArticleComment',
+            'RecordID' => $ArticleCommentID,
             'Data' => array('Name' => $ArticleName)
         );
         $ActivityModel->Save($Activity);
