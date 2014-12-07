@@ -248,6 +248,21 @@ class ArticleCommentModel extends Gdn_Model {
     }
 
     /**
+     * Remove the "new article comment" activity for an article comment.
+     *
+     * @param int $ArticleCommentID
+     */
+    public function DeleteActivity($ArticleCommentID) {
+        $ActivityModel = new ActivityModel();
+
+        $Where = array('RecordType' => 'ArticleComment', 'RecordID' => $ArticleCommentID);
+        $Activity = $ActivityModel->GetWhere($Where, 0, 1)->FirstRow();
+
+        if ($Activity)
+            $ActivityModel->Delete(val('ActivityID', $Activity, false));
+    }
+
+    /**
      * Delete a comment.
      *
      * This is a hard delete that completely removes it from the database.

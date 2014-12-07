@@ -277,10 +277,7 @@ class ArticleController extends Gdn_Controller {
 
             if ($this->Form->ErrorCount() == 0) {
                 // Remove the "new article" activity for this article.
-                $ActivityModel = new ActivityModel();
-                $Activity = $ActivityModel->GetWhere(array('RecordType' => 'Article', 'RecordID' => $ArticleID), 0, 1)->FirstRow();
-                if($Activity)
-                    $ActivityModel->Delete(val('ActivityID', $Activity, false));
+                $this->ArticleModel->DeleteActivity($ArticleID);
 
                 // Redirect.
                 if ($this->_DeliveryType === DELIVERY_TYPE_ALL)
@@ -336,11 +333,9 @@ class ArticleController extends Gdn_Controller {
                     $this->Form->AddError('Failed to delete comment');
                 } else {
                     // Comment was successfully deleted.
-                    // Remove the "new article" activity for this article.
-                    $ActivityModel = new ActivityModel();
-                    $Activity = $ActivityModel->GetWhere(array('RecordType' => 'ArticleComment', 'RecordID' => $ArticleCommentID), 0, 1)->FirstRow();
-                    if($Activity)
-                        $ActivityModel->Delete(val('ActivityID', $Activity, false));
+
+                    // Remove the "new article comment" activity for this article comment.
+                    $this->ArticleCommentModel->DeleteActivity($ArticleCommentID);
                 }
             } else {
                 $this->Form->AddError('Invalid comment');

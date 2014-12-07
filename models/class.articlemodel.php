@@ -413,4 +413,19 @@ class ArticleModel extends Gdn_Model {
             $ActivityModel->Save($Activity);
         }
     }
+
+    /**
+     * Remove the "new article" activity for an article.
+     *
+     * @param int $ArticleID
+     */
+    public function DeleteActivity($ArticleID) {
+        $ActivityModel = new ActivityModel();
+
+        $Where = array('RecordType' => 'Article', 'RecordID' => $ArticleID);
+        $Activity = $ActivityModel->GetWhere($Where, 0, 1)->FirstRow();
+
+        if ($Activity)
+            $ActivityModel->Delete(val('ActivityID', $Activity, false));
+    }
 }
