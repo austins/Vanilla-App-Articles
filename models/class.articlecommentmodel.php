@@ -227,6 +227,10 @@ class ArticleCommentModel extends Gdn_Model {
      * @param string $ArticleName
      */
     private function AddActivity($Fields, $Insert, $ArticleCommentID, $ArticleName) {
+        // Current user must be logged in for an activity to be posted.
+        if (!Gdn::Session()->IsValid())
+            return;
+
         // Only add a new activity if the comment is new and not a threaded reply.
         if (!$Insert || ($Fields['ParentArticleCommentID'] > 0))
             return;

@@ -373,6 +373,10 @@ class ArticleModel extends Gdn_Model {
      * @param bool $Insert
      */
     private function AddActivity($Fields, $Insert) {
+        // Current user must be logged in for an activity to be posted.
+        if (!Gdn::Session()->IsValid())
+            return;
+
         // Determine whether to add a new activity.
         if ($Insert && ($Fields['Status'] === self::STATUS_PUBLISHED)) {
             // The article is new and will be published.
@@ -391,12 +395,12 @@ class ArticleModel extends Gdn_Model {
         }
 
         if ($InsertActivity) {
-//            if ($Fields['Excerpt'] != '') {
-//                $ActivityStory = Gdn_Format::To($Fields['Excerpt'], $Fields['Format']);
-//            } else {
-//                $ActivityStory = SliceParagraph(Gdn_Format::PlainText($Fields['Body'], $Fields['Format']),
-//                    C('Articles.Excerpt.MaxLength', 160));
-//            }
+            //if ($Fields['Excerpt'] != '') {
+            //    $ActivityStory = Gdn_Format::To($Fields['Excerpt'], $Fields['Format']);
+            //} else {
+            //    $ActivityStory = SliceParagraph(Gdn_Format::PlainText($Fields['Body'], $Fields['Format']),
+            //        C('Articles.Excerpt.MaxLength', 160));
+            //}
 
             $ActivityModel = new ActivityModel();
             $Activity = array(
