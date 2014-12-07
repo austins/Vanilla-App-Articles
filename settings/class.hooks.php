@@ -699,4 +699,18 @@ class ArticlesHooks extends Gdn_Plugin {
     //            $Row->Name = $Comment->GuestName;
     //        }
     //    }
+
+    /**
+     * Add link to Articles Dashboard to the MeModule fly-out menu.
+     *
+     * @param MeModule $Sender
+     */
+    public function MeModule_FlyoutMenu_Handler($Sender) {
+        $Session = Gdn::Session();
+
+        $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
+        if ($Session->CheckPermission($PermissionsAllowed, false)) {
+            echo Wrap(Anchor(Sprite('SpDashboard').' '.T('Articles Dashboard'), '/compose'), 'li');
+        }
+    }
 }
