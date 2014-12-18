@@ -1,6 +1,4 @@
-<?php
-if (!defined('APPLICATION'))
-    exit();
+<?php defined('APPLICATION') or exit();
 
 /**
  * Handles data for article comments.

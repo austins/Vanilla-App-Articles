@@ -1,6 +1,4 @@
-<?php
-if (!defined('APPLICATION'))
-    exit();
+<?php defined('APPLICATION') or exit();
 
 $Categories = $this->Data('Categories')->Result();
 ?>

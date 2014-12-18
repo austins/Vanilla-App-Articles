@@ -1,6 +1,4 @@
-<?php
-if (!defined('APPLICATION'))
-    exit();
+<?php defined('APPLICATION') or exit();
 
 // Register library classes and interfaces in the auto-loader.
 $Map = Gdn_Autoloader::MAP_LIBRARY;

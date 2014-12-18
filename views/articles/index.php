@@ -1,6 +1,4 @@
-<?php
-if (!defined('APPLICATION'))
-    exit();
+<?php defined('APPLICATION') or exit();
 
 if (!function_exists('ShowArticleOptions')) {
     include($this->FetchViewLocation('helper_functions', 'article', 'articles'));

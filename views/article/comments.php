@@ -1,6 +1,4 @@
-<?php
-if (!defined('APPLICATION'))
-    exit();
+<?php defined('APPLICATION') or exit();
 
 $Controller = Gdn::Controller();
 $Session = Gdn::Session();

@@ -1,4 +1,5 @@
-<?php if (!defined('APPLICATION')) exit();
+<?php defined('APPLICATION') or exit();
+
 /**
  * Manages searches for Articles and associated comments.
  *

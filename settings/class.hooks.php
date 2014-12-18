@@ -1,6 +1,4 @@
-<?php
-if (!defined('APPLICATION'))
-    exit();
+<?php defined('APPLICATION') or exit();
 
 /**
  * The class.hooks.php file is essentially a giant plugin container for an app

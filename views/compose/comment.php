@@ -1,6 +1,4 @@
-<?php
-if (!defined('APPLICATION'))
-    exit();
+<?php defined('APPLICATION') or exit();
 
 $Session = Gdn::Session();
 $GuestCommenting = (C('Articles.Comments.AllowGuests', false) && !$Session->IsValid());
