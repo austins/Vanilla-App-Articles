@@ -11,7 +11,6 @@ class ArticleCategoryModel extends Gdn_Model {
         parent::__construct('ArticleCategory');
     }
 
-
     /**
      * Count recalculation. Called by DBAModel->Counts().
      *
