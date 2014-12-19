@@ -14,9 +14,9 @@ if ($Category) {
 
 if (count($Articles) == 0) {
     if ($Category) {
-        echo Wrap(T('No articles have been published in this category yet.'), 'div');
+        echo Wrap(T('No articles have been published in this category yet.'), 'div', array('class' => 'Empty'));
     } else {
-        echo Wrap(T('No articles have been published yet.'), 'div');
+        echo Wrap(T('No articles have been published yet.'), 'div', array('class' => 'Empty'));
     }
 } else {
     foreach ($Articles as $Article):
