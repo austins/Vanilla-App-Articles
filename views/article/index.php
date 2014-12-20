@@ -44,6 +44,8 @@ else
     <div class="ArticleBody"><?php echo FormatArticleBody($Article->Body, $Article->Format); ?></div>
 </article>
 
+<?php $this->FireEvent('AfterArticle'); ?>
+
 <section id="comments">
 <?php
 include $this->FetchViewLocation('comments', 'article', 'Articles');
