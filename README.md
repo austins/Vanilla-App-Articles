@@ -1,5 +1,19 @@
 # Articles
 
-This application is still in development. Please do not use on a production website.
+A Vanilla Forums application that provides a way to create articles.
 
-**[View the development checklist / to-do list](https://github.com/shadowdare/Vanilla-App-Articles/issues?milestone=1&state=open).**
+This application is released under the GPLv3 license.
+
+## Features:
+
+Too many times have we seen posts about embedding, integrating, and unifying Vanilla with bloated blogging software. Current blogging addons modify discussions into blog posts. However, blog posts and discussions are completely different things.
+
+- Article workflow consisting of draft, pending review, and published article states and based on permissions.
+- Comments with threading for replies to the top-level comment.
+- Guest commenting which is switchable globally with moderation and spam checks.
+- File upload for article thumbnail and images.
+- Top-level categories.
+- Simple and clean presentation of articles.
+- Stability and performance is of importance, and Vanilla 2.1+ is the target for compatibility.
+
+The word "article" stands for content produced by both bloggers and journalists, and is interchangeable with "blog post."
