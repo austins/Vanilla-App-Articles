@@ -1,12 +1,11 @@
 .Article {
-    clear: both;
     padding-bottom: 10px;
     border-bottom: 1px solid #DDD;
     margin-bottom: 14px;
 }
 
-.Article:first-child {
-    clear: none;
+.Article > .ClearFix {
+    display: inline-table;
 }
 
 .Article:last-child {

@@ -55,14 +55,14 @@ if (count($Articles) == 0) {
                     Gdn::Controller()->FireEvent('AfterArticleLabels');
                     ?>
                     <span
-                        class="MItem MCount ArticleCategory"><?php echo Anchor($ArticleCategory->Name,
+                        class="MItem ArticleCategory"><?php echo Anchor($ArticleCategory->Name,
                             ArticleCategoryUrl($ArticleCategory));
                         ?></span>
           <span
-              class="MItem MCount ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
+              class="MItem ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
                   '%e %B %Y - %l:%M %p');
               ?></span>
-                    <span class="MItem MCount ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
+                    <span class="MItem ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
           <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText, $ArticleUrl . '#comments');
               ?></span>
                 </div>
@@ -76,8 +76,6 @@ if (count($Articles) == 0) {
             </div>
 
             </div>
-
-            <div class="ClearFix"></div>
         </article>
     <?php
     endforeach;
