@@ -2,7 +2,7 @@
 
 A Vanilla Forums application that provides a way to create articles.
 
-This application is released under the GPLv3 license.
+This application is released under the GNU GPL2 license.
 
 ## Features:
 
