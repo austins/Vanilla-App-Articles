@@ -74,3 +74,9 @@ body.Articles.category .Article .Options > .ToggleFlyout.Open {
     position: relative;
     z-index: 500;
 }
+
+.ArticleBody img,
+.ArticleThumbnail img {
+    max-width: 100%;
+    height: auto;
+}
