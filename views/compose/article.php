@@ -22,7 +22,7 @@ echo $this->Form->Errors();
                 'IncludeNull' => true,
                 'ValueField' => 'ArticleCategoryID',
                 'TextField' => 'Name',
-                'Value' => val('ArticleCategoryID', $this->Category)
+                'Value' => val('ArticleCategoryID', $this->Data('Category'))
             ));
             echo '</div>';
         }

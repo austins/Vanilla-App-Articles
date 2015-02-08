@@ -506,8 +506,12 @@ class ArticlesHooks extends Gdn_Plugin {
         $UserID = $Sender->User->UserID;
         $UserMetaModel = Gdn::UserMetaModel();
         $UserMeta = $UserMetaModel->GetUserMeta($UserID);
-        $Sender->Form->SetValue('Articles.AuthorDisplayName', $UserMeta['Articles.AuthorDisplayName']);
-        $Sender->Form->SetValue('Articles.AuthorBio', $UserMeta['Articles.AuthorBio']);
+
+        if (isset($UserMeta['Articles.AuthorDisplayName']))
+            $Sender->Form->SetValue('Articles.AuthorDisplayName', $UserMeta['Articles.AuthorDisplayName']);
+        
+        if (isset($UserMeta['Articles.AuthorBio']))
+            $Sender->Form->SetValue('Articles.AuthorBio', $UserMeta['Articles.AuthorBio']);
     }
 
     /**
@@ -541,7 +545,8 @@ class ArticlesHooks extends Gdn_Plugin {
             return;
 
         // Display author display name.
-        if (($UserMeta['AuthorDisplayName'] != '') && ($Sender->User->Name != $UserMeta['AuthorDisplayName'])) {
+        if (isset($UserMeta['AuthorDisplayName']) && ($UserMeta['AuthorDisplayName'] != '')
+                && ($Sender->User->Name != $UserMeta['AuthorDisplayName'])) {
             echo ' <dt class="Articles Profile AuthorDisplayName">' . T('Author Display Name') . '</dt> ';
             echo ' <dd class="Articles Profile AuthorDisplayName">' . Gdn_Format::Html($UserMeta['AuthorDisplayName']) . '</dd> ';
         }

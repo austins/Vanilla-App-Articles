@@ -201,6 +201,8 @@ class ComposeController extends Gdn_Controller {
         $this->SetData('StatusOptions', $this->GetArticleStatusOptions($Article), true);
 
         $UserModel = new UserModel();
+        $Author = false;
+        $Preview = false;
 
         // The form has not been submitted yet.
         if (!$this->Form->AuthenticatedPostBack()) {
