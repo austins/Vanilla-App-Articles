@@ -339,8 +339,10 @@ class ComposeController extends Gdn_Controller {
                         // If not editing.
                         // Assign the new article's ID to any uploaded images.
                         $UploadedImageIDs = $FormValues['UploadedImageIDs'];
-                        foreach($UploadedImageIDs as $ArticleMediaID) {
-                            $this->ArticleMediaModel->SetField($ArticleMediaID, 'ArticleID', $ArticleID);
+                        if (is_array($UploadedImageIDs)) {
+                            foreach ($UploadedImageIDs as $ArticleMediaID) {
+                                $this->ArticleMediaModel->SetField($ArticleMediaID, 'ArticleID', $ArticleID);
+                            }
                         }
 
                         $UploadedThumbnailID = (int)$FormValues['UploadedThumbnailID'];
