@@ -451,8 +451,9 @@ class ComposeController extends Gdn_Controller {
             $CurrentYear = date('Y');
             $CurrentMonth = date('m');
             $UploadPath = PATH_UPLOADS . '/articles/' . $CurrentYear . '/' . $CurrentMonth;
-            $TargetImage = $UploadImage->GenerateTargetName($UploadPath, 'jpg', false);
+            $TargetImage = $UploadImage->GenerateTargetName($UploadPath, false, false);
             $Basename = pathinfo($TargetImage, PATHINFO_BASENAME);
+            $Extension = trim(pathinfo($TargetImage, PATHINFO_EXTENSION), '.');
             $UploadsSubdir = '/articles/' . $CurrentYear . '/' . $CurrentMonth;
 
             if($isThumbnail) {
@@ -469,7 +470,7 @@ class ComposeController extends Gdn_Controller {
                 $UploadsSubdir . '/' . $Basename,
                 $SaveHeight,
                 $SaveWidth, // change these configs and add quality etc.
-                array('OutputType' => 'jpg', 'ImageQuality' => C('Garden.UploadImage.Quality', 75))
+                array('OutputType' => $Extension, 'ImageQuality' => C('Garden.UploadImage.Quality', 75))
             );
 
             $UploadedImagePath = sprintf($Props['SaveFormat'], $UploadsSubdir . '/' . $Basename);
@@ -495,7 +496,8 @@ class ComposeController extends Gdn_Controller {
 
         $ArticleMediaID = $this->ArticleMediaModel->Save($MediaValues);
 
-        // Return path to the uploaded image in format '/articles/year/month/filename.jpg'
+        // Return path to the uploaded image in the following format.
+        // Example: '/articles/year/month/filename.jpg'
         $JsonData = array(
             'ArticleMediaID' => $ArticleMediaID,
             'Name' => $Basename,
