@@ -337,6 +337,11 @@ class ComposeController extends Gdn_Controller {
                                 && ($NewArticle->Status == ArticleModel::STATUS_PUBLISHED)) {
                             $this->ArticleModel->SetField($ArticleID, 'DateInserted', Gdn_Format::ToDateTime());
                         }
+
+                        // Set thumbnail ID.
+                        $UploadedThumbnail = $this->ArticleMediaModel->GetThumbnailByArticleID($Article->ArticleID);
+                        if (is_object($UploadedThumbnail) && ($UploadedThumbnail->ArticleMediaID > 0))
+                            $this->ArticleModel->SetField($ArticleID, 'ThumbnailID', $UploadedThumbnail->ArticleMediaID);
                     } else {
                         // If not editing.
                         // Assign the new article's ID to any uploaded images.
@@ -347,9 +352,12 @@ class ComposeController extends Gdn_Controller {
                             }
                         }
 
+                        // Set thumbnail ID.
                         $UploadedThumbnailID = (int)$FormValues['UploadedThumbnailID'];
-                        if ($UploadedThumbnailID > 0)
+                        if ($UploadedThumbnailID > 0) {
+                            $this->ArticleModel->SetField($ArticleID, 'ThumbnailID', $UploadedThumbnailID);
                             $this->ArticleMediaModel->SetField($UploadedThumbnailID, 'ArticleID', $ArticleID);
+                        }
                     }
 
                     // Redirect to the article.

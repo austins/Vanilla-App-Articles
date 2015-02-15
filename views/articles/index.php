@@ -30,11 +30,11 @@ if (count($Articles) == 0) {
 
         $Thumbnail = $this->ArticleMediaModel->GetThumbnailByArticleID($Article->ArticleID);
         ?>
-        <article id="Article_<?php echo $Article->ArticleID; ?>" class="Article">
+        <article id="Article_<?php echo $Article->ArticleID; ?>" class="Article ClearFix">
             <?php ShowArticleOptions($Article); ?>
 
             <?php
-            if ($Thumbnail && ($Article->Excerpt != "")) {
+            if (is_object($Thumbnail) && ($Article->Excerpt != "")) {
                 $ThumbnailPath = '/uploads' . $Thumbnail->Path;
 
                 echo '<div class="ArticleThumbnail">';
@@ -43,38 +43,33 @@ if (count($Articles) == 0) {
             }
             ?>
             <div class="ArticleInner">
-            <header>
-                <h2 class="ArticleTitle"><?php echo Anchor($Article->Name, $ArticleUrl); ?></h2>
+                <header>
+                    <h2 class="ArticleTitle"><?php echo Anchor($Article->Name, $ArticleUrl); ?></h2>
 
-                <div class="Meta Meta-Article">
+                    <div class="Meta Meta-Article">
+                        <?php
+                        Gdn::Controller()->FireEvent('BeforeArticleMeta');
+
+                        echo ArticleTag($Article, 'Closed', 'Closed');
+
+                        Gdn::Controller()->FireEvent('AfterArticleLabels');
+                        ?>
+                        <span
+                            class="MItem ArticleCategory"><?php echo Anchor($ArticleCategory->Name,
+                                ArticleCategoryUrl($ArticleCategory));
+                            ?></span>
+                        <span class="MItem ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted, '%e %B %Y - %l:%M %p'); ?></span>
+                        <span class="MItem ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
+                        <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText, $ArticleUrl . '#comments'); ?></span>
+                    </div>
+                </header>
+
+                <div class="ArticleBody">
                     <?php
-                    Gdn::Controller()->FireEvent('BeforeArticleMeta');
-
-                    echo ArticleTag($Article, 'Closed', 'Closed');
-
-                    Gdn::Controller()->FireEvent('AfterArticleLabels');
+                    $ArticleBody = ($Article->Excerpt != "") ? $Article->Excerpt : $Article->Body;
+                    echo FormatArticleBody($ArticleBody, $Article->Format);
                     ?>
-                    <span
-                        class="MItem ArticleCategory"><?php echo Anchor($ArticleCategory->Name,
-                            ArticleCategoryUrl($ArticleCategory));
-                        ?></span>
-          <span
-              class="MItem ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
-                  '%e %B %Y - %l:%M %p');
-              ?></span>
-                    <span class="MItem ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
-          <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText, $ArticleUrl . '#comments');
-              ?></span>
                 </div>
-            </header>
-
-            <div class="ArticleBody">
-                <?php
-                $ArticleBody = ($Article->Excerpt != "") ? $Article->Excerpt : $Article->Body;
-                echo FormatArticleBody($ArticleBody, $Article->Format);
-                ?>
-            </div>
-
             </div>
         </article>
     <?php

@@ -4,8 +4,9 @@
     margin-bottom: 14px;
 }
 
-.Article > .ClearFix {
+.Article.ClearFix {
     display: inline-table;
+    width: 100%;
 }
 
 .Article:last-child {
