@@ -10,7 +10,21 @@
     width: 100%;
 }
 
-.Article:last-child {
+#articles_articles_index .ArticleBody {
+    word-wrap: break-word;
+}
+
+#articles_articles_index .Article {
+    position: relative;
+}
+
+#articles_articles_index .Options {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.Article:last-of-type {
     border-bottom: 0;
     margin-bottom: 0;
 }
