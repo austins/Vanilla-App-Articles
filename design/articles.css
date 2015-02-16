@@ -11,17 +11,20 @@
 }
 
 body.Articles.index .ArticleBody,
-body.Articles.category .ArticleBody {
+body.Articles.category .ArticleBody,
+#dashboard_profile_articles .ArticleBody {
     word-wrap: break-word;
 }
 
 body.Articles.index .Article,
-body.Articles.category .Article {
+body.Articles.category .Article,
+#dashboard_profile_articles .Article {
     position: relative;
 }
 
 body.Articles.index .Options,
-body.Articles.category .Options {
+body.Articles.category .Options,
+#dashboard_profile_articles .Options {
     position: absolute;
     right: 0;
 }
@@ -60,14 +63,17 @@ body.Articles.category .Options {
 }
 
 body.Articles.index .Article .Options > .ToggleFlyout,
-body.Articles.category .Article .Options > .ToggleFlyout {
+body.Articles.category .Article .Options > .ToggleFlyout,
+#dashboard_profile_articles .Article .Options > .ToggleFlyout {
     display: none;
 }
 
 body.Articles.index .Article:hover .Options > .ToggleFlyout,
 body.Articles.index .Article .Options > .ToggleFlyout.Open,
 body.Articles.category .Article:hover .Options > .ToggleFlyout,
-body.Articles.category .Article .Options > .ToggleFlyout.Open {
+body.Articles.category .Article .Options > .ToggleFlyout.Open,
+#dashboard_profile_articles .Article:hover .Options > .ToggleFlyout,
+#dashboard_profile_articles .Article .Options > .ToggleFlyout.Open {
     display: block;
 }
 
