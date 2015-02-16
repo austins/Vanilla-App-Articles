@@ -10,15 +10,18 @@
     width: 100%;
 }
 
-#articles_articles_index .ArticleBody {
+body.Articles.index .ArticleBody,
+body.Articles.category .ArticleBody {
     word-wrap: break-word;
 }
 
-#articles_articles_index .Article {
+body.Articles.index .Article,
+body.Articles.category .Article {
     position: relative;
 }
 
-#articles_articles_index .Options {
+body.Articles.index .Options,
+body.Articles.category .Options {
     position: absolute;
     right: 0;
 }
