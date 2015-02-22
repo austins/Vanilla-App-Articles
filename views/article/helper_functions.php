@@ -134,9 +134,8 @@ if (!function_exists('WriteArticleReactions')):
                     'ReactButton ReplyLink Visible');
             }
         }
-
-        Gdn::Controller()->FireEvent('AfterFlag');
-        Gdn::Controller()->FireEvent('AfterReactions');
+        
+        Gdn::Controller()->FireEvent('AfterArticleReactions');
         echo '</div>';
     }
 endif;
