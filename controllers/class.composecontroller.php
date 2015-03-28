@@ -69,7 +69,7 @@ class ComposeController extends Gdn_Controller {
         // The user only needs one of the specified permissions.
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
         $this->Permission($PermissionsAllowed, false);
-        
+
         $this->AddModule('ComposeFilterModule');
 
         // Get recently published articles.
