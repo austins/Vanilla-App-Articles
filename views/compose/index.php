@@ -47,7 +47,7 @@
                     $UserName = $Comment->GuestName;
                     if ($Comment->InsertUserID > 0) {
                         $User = Gdn::UserModel()->GetID($Comment->InsertUserID);
-                        $UserName = is_object($User) ? UserAnchor($User) : $Comment->GuestName;
+                        $UserName = UserAnchor($User);
                     }
                     ?>
                     <li id="<?php echo 'Comment_' . $Comment->ArticleCommentID; ?>" class="Item">
