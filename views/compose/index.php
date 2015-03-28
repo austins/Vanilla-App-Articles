@@ -44,8 +44,11 @@
                     $Permalink = '/article/comment/' . $Comment->ArticleCommentID . '/#Comment_' . $Comment->ArticleCommentID;
                     $Article = $this->ArticleModel->GetByID($Comment->ArticleID);
 
-                    $User = Gdn::UserModel()->GetID($Comment->InsertUserID);
-                    $UserAnchor = is_object($User) ? UserAnchor($User) : $Comment->GuestName;
+                    $UserName = $Comment->GuestName;
+                    if (strlen($Comment->GuestName) == 0) {
+                        $User = Gdn::UserModel()->GetID($Comment->InsertUserID);
+                        $UserName = is_object($User) ? UserAnchor($User) : $Comment->GuestName;
+                    }
                     ?>
                     <li id="<?php echo 'Comment_' . $Comment->ArticleCommentID; ?>" class="Item">
                         <?php $this->FireEvent('BeforeItemContent'); ?>
@@ -57,7 +60,7 @@
                             <div class="Meta">
                     <span class="MItem"><?php echo T('Comment in', 'in') . ' '; ?>
                         <b><?php echo Anchor(Gdn_Format::Text($Article->Name), $Permalink); ?></b></span>
-                                <span class="MItem"><?php printf(T('Comment by %s'), $UserAnchor); ?></span>
+                                <span class="MItem"><?php printf(T('Comment by %s'), $UserName); ?></span>
                                 <span class="MItem"><?php echo Anchor(Gdn_Format::Date($Comment->DateInserted),
                                         $Permalink); ?></span>
                             </div>
