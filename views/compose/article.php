@@ -1,10 +1,4 @@
-<?php if (!defined('APPLICATION'))
-    exit();
-
-if (!function_exists('ShowArticlesDashboardMenu'))
-    include($this->FetchViewLocation('helper_functions', 'compose', 'articles'));
-
-ShowArticlesDashboardMenu($this->RequestMethod);
+<?php defined('APPLICATION') or exit();
 
 // Declare variables.
 $Categories = $this->Data('Categories');
@@ -14,6 +8,8 @@ echo $this->Form->Open(array('id' => 'Form_ComposeArticle'));
 echo $this->Form->Errors();
 ?>
     <div>
+        <h1 class="H"><?php echo $this->Data('Title'); ?></h1>
+
         <?php
         if ($Categories->NumRows() > 0) {
             echo '<div class="P">';

@@ -1,12 +1,3 @@
-body.Articles.Compose #Panel {
-    display: none;
-}
-
-body.Articles.Compose #Content {
-    width: auto;
-    margin: 0;
-}
-
 #articles_compose_index .ArticlesDashboardColumn {
     float: left;
 }

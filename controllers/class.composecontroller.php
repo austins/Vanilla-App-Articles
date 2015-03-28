@@ -70,6 +70,12 @@ class ComposeController extends Gdn_Controller {
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
         $this->Permission($PermissionsAllowed, false);
 
+        $this->SetData('Breadcrumbs', array(
+            array('Name' => T('Compose'), 'Url' => '/compose')
+        ));
+
+        $this->AddModule('ComposeFilterModule');
+
         // Get recently published articles.
         $RecentlyPublishedOffset = 0;
         $RecentlyPublishedLimit = 5;
@@ -125,6 +131,13 @@ class ComposeController extends Gdn_Controller {
         // The user only needs one of the specified permissions.
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
         $this->Permission($PermissionsAllowed, false);
+
+        $this->SetData('Breadcrumbs', array(
+            array('Name' => T('Compose'), 'Url' => '/compose'),
+            array('Name' => T('Posts'), 'Url' => '/compose/posts')
+        ));
+
+        $this->AddModule('ComposeFilterModule');
 
         // Get total article count.
         $CountArticles = $this->ArticleModel->GetCount();
@@ -183,6 +196,11 @@ class ComposeController extends Gdn_Controller {
             // Set allowed permission.
             $this->Permission('Articles.Articles.Add');
         }
+
+        $this->SetData('Breadcrumbs', array(
+            array('Name' => T('Compose'), 'Url' => '/compose'),
+            array('Name' => T('New Article'), 'Url' => '/compose/article')
+        ));
 
         // Set the model on the form.
         $this->Form->SetModel($this->ArticleModel);
@@ -371,6 +389,8 @@ class ComposeController extends Gdn_Controller {
 
         if (!$Preview)
             $this->View = 'article';
+
+        $this->CssClass = 'NoPanel';
 
         $this->Render();
     }

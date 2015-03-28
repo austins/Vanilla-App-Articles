@@ -1,10 +1,5 @@
 <?php defined('APPLICATION') or exit();
 
-if (!function_exists('ShowArticlesDashboardMenu'))
-    include($this->FetchViewLocation('helper_functions', 'compose', 'articles'));
-
-ShowArticlesDashboardMenu($this->RequestMethod);
-
 if (!function_exists('ShowArticleOptions'))
     include($this->FetchViewLocation('helper_functions', 'article', 'articles'));
 

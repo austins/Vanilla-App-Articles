@@ -1,10 +1,4 @@
-<?php defined('APPLICATION') or exit();
-
-if (!function_exists('ShowArticlesDashboardMenu'))
-    include($this->FetchViewLocation('helper_functions', 'compose', 'articles'));
-
-ShowArticlesDashboardMenu($this->RequestMethod);
-?>
+<?php defined('APPLICATION') or exit(); ?>
 <div id="ArticlesDashboardWrap">
     <div class="ArticlesDashboardColumn FirstColumn">
         <h2>Recently Published</h2>
