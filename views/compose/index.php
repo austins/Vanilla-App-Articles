@@ -1,5 +1,7 @@
 <?php defined('APPLICATION') or exit(); ?>
 <div id="ArticlesDashboardWrap">
+    <h1 class="H"><?php echo T('Articles Dashboard'); ?></h1>
+
     <div class="RecentlyPublished">
         <h2>Recently Published</h2>
         <ul class="DataList">

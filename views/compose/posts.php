@@ -6,6 +6,8 @@ if (!function_exists('ShowArticleOptions'))
 $Articles = $this->Data('Articles')->Result();
 $ArticleCount = $this->Data('Articles')->NumRows();
 
+echo Wrap(T('Article Posts'), 'h1', array('class' => 'H'));
+
 if (count($Articles) == 0)
     echo Wrap(T('No articles have been found.'), 'div');
 else {
