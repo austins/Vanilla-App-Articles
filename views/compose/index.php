@@ -16,7 +16,7 @@
                     $Author = Gdn::UserModel()->GetID($Article->InsertUserID);
 
                     echo '<li class="Item RecentlyPublishedArticle">';
-                    echo Wrap(Anchor($Article->Name, ArticleUrl($Article)), 'div', array('class' => 'ArticleTitle'));
+                    echo Wrap(Anchor($Article->Name, ArticleUrl($Article)), 'div');
 
                     echo '<div class="Meta Meta-Article">';
                     echo '<span class="MItem ArticleDate">' . Gdn_Format::Date($Article->DateInserted,
