@@ -45,7 +45,7 @@
                     $Article = $this->ArticleModel->GetByID($Comment->ArticleID);
 
                     $UserName = $Comment->GuestName;
-                    if (strlen($Comment->GuestName) == 0) {
+                    if ($Comment->InsertUserID > 0) {
                         $User = Gdn::UserModel()->GetID($Comment->InsertUserID);
                         $UserName = is_object($User) ? UserAnchor($User) : $Comment->GuestName;
                     }
