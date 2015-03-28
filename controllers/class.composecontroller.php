@@ -84,6 +84,13 @@ class ComposeController extends Gdn_Controller {
             $RecentlyPublishedWheres);
         $this->SetData('RecentlyPublished', $RecentlyPublished);
 
+        // Get recent article comments.
+        $RecentCommentsOffset = 0;
+        $RecentCommentsLimit = 5;
+        $RecentComments = $this->ArticleCommentModel->Get($RecentCommentsOffset,
+            $RecentCommentsLimit, null, 'desc');
+        $this->SetData('RecentComments', $RecentComments);
+
         // Get recent articles pending review.
         if (Gdn::Session()->CheckPermission('Articles.Articles.Edit')) {
             $PendingArticlesOffset = 0;

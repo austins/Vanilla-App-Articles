@@ -36,7 +36,7 @@ class ArticleCommentModel extends Gdn_Model {
      *
      * @return Gdn_DataSet SQL result.
      */
-    public function Get($Offset = 0, $Limit = false, $Wheres = null) {
+    public function Get($Offset = 0, $Limit = false, $Wheres = null, $SortOrder = 'asc') {
         // Set up selection query.
         $this->SQL->Select('ac.*')->From('ArticleComment ac');
 
@@ -55,7 +55,10 @@ class ArticleCommentModel extends Gdn_Model {
             $this->SQL->Where($Wheres);
 
         // Set order of data.
-        $this->SQL->OrderBy('ac.DateInserted', 'asc');
+        if (($SortOrder !== 'asc') && ($SortOrder !== 'desc'))
+            $SortOrder = 'asc';
+
+        $this->SQL->OrderBy('ac.DateInserted', $SortOrder);
 
         // Fetch data.
         $Comments = $this->SQL->Get();

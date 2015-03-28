@@ -1,10 +1,10 @@
 <?php defined('APPLICATION') or exit(); ?>
 <div id="ArticlesDashboardWrap">
-    <div class="ArticlesDashboardColumn FirstColumn">
+    <div class="RecentlyPublished">
         <h2>Recently Published</h2>
-        <ul>
+        <ul class="DataList">
             <?php
-            // Render the recently published column.
+            // Render the recently published block.
             $RecentlyPublished = $this->Data('RecentlyPublished')->Result();
 
             if (count($RecentlyPublished) == 0)
@@ -13,7 +13,7 @@
                 foreach ($RecentlyPublished as $Article) {
                     $Author = Gdn::UserModel()->GetID($Article->InsertUserID);
 
-                    echo '<li class="RecentlyPublishedArticle">';
+                    echo '<li class="Item RecentlyPublishedArticle">';
                     echo Wrap(Anchor($Article->Name, ArticleUrl($Article)), 'div', array('class' => 'ArticleTitle'));
 
                     echo '<div class="Meta Meta-Article">';
@@ -28,22 +28,52 @@
         </ul>
     </div>
 
-    <div class="ArticlesDashboardColumn SecondColumn">
+    <div class="RecentComments">
         <h2>Recent Comments</h2>
+        <ul class="DataList">
+            <?php
+            // Render the recent comments block.
+            $RecentComments = $this->Data('RecentComments')->Result();
 
-        <div>
-            None.
-        </div>
+            if (count($RecentComments) == 0)
+                echo 'None.';
+            else {
+                foreach ($RecentComments as $Comment) {
+                    $Permalink = '/article/comment/' . $Comment->ArticleCommentID . '/#Comment_' . $Comment->ArticleCommentID;
+                    $Article = $this->ArticleModel->GetByID($Comment->ArticleID);
+
+                    $User = Gdn::UserModel()->GetID($Comment->InsertUserID);
+                    $UserAnchor = is_object($User) ? UserAnchor($User) : $Comment->GuestName;
+                    ?>
+                    <li id="<?php echo 'Comment_' . $Comment->ArticleCommentID; ?>" class="Item">
+                        <?php $this->FireEvent('BeforeItemContent'); ?>
+                        <div class="ItemContent">
+                            <div class="Message"><?php
+                                echo SliceString(Gdn_Format::Text(Gdn_Format::To($Comment->Body, $Comment->Format),
+                                    false), 250);
+                                ?></div>
+                            <div class="Meta">
+                    <span class="MItem"><?php echo T('Comment in', 'in') . ' '; ?>
+                        <b><?php echo Anchor(Gdn_Format::Text($Article->Name), $Permalink); ?></b></span>
+                                <span class="MItem"><?php printf(T('Comment by %s'), $UserAnchor); ?></span>
+                                <span class="MItem"><?php echo Anchor(Gdn_Format::Date($Comment->DateInserted),
+                                        $Permalink); ?></span>
+                            </div>
+                        </div>
+                    </li>
+                <?php
+                }
+            }
+            ?>
+        </ul>
     </div>
 
-    <div class="ClearFix"></div>
-
     <?php if (Gdn::Session()->CheckPermission('Articles.Articles.Edit')): ?>
-        <div class="ArticlesDashboardColumn FirstColumn">
+        <div class="PendingArticles">
             <h2>Pending Articles</h2>
-            <ul>
+            <ul class="DataList">
                 <?php
-                // Render the recently published column.
+                // Render the recently published block.
                 $PendingArticles = $this->Data('PendingArticles')->Result();
 
                 if (count($PendingArticles) == 0)
@@ -52,7 +82,7 @@
                     foreach ($PendingArticles as $Article) {
                         $Author = Gdn::UserModel()->GetID($Article->InsertUserID);
 
-                        echo '<li class="PendingArticle">';
+                        echo '<li class="Item PendingArticle">';
                         echo Wrap(Anchor($Article->Name, ArticleUrl($Article)), 'div',
                             array('class' => 'ArticleTitle'));
 
@@ -68,6 +98,4 @@
             </ul>
         </div>
     <?php endif; ?>
-
-    <div class="ClearFix"></div>
 </div>
