@@ -23,7 +23,11 @@ class ArticleCategoriesModule extends Gdn_Module {
     public function __construct($Sender = '') {
         // Load categories.
         $ArticleCategoryModel = new ArticleCategoryModel();
-        $this->Data = $ArticleCategoryModel->Get();
+
+        $CategoriesWheres = array('ac.CountArticles >' => '0'); // Category must have at least one article.
+        $Categories = $ArticleCategoryModel->Get($CategoriesWheres);
+
+        $this->Data = $Categories;
 
         parent::__construct($Sender);
     }
