@@ -26,8 +26,8 @@ class ArticleController extends Gdn_Controller {
     public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'ArticleCommentModel', 'ArticleMediaModel', 'Form');
 
     public $Article = false;
-    protected $Category = false;
-    protected $Comments = false;
+    protected $ArticleCategory = false;
+    protected $ArticleComments = false;
 
     /**
      * Include JS, CSS, and modules used by all methods.
@@ -56,6 +56,7 @@ class ArticleController extends Gdn_Controller {
         $this->AddModule('GuestModule');
         $this->AddModule('SignedInModule');
         $this->AddModule('ArticlesDashboardModule');
+        $this->AddModule('ArticleCategoriesModule');
         $this->AddModule('RecentActivityModule');
 
         parent::Initialize();
@@ -89,9 +90,10 @@ class ArticleController extends Gdn_Controller {
             $this->Permission('Articles.Articles.View');
 
         // Get the category.
-        $this->Category = $this->ArticleCategoryModel->GetByID($this->Article->ArticleCategoryID);
+        $this->ArticleCategory = $this->ArticleCategoryModel->GetByID($this->Article->ArticleCategoryID);
+        $this->SetData('ArticleCategory', $this->ArticleCategory);
         $this->SetData('Breadcrumbs', array(
-            array('Name' => $this->Category->Name, 'Url' => ArticleCategoryUrl($this->Category))
+            array('Name' => $this->ArticleCategory->Name, 'Url' => ArticleCategoryUrl($this->ArticleCategory))
         ));
 
         // Prepare comment arguments.
@@ -123,7 +125,7 @@ class ArticleController extends Gdn_Controller {
         $this->CanonicalUrl(ArticleUrl($this->Article, PageNumber($Offset, $Limit, 0, false)));
 
         // Get the comments.
-        $this->Comments = $this->ArticleCommentModel->GetByArticleID($this->Article->ArticleID, $Offset, $Limit);
+        $this->ArticleComments = $this->ArticleCommentModel->GetByArticleID($this->Article->ArticleID, $Offset, $Limit);
 
         // Validate slugs.
         $DateInsertedYear = Gdn_Format::Date($this->Article->DateInserted, '%Y');
@@ -174,7 +176,7 @@ class ArticleController extends Gdn_Controller {
 
         $HeadModule->AddTag('meta',
             array('property' => 'article:author', 'content' => Url('profile/articles/' . $Article->AttributionUserID . '/' . $Article->AuthorName, true)));
-        $HeadModule->AddTag('meta', array('property' => 'article:section', 'content' => $this->Category->Name));
+        $HeadModule->AddTag('meta', array('property' => 'article:section', 'content' => $this->ArticleCategory->Name));
 
         // Image meta info
         $Image = $this->ArticleMediaModel->GetThumbnailByArticleID($Article->ArticleID);

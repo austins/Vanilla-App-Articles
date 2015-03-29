@@ -17,10 +17,14 @@
  */
 
 /**
- * Renders the menu for the Compose controller.
+ * Renders the categories menu for the Articles controller.
  */
-class ComposeFilterModule extends Gdn_Module {
+class ArticleCategoriesModule extends Gdn_Module {
     public function __construct($Sender = '') {
+        // Load categories.
+        $ArticleCategoryModel = new ArticleCategoryModel();
+        $this->Data = $ArticleCategoryModel->Get();
+
         parent::__construct($Sender);
     }
 
@@ -42,11 +46,10 @@ class ComposeFilterModule extends Gdn_Module {
         $Controller = Gdn::Controller();
         $Session = Gdn::Session();
 
-        $Controller->EventArguments['ComposeFilterModule'] = &$this;
-        $Controller->FireEvent('BeforeComposeFilterModule');
+        $Controller->EventArguments['ArticleCategoriesModule'] = &$this;
+        $Controller->FireEvent('BeforeArticleCategoriesModule');
 
-        $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
-        if (!$Session->CheckPermission($PermissionsAllowed, false))
+        if (!$Session->CheckPermission('Articles.Articles.View'))
             return '';
 
         return parent::ToString();

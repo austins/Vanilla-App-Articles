@@ -8,7 +8,7 @@ $Article = $this->Article;
 $ArticleUrl = ArticleUrl($Article);
 $Author = Gdn::UserModel()->GetID($Article->AttributionUserID);
 
-$Category = $this->Category;
+$Category = $this->ArticleCategory;
 
 if ($Article->CountArticleComments == 0)
     $CommentCountText = 'Comments';

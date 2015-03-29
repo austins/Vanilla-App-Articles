@@ -3,10 +3,10 @@
 $Controller = Gdn::Controller();
 $Session = Gdn::Session();
 
-$Comments = $this->Comments->Result();
+$Comments = $this->ArticleComments->Result();
 $Article = $this->Article;
 $CurrentOffset = 0;
-if ($this->Comments->NumRows() > 0):
+if ($this->ArticleComments->NumRows() > 0):
     ?>
     <div class="DataBox DataBox-Comments">
         <?php

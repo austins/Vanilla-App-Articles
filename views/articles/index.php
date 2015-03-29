@@ -6,7 +6,7 @@ if (!function_exists('ShowArticleOptions')) {
 
 $Articles = $this->Data('Articles');
 
-$Category = isset($this->Category->ArticleCategoryID) ? $this->Category : false;
+$Category = isset($this->ArticleCategory->ArticleCategoryID) ? $this->ArticleCategory : false;
 
 if ($Category) {
     echo Wrap($Category->Name, 'h1', array('class' => 'H'));

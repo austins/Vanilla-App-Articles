@@ -25,7 +25,7 @@ class ArticlesController extends Gdn_Controller {
      */
     public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'ArticleMediaModel');
 
-    protected $Category = false;
+    protected $ArticleCategory = false;
 
     /**
      * Include JS, CSS, and modules used by all methods.
@@ -53,6 +53,8 @@ class ArticlesController extends Gdn_Controller {
         $this->AddModule('GuestModule');
         $this->AddModule('SignedInModule');
         $this->AddModule('ArticlesDashboardModule');
+        $this->AddModule('ArticleCategoriesModule');
+        $this->AddModule('DiscussionsModule');
         $this->AddModule('RecentActivityModule');
 
         parent::Initialize();
@@ -126,18 +128,20 @@ class ArticlesController extends Gdn_Controller {
         
         // Get the category.
         if ($UrlCode != '')
-            $this->Category = $this->ArticleCategoryModel->GetByUrlCode($UrlCode);
+            $this->ArticleCategory = $this->ArticleCategoryModel->GetByUrlCode($UrlCode);
 
-        if (!$this->Category)
+        if (!$this->ArticleCategory)
             throw NotFoundException('Article category');
 
+        $this->SetData('ArticleCategory', $this->ArticleCategory);
+
         // Set the title.
-        $this->Title($this->Category->Name);
+        $this->Title($this->ArticleCategory->Name);
 
         // Get published articles.
         $Wheres = array(
             'Status' => ArticleModel::STATUS_PUBLISHED,
-            'ArticleCategoryID' => $this->Category->ArticleCategoryID
+            'ArticleCategoryID' => $this->ArticleCategory->ArticleCategoryID
         );
         $this->SetData('Articles', $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result());
         // Get total article count.
