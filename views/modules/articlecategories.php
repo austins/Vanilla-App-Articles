@@ -17,11 +17,12 @@ $CategoryID = val('ArticleCategoryID', $this->_Sender->Data('ArticleCategory'), 
         echo Wrap(Anchor(T('All Categories'), '/articles'), 'li', $AllArticlesClass);
 
         $ArticleModel = new ArticleModel();
+        $ArticleOffset = 0;
+        $ArticleLimit = 1;
+        $ArticleWheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED);
         foreach ($Categories as $Category) {
             // Category must have at least one published article.
-            $ArticleOffset = 0;
-            $ArticleLimit = 1;
-            $ArticleWheres = array('a.ArticleCategoryID' => $Category->ArticleCategoryID, 'a.Status' => ArticleModel::STATUS_PUBLISHED);
+            $ArticleWheres['a.ArticleCategoryID'] = $Category->ArticleCategoryID;
             $Article = $ArticleModel->Get($ArticleOffset, $ArticleLimit, $ArticleWheres)->FirstRow();
             $PublishedArticleExists = isset($Article->ArticleID);
 
