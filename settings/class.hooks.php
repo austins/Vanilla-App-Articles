@@ -27,7 +27,7 @@ class ArticlesHooks extends Gdn_Plugin {
      * @param $Sender
      */
     public function Base_Render_Before($Sender) {
-        if ($Sender->Menu)
+        if ($Sender->Menu && C('Articles.ShowMenuLink', true))
             $Sender->Menu->AddLink('Articles', T('Articles'), '/articles');
     }
 
@@ -50,7 +50,10 @@ class ArticlesHooks extends Gdn_Plugin {
         include(PATH_APPLICATIONS . DS . 'articles' . DS . 'settings' . DS . 'about.php');
         $Version = ArrayValue('Version', $ApplicationInfo['Articles'], false);
         if ($Version) {
-            $Save = array('Articles.Version' => $Version);
+            $Save = array(
+                'Articles.Version' => $Version,
+                'Articles.ShowMenuLink' => true
+            );
             SaveToConfig($Save);
         }
     }
@@ -104,6 +107,10 @@ class ArticlesHooks extends Gdn_Plugin {
         $ConfigModule = new ConfigurationModule($Sender);
 
         $ConfigModule->Initialize(array(
+            'Articles.ShowMenuLink' => array(
+                'LabelCode' => 'Show link to Articles page in main menu?',
+                'Control' => 'Checkbox'
+            ),
             'Articles.Comments.EnableThreadedComments' => array(
                 'LabelCode' => 'Enable threaded (one level) comment replies?',
                 'Control' => 'Checkbox'
