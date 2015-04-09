@@ -355,7 +355,7 @@ class ArticlesHooks extends Gdn_Plugin {
 
                 $Sender->AddProfileTab(T('Article Comments'),
                     'profile/articlecomments/' . $Sender->User->UserID . '/' . rawurlencode($Sender->User->Name),
-                    'Article Comments', $ArticleCommentsLabel);
+                    'ArticleComments', $ArticleCommentsLabel);
             }
 
             // Add the article tab's CSS and Javascript.
