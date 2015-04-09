@@ -50,10 +50,7 @@ class ArticlesHooks extends Gdn_Plugin {
         include(PATH_APPLICATIONS . DS . 'articles' . DS . 'settings' . DS . 'about.php');
         $Version = ArrayValue('Version', $ApplicationInfo['Articles'], false);
         if ($Version) {
-            $Save = array(
-                'Articles.Version' => $Version,
-                'Articles.ShowMenuLink' => true
-            );
+            $Save = array('Articles.Version' => $Version);
             SaveToConfig($Save);
         }
     }

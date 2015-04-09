@@ -220,7 +220,8 @@ class ArticleCommentModel extends Gdn_Model {
 
                 // Add the activity.
                 $ArticleName = $Article->Name;
-                $this->AddActivity($Fields, $Insert, $PrimaryKeyVal, $ArticleName);
+                if (C('Articles.Comments.AddActivity', true))
+                    $this->AddActivity($Fields, $Insert, $PrimaryKeyVal, $ArticleName);
 
                 $this->UpdateCommentCount($Article, $Comment);
 

@@ -238,7 +238,8 @@ class ArticleModel extends Gdn_Model {
             $Fields = $this->Validation->ValidationFields();
 
             // Add the activity.
-            $this->AddActivity($Fields, $Insert);
+            if (C('Articles.Articles.AddActivity', true))
+                $this->AddActivity($Fields, $Insert);
 
             $Fields = RemoveKeyFromArray($Fields, $this->PrimaryKey); // Don't try to insert or update the primary key
             if ($Insert === false) {
