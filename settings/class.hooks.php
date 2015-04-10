@@ -736,4 +736,12 @@ class ArticlesHooks extends Gdn_Plugin {
             echo Wrap(Anchor(Sprite('SpMyDrafts').' '.T('Articles Dashboard'), '/compose'), 'li');
         }
     }
+
+    public function DiscussionsController_Render_Before($Sender) {
+        $Sender->AddModule('ArticlesModule');
+    }
+
+    public function CategoriesController_Render_Before($Sender) {
+        $Sender->AddModule('ArticlesModule');
+    }
 }
