@@ -724,7 +724,7 @@ class ComposeController extends Gdn_Controller {
                     $CommentID = $this->Form->Save($FormValues);
 
                     if ($CommentID)
-                        $this->RedirectUrl = ArticleCommentUrl($Article, $CommentID);
+                        $this->RedirectUrl = ArticleCommentUrl($CommentID);
                 }
             }
         }

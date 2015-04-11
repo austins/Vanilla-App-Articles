@@ -20,7 +20,7 @@ if (!function_exists('ArticleUrl')) {
     /**
      * Get the URL of an article.
      *
-     * @param mixed $Article
+     * @param object|array $Article
      * @param int|string $Page
      * @param bool $WithDomain
      * @return string
@@ -45,11 +45,10 @@ if (!function_exists('ArticleCommentUrl')) {
     /**
      * Get the URL for an article comment.
      *
-     * @param mixed $Article
      * @param int $ArticleCommentID
      * @return string
      */
-    function ArticleCommentUrl($Article, $ArticleCommentID) {
+    function ArticleCommentUrl($ArticleCommentID) {
         return Url("/article/comment/$ArticleCommentID/#Comment_$ArticleCommentID", true);
     }
 }
@@ -90,18 +89,20 @@ if (!function_exists('ArticleCategoryUrl')) {
     /**
      * Get the URL of an article category.
      *
-     * @param mixed $Category
+     * @param object|array|string $Category
      * @param int|string $Page
      * @param bool $WithDomain
      * @return string
      */
     function ArticleCategoryUrl($Category, $Page = '', $WithDomain = true) {
-        // If $Article type is an array, then cast it to an object.
+        // If $Category type is an array, then cast it to an object.
         if (is_array($Category))
             $Category = (object)$Category;
 
+        $UrlCode = isset($Category->UrlCode) ? $Category->UrlCode : $Category;
+
         // Set up the initial URL string.
-        $Result = '/articles/category/' . $Category->UrlCode;
+        $Result = '/articles/category/' . $UrlCode;
 
         // Add in the page number if necessary.
         if ($Page && ($Page > 1 || Gdn::Session()->UserID))

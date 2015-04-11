@@ -74,7 +74,7 @@ if ($this->ArticleComments->NumRows() > 0):
 
                             <div class="Meta CommentMeta CommentInfo">
                             <span class="MItem DateCreated"><?php echo Anchor(Gdn_Format::Date($Comment->DateInserted,
-                                        'html'), ArticleCommentUrl($Article, $Comment->ArticleCommentID), 'Permalink',
+                                        'html'), ArticleCommentUrl($Comment->ArticleCommentID), 'Permalink',
                                     array('name' => 'Item_' . ($CurrentOffset), 'rel' => 'nofollow')); ?></span>
                                 <?php
                                 echo DateUpdated($Comment, array('<span class="MItem">', '</span>'));
