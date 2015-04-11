@@ -128,6 +128,14 @@ class ArticleModel extends Gdn_Model {
         $this->EventArguments['Wheres'] = & $Wheres;
         $this->FireEvent('BeforeGet');
 
+        // If ArticleCategoryID is in the $Wheres array,
+        // extract it to be used in the join call instead of the where clause.
+        $ArticleCategoryID = false;
+        if (isset($Wheres['ArticleCategoryID']) && is_numeric($Wheres['ArticleCategoryID'])) {
+            $ArticleCategoryID = $Wheres['ArticleCategoryID'];
+            unset($Wheres['ArticleCategoryID']);
+        }
+
         if (is_array($Wheres))
             $this->SQL->Where($Wheres);
 
@@ -136,9 +144,7 @@ class ArticleModel extends Gdn_Model {
 
         // Join in related data.
         $this->JoinAuthorInfo($this->SQL);
-
-        if (!isset($Wheres['ArticleCategoryID']))
-            $this->JoinArticleCategory($this->SQL);
+        $this->JoinArticleCategory($this->SQL, $ArticleCategoryID);
         
         // Fetch data.
         $Articles = $this->SQL->Get();
@@ -221,9 +227,13 @@ class ArticleModel extends Gdn_Model {
             ->LeftJoin('User u', 'u.UserID = a.AttributionUserID');
     }
 
-    private function JoinArticleCategory(Gdn_SQLDriver &$SQL) {
-        $SQL->Select('ac.Name as ArticleCategoryName, ac.UrlCode as ArticleCategoryUrlCode')
-            ->LeftJoin('ArticleCategory ac', 'a.ArticleCategoryID = ac.ArticleCategoryID');
+    private function JoinArticleCategory(Gdn_SQLDriver &$SQL, $ArticleCategoryID = false) {
+        $SQL->Select('ac.Name as ArticleCategoryName, ac.UrlCode as ArticleCategoryUrlCode');
+
+        if (is_numeric($ArticleCategoryID))
+            $SQL->LeftJoin('ArticleCategory ac', 'ac.ArticleCategoryID = ' . $ArticleCategoryID);
+        else
+            $SQL->LeftJoin('ArticleCategory ac', 'a.ArticleCategoryID = ac.ArticleCategoryID');
     }
 
     /**
