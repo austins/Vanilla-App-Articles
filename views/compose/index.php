@@ -19,6 +19,8 @@
                     echo Wrap(Anchor($Article->Name, ArticleUrl($Article)), 'div');
 
                     echo '<div class="Meta Meta-Article">';
+                    echo '<span class="MItem ArticleCategory">' . Anchor($Article->ArticleCategoryName,
+                            ArticleCategoryUrl($Article->ArticleCategoryUrlCode)) . '</span>';
                     echo '<span class="MItem ArticleDate">' . Gdn_Format::Date($Article->DateInserted,
                             '%e %B %Y - %l:%M %p') . '</span>';
                     echo '<span class="MItem ArticleAuthor">' . ArticleAuthorAnchor($Author) . '</span>';
