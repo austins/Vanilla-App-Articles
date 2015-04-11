@@ -23,8 +23,6 @@ if (count($Articles) == 0) {
         $ArticleUrl = ArticleUrl($Article);
         $Author = Gdn::UserModel()->GetID($Article->AttributionUserID);
 
-        $ArticleCategory = $this->ArticleCategoryModel->GetByID($Article->ArticleCategoryID);
-
         $CommentCountText = ($Article->CountArticleComments == 0) ? 'Comments' :
             Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
 
@@ -55,8 +53,8 @@ if (count($Articles) == 0) {
                         Gdn::Controller()->FireEvent('AfterArticleLabels');
                         ?>
                         <span
-                            class="MItem ArticleCategory"><?php echo Anchor($ArticleCategory->Name,
-                                ArticleCategoryUrl($ArticleCategory));
+                            class="MItem ArticleCategory"><?php echo Anchor($Article->ArticleCategoryName,
+                                ArticleCategoryUrl($Article->ArticleCategoryUrlCode));
                             ?></span>
                         <span class="MItem ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted, '%e %B %Y - %l:%M %p'); ?></span>
                         <span class="MItem ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>

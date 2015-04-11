@@ -1,5 +1,7 @@
 <?php if(!defined('APPLICATION')) exit();
 
+// TODO: RSS; update properties, view, etc.
+
 echo Wrap(Gdn_Format::Text($this->Head->Title()), 'description');
 echo Wrap(Gdn::Config('Garden.Locale', 'en-US'), 'language');
 echo '<atom:link href="' . htmlspecialchars(Url($this->SelfUrl, TRUE)) . '" rel="self" type="application/rss+xml" />';

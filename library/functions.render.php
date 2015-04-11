@@ -99,6 +99,8 @@ if (!function_exists('ArticleCategoryUrl')) {
         if (is_array($Category))
             $Category = (object)$Category;
 
+        // If $Category is an object, then assign $UrlCode to UrlCode property,
+        // else assume $Category is a string that is the UrlCode.
         $UrlCode = isset($Category->UrlCode) ? $Category->UrlCode : $Category;
 
         // Set up the initial URL string.

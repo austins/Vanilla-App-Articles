@@ -134,8 +134,11 @@ class ArticleModel extends Gdn_Model {
         // Set order of data.
         $this->SQL->OrderBy('a.DateInserted', 'desc');
 
-        // Join in the author data
-        $this->SQL->Select('u.Name as InsertName, u.Email as InsertEmail, u.Photo as InsertPhoto')->Join('User u', 'u.UserID = a.InsertUserID');
+        // Join in related data.
+        $this->JoinAuthorInfo($this->SQL);
+
+        if (!isset($Wheres['ArticleCategoryID']))
+            $this->JoinArticleCategory($this->SQL);
         
         // Fetch data.
         $Articles = $this->SQL->Get();
@@ -158,9 +161,10 @@ class ArticleModel extends Gdn_Model {
         $this->SQL->Select('a.*')
             ->From('Article a')
             ->Where('a.ArticleID', $ArticleID);
-        
-        // Join in the author data
-        $this->SQL->Select('u.Name as AuthorName, u.Email as AuthorEmail, u.Photo as AuthorPhoto')->Join('User u', 'u.UserID = a.AttributionUserID');
+
+        // Join in related data.
+        $this->JoinAuthorInfo($this->SQL);
+        $this->JoinArticleCategory($this->SQL);
         
         // Fetch data.
         $Article = $this->SQL->Get()->FirstRow();
@@ -180,8 +184,9 @@ class ArticleModel extends Gdn_Model {
             ->From('Article a')
             ->Where('a.UrlCode', $ArticleUrlCode);
 
-        // Join in the author data
-        $this->SQL->Select('u.Name as AuthorName, u.Email as AuthorEmail, u.Photo as AuthorPhoto')->Join('User u', 'u.UserID = a.AttributionUserID');
+        // Join in related data
+        $this->JoinAuthorInfo($this->SQL);
+        $this->JoinArticleCategory($this->SQL);
         
         // Fetch data.
         $Article = $this->SQL->Get()->FirstRow();
@@ -208,6 +213,17 @@ class ArticleModel extends Gdn_Model {
         $this->LastArticleCount = $Articles->NumRows();
 
         return $Articles;
+    }
+
+    private function JoinAuthorInfo(Gdn_SQLDriver &$SQL) {
+        // Join in the author data
+        $SQL->Select('u.Name as AuthorName, u.Photo as AuthorPhoto')
+            ->LeftJoin('User u', 'u.UserID = a.AttributionUserID');
+    }
+
+    private function JoinArticleCategory(Gdn_SQLDriver &$SQL) {
+        $SQL->Select('ac.Name as ArticleCategoryName, ac.UrlCode as ArticleCategoryUrlCode')
+            ->LeftJoin('ArticleCategory ac', 'a.ArticleCategoryID = ac.ArticleCategoryID');
     }
 
     /**

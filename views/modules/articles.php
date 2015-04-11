@@ -6,9 +6,7 @@ $Articles = $this->Data->Result();
     <h4><?php echo T('Recent Articles'); ?></h4>
     <ul class="PanelInfo PanelArticles DataList">
         <?php
-        $ArticleCategoryModel = new ArticleCategoryModel();
-        foreach ($Articles as $Article) {
-            $Category = $ArticleCategoryModel->GetByID($Article->ArticleCategoryID);
+        foreach ($Articles as $Article) :
             ?>
             <li id="Article_<?php echo $Article->ArticleID; ?>">
                 <div class="Title"><?php echo Anchor(Gdn_Format::Text($Article->Name, false), ArticleUrl($Article),
@@ -16,9 +14,10 @@ $Articles = $this->Data->Result();
 
                 <div class="Meta">
                     <span class="MItem"><?php echo Gdn_Format::Date($Article->DateInserted,
-                                'html') . Anchor($Category->Name, ArticleCategoryUrl($Category)); ?></span>
+                                'html') . Anchor($Article->ArticleCategoryName,
+                                ArticleCategoryUrl($Article->ArticleCategoryUrlCode)); ?></span>
                 </div>
             </li>
-        <?php } ?>
+        <?php endforeach; ?>
     </ul>
 </div>
