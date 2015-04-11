@@ -12,7 +12,6 @@ if (!$Comments || count($Comments) == 0) {
     foreach ($Comments as $Comment) {
         $Permalink = '/article/comment/' . $Comment->ArticleCommentID . '/#Comment_' . $Comment->ArticleCommentID;
         $User = UserBuilder($Comment, 'Insert');
-        $Article = $this->ArticleModel->GetByID($Comment->ArticleID);
         ?>
         <li id="<?php echo 'Comment_' . $Comment->ArticleCommentID; ?>" class="Item">
             <?php $this->FireEvent('BeforeItemContent'); ?>
@@ -22,7 +21,7 @@ if (!$Comments || count($Comments) == 0) {
                     ?></div>
                 <div class="Meta">
                     <span class="MItem"><?php echo T('Comment in', 'in') . ' '; ?>
-                        <b><?php echo Anchor(Gdn_Format::Text($Article->Name), $Permalink); ?></b></span>
+                        <b><?php echo Anchor(Gdn_Format::Text($Comment->ArticleName), $Permalink); ?></b></span>
                     <span class="MItem"><?php printf(T('Comment by %s'), UserAnchor($User)); ?></span>
                     <span class="MItem"><?php echo Anchor(Gdn_Format::Date($Comment->DateInserted), $Permalink); ?></span>
                 </div>
