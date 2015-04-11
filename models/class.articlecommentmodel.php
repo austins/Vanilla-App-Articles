@@ -60,8 +60,14 @@ class ArticleCommentModel extends Gdn_Model {
 
         $this->SQL->OrderBy('ac.DateInserted', $SortOrder);
 
+        // Join in article info.
+        $this->SQL->Select('a.Name', '', 'ArticleName')
+            ->LeftJoin('Article a', 'ac.ArticleID = a.ArticleID');
+
         // Fetch data.
         $Comments = $this->SQL->Get();
+
+        Gdn::UserModel()->JoinUsers($Comments, array('InsertUserID', 'UpdateUserID'));
 
         // Prepare and fire event.
         $this->EventArguments['Data'] = $Comments;
@@ -113,33 +119,6 @@ class ArticleCommentModel extends Gdn_Model {
     }
 
     /**
-     * Select the data for a single comment.
-     *
-     * @param bool $FireEvent
-     * @param bool $Join
-     */
-    public function PrepareCommentQuery($FireEvent = true, $Join = true) {
-        $this->SQL->Select('ac.*')
-            ->From('ArticleComment ac');
-
-        if ($Join) {
-            $this->SQL
-                ->Select('iu.Name', '', 'InsertName')
-                ->Select('iu.Photo', '', 'InsertPhoto')
-                ->Select('iu.Email', '', 'InsertEmail')
-                ->Join('User iu', 'ac.InsertUserID = iu.UserID', 'left')
-
-                ->Select('uu.Name', '', 'UpdateName')
-                ->Select('uu.Photo', '', 'UpdatePhoto')
-                ->Select('uu.Email', '', 'UpdateEmail')
-                ->Join('User uu', 'ac.UpdateUserID = uu.UserID', 'left');
-        }
-
-        if ($FireEvent)
-            $this->FireEvent('AfterCommentQuery');
-    }
-
-    /**
      * Get comments for a user.
      *
      * @param int $UserID Which user to get comments for.
@@ -151,20 +130,11 @@ class ArticleCommentModel extends Gdn_Model {
         if (!is_numeric($UserID))
             throw new InvalidArgumentException('The user ID must be a numeric value.');
 
-        $this->PrepareCommentQuery(true, true);
-        $this->FireEvent('BeforeGet');
+        $Wheres = array('ac.InsertUserID', $UserID);
 
-        $this->SQL
-            ->Select('a.Name', '', 'ArticleName')
-            ->Join('Article a', 'ac.ArticleID = a.ArticleID')
-            ->Where('ac.InsertUserID', $UserID)
-            ->OrderBy('ac.ArticleCommentID', 'desc')
-            ->Limit($Limit, $Offset);
+        $Comments = $this->Get($Offset, $Limit, $Wheres);
 
-        $Data = $this->SQL->Get();
-        Gdn::UserModel()->JoinUsers($Data, array('InsertUserID', 'UpdateUserID'));
-
-        return $Data;
+        return $Comments;
     }
 
     /**

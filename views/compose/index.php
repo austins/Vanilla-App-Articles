@@ -44,7 +44,6 @@
             else {
                 foreach ($RecentComments as $Comment) {
                     $Permalink = '/article/comment/' . $Comment->ArticleCommentID . '/#Comment_' . $Comment->ArticleCommentID;
-                    $Article = $this->ArticleModel->GetByID($Comment->ArticleID);
 
                     $UserName = $Comment->GuestName;
                     if ($Comment->InsertUserID > 0) {
@@ -61,7 +60,7 @@
                                 ?></div>
                             <div class="Meta">
                     <span class="MItem"><?php echo T('Comment in', 'in') . ' '; ?>
-                        <b><?php echo Anchor(Gdn_Format::Text($Article->Name), $Permalink); ?></b></span>
+                        <b><?php echo Anchor(Gdn_Format::Text($Comment->ArticleName), $Permalink); ?></b></span>
                                 <span class="MItem"><?php printf(T('Comment by %s'), $UserName); ?></span>
                                 <span class="MItem"><?php echo Anchor(Gdn_Format::Date($Comment->DateInserted),
                                         $Permalink); ?></span>

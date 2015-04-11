@@ -142,12 +142,12 @@ class ArticleModel extends Gdn_Model {
         // Set order of data.
         $this->SQL->OrderBy('a.DateInserted', 'desc');
 
-        // Join in related data.
-        $this->JoinAuthorInfo($this->SQL);
-        $this->JoinArticleCategory($this->SQL, $ArticleCategoryID);
+        $this->JoinArticleCategoryInfo($ArticleCategoryID);
         
         // Fetch data.
         $Articles = $this->SQL->Get();
+
+        Gdn::UserModel()->JoinUsers($Articles, array('InsertUserID', 'UpdateUserID', 'AttributionUserID'));
 
         // Prepare and fire event.
         $this->EventArguments['Data'] = $Articles;
@@ -168,12 +168,12 @@ class ArticleModel extends Gdn_Model {
             ->From('Article a')
             ->Where('a.ArticleID', $ArticleID);
 
-        // Join in related data.
-        $this->JoinAuthorInfo($this->SQL);
-        $this->JoinArticleCategory($this->SQL);
+        $this->JoinArticleCategoryInfo();
         
         // Fetch data.
         $Article = $this->SQL->Get()->FirstRow();
+
+        Gdn::UserModel()->JoinUsers($Article, array('InsertUserID', 'UpdateUserID', 'AttributionUserID'));
 
         return $Article;
     }
@@ -190,12 +190,12 @@ class ArticleModel extends Gdn_Model {
             ->From('Article a')
             ->Where('a.UrlCode', $ArticleUrlCode);
 
-        // Join in related data
-        $this->JoinAuthorInfo($this->SQL);
-        $this->JoinArticleCategory($this->SQL);
+        $this->JoinArticleCategoryInfo();
         
         // Fetch data.
         $Article = $this->SQL->Get()->FirstRow();
+
+        Gdn::UserModel()->JoinUsers($Article, array('InsertUserID', 'UpdateUserID', 'AttributionUserID'));
 
         return $Article;
     }
@@ -221,19 +221,14 @@ class ArticleModel extends Gdn_Model {
         return $Articles;
     }
 
-    private function JoinAuthorInfo(Gdn_SQLDriver &$SQL) {
-        // Join in the author data
-        $SQL->Select('u.Name as AuthorName, u.Photo as AuthorPhoto')
-            ->LeftJoin('User u', 'u.UserID = a.AttributionUserID');
-    }
-
-    private function JoinArticleCategory(Gdn_SQLDriver &$SQL, $ArticleCategoryID = false) {
-        $SQL->Select('ac.Name as ArticleCategoryName, ac.UrlCode as ArticleCategoryUrlCode');
+    private function JoinArticleCategoryInfo($ArticleCategoryID = false) {
+        $this->SQL->Select('ac.Name', '', 'ArticleCategoryName')
+            ->Select('ac.UrlCode', '', 'ArticleCategoryUrlCode');
 
         if (is_numeric($ArticleCategoryID))
-            $SQL->LeftJoin('ArticleCategory ac', 'ac.ArticleCategoryID = ' . $ArticleCategoryID);
+            $this->SQL->LeftJoin('ArticleCategory ac', 'ac.ArticleCategoryID = ' . $ArticleCategoryID);
         else
-            $SQL->LeftJoin('ArticleCategory ac', 'a.ArticleCategoryID = ac.ArticleCategoryID');
+            $this->SQL->LeftJoin('ArticleCategory ac', 'a.ArticleCategoryID = ac.ArticleCategoryID');
     }
 
     /**
