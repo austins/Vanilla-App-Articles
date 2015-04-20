@@ -149,7 +149,7 @@ class ArticleModel extends Gdn_Model {
 
         // Fetch data.
         $Articles = $this->SQL->Get();
-        
+
         Gdn::UserModel()->JoinUsers($Articles, array('InsertUserID', 'UpdateUserID', 'AttributionUserID'));
 
         // Prepare and fire event.
@@ -272,14 +272,14 @@ class ArticleModel extends Gdn_Model {
             } else {
                 // Inserting.
                 $PrimaryKeyVal = $this->Insert($Fields);
-
-                // Update article count for affected category and user.
-                $Article = $this->GetByID($PrimaryKeyVal);
-                $ArticleCategoryID = val('ArticleCategoryID', $Article, false);
-
-                $this->UpdateArticleCount($ArticleCategoryID, $Article);
-                $this->UpdateUserArticleCount(val('AttributionUserID', $Article, false));
             }
+
+            // Update article count for affected category and user.
+            $Article = $this->GetByID($PrimaryKeyVal);
+            $ArticleCategoryID = val('ArticleCategoryID', $Article, false);
+
+            $this->UpdateArticleCount($ArticleCategoryID, $Article);
+            $this->UpdateUserArticleCount(val('AttributionUserID', $Article, false));
         } else {
             $PrimaryKeyVal = false;
         }
