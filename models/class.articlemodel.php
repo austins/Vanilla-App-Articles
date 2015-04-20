@@ -128,12 +128,15 @@ class ArticleModel extends Gdn_Model {
         $this->EventArguments['Wheres'] = & $Wheres;
         $this->FireEvent('BeforeGet');
 
-        // If ArticleCategoryID is in the $Wheres array,
-        // extract it to be used in the join call instead of the where clause.
+        // Handle ArticleCategoryID in Wheres clause
         $ArticleCategoryID = false;
         if (isset($Wheres['ArticleCategoryID']) && is_numeric($Wheres['ArticleCategoryID'])) {
             $ArticleCategoryID = $Wheres['ArticleCategoryID'];
-            unset($Wheres['ArticleCategoryID']);
+
+            unset($Wheres['ArticleCategoryID']); // Remove ambiguous ArticleCategoryID selection
+            $Wheres['a.ArticleCategoryID'] = $ArticleCategoryID; // Fully qualify ArticleCategoryID selection
+        } else if (isset($Wheres['a.ArticleCategoryID']) && is_numeric($Wheres['a.ArticleCategoryID'])) {
+            $ArticleCategoryID = $Wheres['a.ArticleCategoryID'];
         }
 
         if (is_array($Wheres))
@@ -143,10 +146,10 @@ class ArticleModel extends Gdn_Model {
         $this->SQL->OrderBy('a.DateInserted', 'desc');
 
         $this->JoinArticleCategoryInfo($ArticleCategoryID);
-        
+
         // Fetch data.
         $Articles = $this->SQL->Get();
-
+        
         Gdn::UserModel()->JoinUsers($Articles, array('InsertUserID', 'UpdateUserID', 'AttributionUserID'));
 
         // Prepare and fire event.
