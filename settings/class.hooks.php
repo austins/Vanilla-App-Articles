@@ -24,11 +24,16 @@ class ArticlesHooks extends Gdn_Plugin {
     /**
      * Add link to the articles controller in the main menu.
      *
-     * @param $Sender
+     * @param Gdn_Controller $Sender
      */
     public function Base_Render_Before($Sender) {
-        if ($Sender->Menu && C('Articles.ShowMenuLink', true))
-            $Sender->Menu->AddLink('Articles', T('Articles'), '/articles');
+        if ($Sender->Menu) {
+            if (C('Articles.ShowArticlesMenuLink', true))
+                $Sender->Menu->AddLink('Articles', T('Articles'), '/articles');
+
+            if (C('Articles.ShowCategoriesMenuLink', false))
+                $Sender->Menu->AddLink('ArticleCategories', T('Article Categories'), '/articles/categories');
+        }
     }
 
     /**
@@ -104,8 +109,12 @@ class ArticlesHooks extends Gdn_Plugin {
         $ConfigModule = new ConfigurationModule($Sender);
 
         $ConfigModule->Initialize(array(
-            'Articles.ShowMenuLink' => array(
+            'Articles.ShowArticlesMenuLink' => array(
                 'LabelCode' => 'Show link to Articles page in main menu?',
+                'Control' => 'Checkbox'
+            ),
+            'Articles.ShowCategoriesMenuLink' => array(
+                'LabelCode' => 'Show link to Article Categories page in main menu?',
                 'Control' => 'Checkbox'
             ),
             'Articles.Comments.EnableThreadedComments' => array(
