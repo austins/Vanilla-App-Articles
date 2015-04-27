@@ -2,7 +2,7 @@
 <h1 class="H HomepageTitle"><?php echo $this->Data('Title'); ?></h1>
 <ul class="DataList ArticleCategoryList">
     <?php
-    $Categories = $this->Data('Categories');
+    $Categories = $this->Data('ArticleCategories');
 
     foreach ($Categories as $Category) :
         ?>

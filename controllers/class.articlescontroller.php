@@ -174,7 +174,7 @@ class ArticlesController extends Gdn_Controller {
         // Get the categories.
         $Wheres = array('ac.CountArticles >' => '0'); // Category must have at least one article.
         $Categories = $this->ArticleCategoryModel->Get($Wheres);
-        $this->SetData('Categories', $Categories, true);
+        $this->SetData('ArticleCategories', $Categories, true);
 
         $this->Render();
     }
