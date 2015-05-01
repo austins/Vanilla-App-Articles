@@ -13,8 +13,8 @@ $CategoryID = val('ArticleCategoryID', $this->_Sender->Data('ArticleCategory'), 
     <ul class="PanelInfo PanelArticleCategories">
         <?php
         // All Categories link
-        $AllArticlesClass = ($OnArticlesController && ($RequestMethod === 'index')) ? array('class' => 'Active') : '';
-        echo Wrap(Anchor(T('All Categories'), '/articles'), 'li', $AllArticlesClass);
+        $AllArticlesClass = ($OnArticlesController && ($RequestMethod === 'categories')) ? array('class' => 'Active') : '';
+        echo Wrap(Anchor(T('All Categories'), '/articles/categories'), 'li', $AllArticlesClass);
 
         $ArticleModel = new ArticleModel();
         $ArticleOffset = 0;
