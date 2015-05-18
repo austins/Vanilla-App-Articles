@@ -346,4 +346,18 @@ jQuery(document).ready(function($) {
             }
         }
     });
+
+    // ArticleCategoriesModule categories drop-down listing
+    $('#ArticleCategoriesDropDown').change(function() {
+        var isAllCategoriesSelected = ($(this).children(':selected').attr('id') === "ArticleCategoriesDropDown_AllCategories");
+        if (isAllCategoriesSelected) {
+            window.location = gdn.url('/articles/categories');
+            return false;
+        }
+
+        // var categoryId = $(this).children(':selected').attr('id').replace(/\D/g, '');
+        var categoryUrlCode = $(this).val();
+
+        window.location = gdn.url('/articles/category/' + categoryUrlCode);
+    });
 });

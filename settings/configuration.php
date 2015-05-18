@@ -28,3 +28,4 @@ $Configuration['Articles']['Articles']['AddActivity'] = true;
 $Configuration['Articles']['Comments']['EnableThreadedComments'] = true;
 $Configuration['Articles']['Comments']['AllowGuests'] = false;
 $Configuration['Articles']['Comments']['AddActivity'] = true;
+$Configuration['Articles']['Modules']['ShowCategoriesAsDropDown'] = false;

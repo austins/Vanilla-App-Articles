@@ -128,6 +128,10 @@ class ArticlesHooks extends Gdn_Plugin {
             'Articles.TwitterUsername' => array(
                 'LabelCode' => 'Enter a Twitter username associated with this website to be used for Twitter card meta tags (optional):',
                 'Control' => 'TextBox'
+            ),
+            'Articles.Modules.ShowCategoriesAsDropDown' => array(
+                'LabelCode' => 'Show article categories in the panel in a drop-down menu instead of a list?',
+                'Control' => 'Checkbox'
             )
         ));
 
