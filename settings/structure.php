@@ -106,6 +106,13 @@ $Construct->PrimaryKey('ArticleMediaID')
     ->Set($Explicit, $Drop);
 
 /*
+ * Create activity types.
+ */
+$ActivityModel = new ActivityModel();
+$ActivityModel->DefineType('Article');
+$ActivityModel->DefineType('ArticleComment');
+
+/*
  * Set up permissions.
  */
 $PermissionModel = Gdn::PermissionModel();
