@@ -344,7 +344,7 @@ class ArticlesHooks extends Gdn_Plugin {
 
             // Add the article tab
             if (($Sender->User->CountArticles > 0) || Gdn::UserModel()->CheckPermission($Sender->User, 'Articles.Articles.Add')) {
-                $ArticlesLabel = Sprite('SpArticles') . ' ' . T('Articles');
+                $ArticlesLabel = Sprite('SpArticles', 'SpMyDrafts Sprite') . ' ' . T('Articles');
 
                 if (C('Articles.Profile.ShowCounts', true))
                     $ArticlesLabel .= '<span class="Aside">' . CountString(GetValueR('User.CountArticles', $Sender,
@@ -357,7 +357,7 @@ class ArticlesHooks extends Gdn_Plugin {
 
             // Add the article comments tab
             if (($Sender->User->CountArticleComments > 0) || Gdn::UserModel()->CheckPermission($Sender->User, 'Articles.Comments.Add')) {
-                $ArticleCommentsLabel = Sprite('SpArticleComments') . ' ' . T('Article Comments');
+                $ArticleCommentsLabel = Sprite('SpArticleComments', 'SpQuote Sprite') . ' ' . T('Article Comments');
 
                 if (C('Articles.Profile.ShowCounts', true))
                     $ArticleCommentsLabel .= '<span class="Aside">' . CountString(GetValueR('User.CountArticleComments',
