@@ -51,18 +51,24 @@ else
         ?>
         <footer>
             <div id="AuthorInfo" class="FormWrapper">
-                <h2 class="H"><?php echo T('About the Author'); ?></h2>
+                <div id="AuthorPhoto">
+                    <?php echo userPhoto($Author, array('Size' => 'Medium')); ?>
+                </div>
 
-                <div>
-                    <?php
-                    echo '<strong>' . $authorDisplayName;
+                <div id="AboutTheAuthor">
+                    <?php echo T('About the Author'); ?>
+                </div>
 
-                    if ($authorMeta['AuthorDisplayName'] !== '') {
-                        echo ' (' . userAnchor($Author) . ')';
-                    }
+                <h2 class="H"><?php
+                        echo $authorDisplayName;
 
-                    echo '</strong> &mdash; ' . $authorMeta['AuthorBio'];
-                    ?>
+                        if ($authorMeta['AuthorDisplayName'] !== '') {
+                            echo ' (' . userAnchor($Author) . ')';
+                        }
+                    ?></h2>
+
+                <div id="AuthorBio">
+                    <?php echo $authorMeta['AuthorBio']; ?>
                 </div>
             </div>
         </footer>

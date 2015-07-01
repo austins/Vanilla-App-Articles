@@ -104,3 +104,20 @@ body.Articles.category .Article .Options > .ToggleFlyout.Open,
     max-width: 100%;
     height: auto;
 }
+
+#AuthorInfo > h2.H {
+    margin-top: 0;
+}
+
+#AuthorPhoto {
+    float: left;
+    margin-right: 15px;
+}
+
+#AboutTheAuthor {
+    float: right;
+    font-weight: bold;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.28);
+    text-transform: uppercase;
+}
