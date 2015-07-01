@@ -524,15 +524,15 @@ class ArticlesHooks extends Gdn_Plugin {
      * @param ProfileController $Sender ProfileController
      */
     public function ProfileController_BeforeEdit_Handler($Sender) {
-        $UserID = $Sender->User->UserID;
-        $UserMetaModel = Gdn::UserMetaModel();
-        $UserMeta = $UserMetaModel->GetUserMeta($UserID);
+        $UserMeta = Gdn::UserModel()->GetMeta($Sender->User->UserID, 'Articles.%', 'Articles.');
+        if (!is_array($UserMeta))
+            return;
 
-        if (isset($UserMeta['Articles.AuthorDisplayName']))
-            $Sender->Form->SetValue('Articles.AuthorDisplayName', $UserMeta['Articles.AuthorDisplayName']);
+        if (isset($UserMeta['AuthorDisplayName']))
+            $Sender->Form->SetValue('Articles.AuthorDisplayName', $UserMeta['AuthorDisplayName']);
         
-        if (isset($UserMeta['Articles.AuthorBio']))
-            $Sender->Form->SetValue('Articles.AuthorBio', $UserMeta['Articles.AuthorBio']);
+        if (isset($UserMeta['AuthorBio']))
+            $Sender->Form->SetValue('Articles.AuthorBio', $UserMeta['AuthorBio']);
     }
 
     /**
@@ -557,7 +557,7 @@ class ArticlesHooks extends Gdn_Plugin {
     /**
      * Display custom fields on profile.
      *
-     * @param ProfileController $Sender ProfileController
+     * @param UserInfoModule $Sender UserInfoModule
      */
     public function UserInfoModule_OnBasicInfo_Handler($Sender) {
         // Get the custom fields.
@@ -570,6 +570,26 @@ class ArticlesHooks extends Gdn_Plugin {
                 && ($Sender->User->Name != $UserMeta['AuthorDisplayName'])) {
             echo ' <dt class="Articles Profile AuthorDisplayName">' . T('Author Display Name') . '</dt> ';
             echo ' <dd class="Articles Profile AuthorDisplayName">' . Gdn_Format::Html($UserMeta['AuthorDisplayName']) . '</dd> ';
+        }
+    }
+
+    /**
+     * Display author bio on profile.
+     *
+     * @param ProfileController $Sender ProfileController
+     */
+    public function ProfileController_AfterUserInfo_Handler($Sender) {
+        // Get the custom fields.
+        $UserMeta = Gdn::UserModel()->GetMeta($Sender->User->UserID, 'Articles.%', 'Articles.');
+        if (!is_array($UserMeta))
+            return;
+
+        // Display author display name.
+        if (isset($UserMeta['AuthorBio']) && ($UserMeta['AuthorBio'] != '')) {
+            echo '<dl id="BoxProfileAuthorBio" class="About">';
+            echo ' <dt class="Articles Profile AuthorBio">' . T('Author Bio') . '</dt> ';
+            echo ' <dd class="Articles Profile AuthorBio">' . Gdn_Format::Html($UserMeta['AuthorBio']) . '</dd> ';
+            echo '</dl>';
         }
     }
 
