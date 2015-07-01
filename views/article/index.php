@@ -46,8 +46,7 @@ else
     <?php
     $authorMeta = UserModel::getMeta($Author->UserID, 'Articles.%', 'Articles.');
 
-    if (c('Articles.Articles.ShowAuthorInfo', false) && (count($authorMeta) > 0)) {
-        $authorDisplayName = ($authorMeta['AuthorDisplayName'] !== '') ? $authorMeta['AuthorDisplayName'] : $Author->Name;
+    if (c('Articles.Articles.ShowAuthorInfo', false) && (count($authorMeta) > 0)) :
         ?>
         <footer>
             <div id="AuthorInfo" class="FormWrapper">
@@ -60,10 +59,10 @@ else
                 </div>
 
                 <h2 class="H"><?php
-                        echo $authorDisplayName;
-
-                        if ($authorMeta['AuthorDisplayName'] !== '') {
-                            echo ' (' . userAnchor($Author) . ')';
+                        if ($authorMeta['AuthorDisplayName'] === '') {
+                            echo userAnchor($Author);
+                        } else {
+                            echo $authorMeta['AuthorDisplayName'] . ' (' . userAnchor($Author) . ')';
                         }
                     ?></h2>
 
@@ -72,9 +71,7 @@ else
                 </div>
             </div>
         </footer>
-    <?php
-    }
-    ?>
+    <?php endif; ?>
 </article>
 
 <?php $this->FireEvent('AfterArticle'); ?>
