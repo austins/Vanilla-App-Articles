@@ -51,7 +51,7 @@ $authorMeta = UserModel::getMeta($Author->UserID, 'Articles.%', 'Articles.');
 
 if (c('Articles.Articles.ShowAuthorInfo', false) && (count($authorMeta) > 0) && ($authorMeta['AuthorBio'] !== '')) :
     ?>
-    <div id="AuthorInfo" class="FormWrapper FormWrapper-Condensed">
+    <div id="AuthorInfo" class="FormWrapper FormWrapper-Condensed BoxAfterArticle">
         <div id="AuthorPhoto">
             <?php echo userPhoto($Author, array('Size' => 'Medium')); ?>
         </div>
