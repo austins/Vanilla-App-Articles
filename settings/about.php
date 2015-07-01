@@ -1,6 +1,6 @@
 <?php defined('APPLICATION') or exit();
 /**
- * Copyright (C) 2015  Austin S. (Shadowdare)
+ * Copyright (C) 2015  Austin S.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 $ApplicationInfo['Articles'] = array(
     'Description' => 'Provides a way to create articles.',
     'Version' => '1.0.0',
-    'Author' => 'Austin S. (Shadowdare)',
+    'Author' => 'Austin S.',
     'AuthorUrl' => 'http://vanillaforums.org/profile/addons/16014/Shadowdare',
     'Url' => 'http://vanillaforums.org/addon/articles-application',
     'License' => 'GNU GPL2',
