@@ -4,7 +4,7 @@ A Vanilla Forums application that provides a way to create articles.
 
 This application is released under the GNU GPL2 license.
 
-## Features:
+## Features
 
 Too many times have we seen posts about embedding, integrating, and unifying Vanilla with bloated blogging software. Current blogging addons modify discussions into blog posts. However, blog posts and discussions are completely different things.
 
@@ -18,6 +18,8 @@ Too many times have we seen posts about embedding, integrating, and unifying Van
 
 The word "article" stands for content produced by both bloggers and journalists, and is interchangeable with "blog post."
 
-## Installation:
+## Installation
 
-This add-on is an application. To install it, extract this project into a folder called `articles` within your Vanilla installation's `/applications` folder.
+This add-on is an application, not a plugin.
+
+To install it, extract this project into a folder called `articles` within your Vanilla installation's `/applications` folder.
