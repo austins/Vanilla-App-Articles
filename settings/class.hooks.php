@@ -117,6 +117,10 @@ class ArticlesHooks extends Gdn_Plugin {
                 'LabelCode' => 'Show link to Article Categories page in main menu?',
                 'Control' => 'Checkbox'
             ),
+            'Articles.Articles.ShowAuthorInfo' => array(
+                'LabelCode' => 'Show author info (display name and bio) under articles?',
+                'Control' => 'Checkbox'
+            ),
             'Articles.Comments.EnableThreadedComments' => array(
                 'LabelCode' => 'Enable threaded (one level) comment replies?',
                 'Control' => 'Checkbox'

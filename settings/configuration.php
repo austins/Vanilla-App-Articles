@@ -25,6 +25,7 @@ $Configuration['Articles']['Excerpt']['MaxLength'] = 160;
 $Configuration['Articles']['Articles']['ThumbnailWidth'] = 260;
 $Configuration['Articles']['Articles']['ThumbnailHeight'] = 146;
 $Configuration['Articles']['Articles']['AddActivity'] = true;
+$Configuration['Articles']['Articles']['ShowAuthorInfo'] = false;
 $Configuration['Articles']['Comments']['EnableThreadedComments'] = true;
 $Configuration['Articles']['Comments']['AllowGuests'] = false;
 $Configuration['Articles']['Comments']['AddActivity'] = true;

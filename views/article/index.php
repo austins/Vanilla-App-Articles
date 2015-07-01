@@ -42,6 +42,33 @@ else
     </header>
 
     <div class="ArticleBody"><?php echo FormatArticleBody($Article->Body, $Article->Format); ?></div>
+
+    <?php
+    $authorMeta = UserModel::getMeta($Author->UserID, 'Articles.%', 'Articles.');
+
+    if (c('Articles.Articles.ShowAuthorInfo', false) && (count($authorMeta) > 0)) {
+        $authorDisplayName = ($authorMeta['AuthorDisplayName'] !== '') ? $authorMeta['AuthorDisplayName'] : $Author->Name;
+        ?>
+        <footer>
+            <div id="AuthorInfo" class="FormWrapper">
+                <h2 class="H"><?php echo T('About the Author'); ?></h2>
+
+                <div>
+                    <?php
+                    echo '<strong>' . $authorDisplayName;
+
+                    if ($authorMeta['AuthorDisplayName'] !== '') {
+                        echo ' (' . userAnchor($Author) . ')';
+                    }
+
+                    echo '</strong> &mdash; ' . $authorMeta['AuthorBio'];
+                    ?>
+                </div>
+            </div>
+        </footer>
+    <?php
+    }
+    ?>
 </article>
 
 <?php $this->FireEvent('AfterArticle'); ?>
