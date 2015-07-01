@@ -29,10 +29,11 @@ class ArticlesHooks extends Gdn_Plugin {
     public function Base_Render_Before($Sender) {
         if ($Sender->Menu) {
             if (C('Articles.ShowArticlesMenuLink', true))
-                $Sender->Menu->AddLink('Articles', T('Articles'), '/articles');
+                $Sender->Menu->AddLink('Articles', T('Articles'), '/articles', 'Articles.Articles.View');
 
             if (C('Articles.ShowCategoriesMenuLink', false))
-                $Sender->Menu->AddLink('ArticleCategories', T('Article Categories'), '/articles/categories');
+                $Sender->Menu->AddLink('ArticleCategories', T('Article Categories'), '/articles/categories',
+                    'Articles.Articles.View');
         }
     }
 
