@@ -16,11 +16,11 @@ $RequestMethod = strtolower($Controller->RequestMethod);
 <div class="BoxFilter BoxComposeFilter">
     <ul class="FilterMenu">
         <li <?php if ($RequestMethod == 'index') echo 'class="Active"'; ?>>
-            <?php echo Anchor(T('Dashboard'), '/compose'); ?>
+            <?php echo Anchor(Sprite('SpArticlesDashboard', 'SpMyDiscussions Sprite') . ' ' . T('Dashboard'), '/compose'); ?>
         </li>
 
         <li <?php if ($RequestMethod == 'posts') echo 'class="Active"'; ?>>
-            <?php echo Anchor(T('Posts'), '/compose/posts'); ?>
+            <?php echo Anchor(Sprite('SpArticles', 'SpMyDrafts Sprite') . ' ' . T('Posts'), '/compose/posts'); ?>
         </li>
     </ul>
 </div>

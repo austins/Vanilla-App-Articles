@@ -746,7 +746,7 @@ class ArticlesHooks extends Gdn_Plugin {
 
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
         if ($Session->CheckPermission($PermissionsAllowed, false)) {
-            echo Wrap(Anchor(Sprite('SpMyDrafts').' '.T('Articles Dashboard'), '/compose'), 'li');
+            echo Wrap(Anchor(Sprite('SpMyDiscussions').' '.T('Articles Dashboard'), '/compose'), 'li');
         }
     }
 
