@@ -114,7 +114,14 @@ body.Articles.category .Article .Options > .ToggleFlyout.Open,
     margin-right: 15px;
 }
 
-#AboutTheAuthor {
+#AuthorInfo {
+    margin: 10px 0 20px 0;
+    border: 1px solid #DDD;
+    border-left: none;
+    border-right: none;
+}
+
+#AuthorInfo #AboutTheAuthor {
     float: right;
     font-weight: bold;
     font-size: 14px;

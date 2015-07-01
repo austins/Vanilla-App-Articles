@@ -42,39 +42,37 @@ else
     </header>
 
     <div class="ArticleBody"><?php echo FormatArticleBody($Article->Body, $Article->Format); ?></div>
-
-    <?php
-    $authorMeta = UserModel::getMeta($Author->UserID, 'Articles.%', 'Articles.');
-
-    if (c('Articles.Articles.ShowAuthorInfo', false) && (count($authorMeta) > 0)) :
-        ?>
-        <footer>
-            <div id="AuthorInfo" class="FormWrapper">
-                <div id="AuthorPhoto">
-                    <?php echo userPhoto($Author, array('Size' => 'Medium')); ?>
-                </div>
-
-                <div id="AboutTheAuthor">
-                    <?php echo T('About the Author'); ?>
-                </div>
-
-                <h2 class="H"><?php
-                        if ($authorMeta['AuthorDisplayName'] === '') {
-                            echo userAnchor($Author);
-                        } else {
-                            echo $authorMeta['AuthorDisplayName'] . ' (' . userAnchor($Author) . ')';
-                        }
-                    ?></h2>
-
-                <div id="AuthorBio">
-                    <?php echo $authorMeta['AuthorBio']; ?>
-                </div>
-            </div>
-        </footer>
-    <?php endif; ?>
 </article>
 
 <?php $this->FireEvent('AfterArticle'); ?>
+
+<?php
+$authorMeta = UserModel::getMeta($Author->UserID, 'Articles.%', 'Articles.');
+
+if (c('Articles.Articles.ShowAuthorInfo', false) && (count($authorMeta) > 0) && ($authorMeta['AuthorBio'] !== '')) :
+    ?>
+    <div id="AuthorInfo" class="FormWrapper FormWrapper-Condensed">
+        <div id="AuthorPhoto">
+            <?php echo userPhoto($Author, array('Size' => 'Medium')); ?>
+        </div>
+
+        <div id="AboutTheAuthor">
+            <?php echo T('About the Author'); ?>
+        </div>
+
+        <h2 class="H"><?php
+            if ($authorMeta['AuthorDisplayName'] === '') {
+                echo userAnchor($Author);
+            } else {
+                echo $authorMeta['AuthorDisplayName'] . ' (' . userAnchor($Author) . ')';
+            }
+            ?></h2>
+
+        <div id="AuthorBio">
+            <?php echo $authorMeta['AuthorBio']; ?>
+        </div>
+    </div>
+<?php endif; ?>
 
 <section id="comments">
 <?php
