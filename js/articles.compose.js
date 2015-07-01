@@ -144,7 +144,7 @@ jQuery(document).ready(function($) {
     });
 
     // Hijack article compose form preview button click
-    $('#Form_ComposeArticle #Form_Preview:submit').live('click', function() {
+    $('#Form_ComposeArticle #Form_Preview:submit').click(function() {
         var btn = this;
         var frm = $(btn).parents('form').get(0);
 
