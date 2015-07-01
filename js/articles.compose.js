@@ -132,11 +132,13 @@ jQuery(document).ready(function($) {
         followConfirm: false,
         deliveryType: 'BOOL',
         afterConfirm: function(json, sender) {
+            var isThumbnail = ($(sender).closest('#UploadedThumbnail').length > 0);
             var linkUrl = jQuery(sender).attr('href').split('?')[0]; // Retrieve part of URL without query string.
             var ArticleMediaID = linkUrl.substring(linkUrl.lastIndexOf('/') + 1);
+
             $('#ArticleMedia_' + ArticleMediaID).remove();
 
-            if ($(this).parent().attr('id') == '#UploadedThumbnail') {
+            if (isThumbnail) {
                 $('#UploadedThumbnailID').remove();
                 $('#Form_UploadThumbnail_New').show();
             }
