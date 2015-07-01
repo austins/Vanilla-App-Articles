@@ -21,7 +21,7 @@ $ApplicationInfo['Articles'] = array(
     'Description' => 'Provides a way to create articles.',
     'Version' => '1.0.0',
     'Author' => 'Austin S.',
-    'AuthorUrl' => 'http://vanillaforums.org/profile/addons/16014/Shadowdare',
+    'AuthorUrl' => 'https://github.com/austins',
     'Url' => 'http://vanillaforums.org/addon/articles-application',
     'License' => 'GNU GPL2',
     'RequiredApplications' => array('Vanilla' => '2.1'),
