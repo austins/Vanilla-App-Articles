@@ -80,7 +80,7 @@ class ArticleSearchModel extends Gdn_Model {
      * @param object $SearchModel SearchModel (Dashboard)
      * @return object SQL result.
      */
-    public function CommentSql($SearchModel) {
+    public function ArticleCommentSql($SearchModel) {
         // Build search part of query
         $SearchModel->AddMatchSql($this->SQL, 'ac.Body', 'ac.DateInserted');
 
@@ -111,6 +111,6 @@ class ArticleSearchModel extends Gdn_Model {
      */
     public function Search($SearchModel) {
         $SearchModel->AddSearch($this->ArticleSql($SearchModel));
-        $SearchModel->AddSearch($this->CommentSql($SearchModel));
+        $SearchModel->AddSearch($this->ArticleCommentSql($SearchModel));
     }
 }
