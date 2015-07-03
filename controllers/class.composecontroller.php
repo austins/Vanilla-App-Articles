@@ -620,7 +620,7 @@ class ComposeController extends Gdn_Controller {
 
         // Determine if this is a guest commenting
         $GuestCommenting = false;
-        if (!$Session->IsValid()) { // Not logged in, so this is a guest
+        if (!$Session->IsValid()) { // Not logged in, so this could be a guest
             if (C('Articles.Comments.AllowGuests', false)) { // If guest commenting is enabled
                 $GuestCommenting = true;
             } else { // Require permission to add comment

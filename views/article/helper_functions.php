@@ -80,7 +80,7 @@ if (!function_exists('ShowCommentForm')) {
         $Article = $Controller->Article;
         $UserCanClose = $Session->CheckPermission('Articles.Articles.Close');
         $UserCanComment = $Session->CheckPermission('Articles.Comments.Add');
-        $GuestCommenting = (C('Articles.Comments.AllowGuests', false) && !$Session->IsValid());
+        $canGuestsComment = C('Articles.Comments.AllowGuests', false);
 
         // Closed notification
         if ((bool)$Article->Closed) {
@@ -89,8 +89,7 @@ if (!function_exists('ShowCommentForm')) {
                 <div class="Note Closed"><?php echo T('This article has been closed.'); ?></div>
             </div>
         <?php
-        } else if (!$UserCanComment && !$GuestCommenting) {
-            if (!$Session->IsValid()) {
+        } else if (!$Session->isValid() && !$canGuestsComment) {
                 ?>
                 <div class="Foot Closed">
                     <div class="Note Closed SignInOrRegister"><?php
@@ -107,10 +106,11 @@ if (!function_exists('ShowCommentForm')) {
                     </div>
                 </div>
             <?php
-            }
         }
 
-        if ((($Article->Closed == '1') && $UserCanClose) || (($Article->Closed == '0') && $UserCanComment) || $GuestCommenting)
+        if ((($Article->Closed == '1') && $UserCanClose)
+                || (($Article->Closed == '0') && $UserCanComment)
+                || (!$Session->isValid() && $canGuestsComment))
             echo $Controller->FetchView('comment', 'compose', 'Articles');
     }
 }
