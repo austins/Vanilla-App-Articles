@@ -22,96 +22,95 @@
  * @package Articles
  */
 class ArticleSearchModel extends Gdn_Model {
-   /**
-    * @var object ArticleModel
-    */	
-	protected $_ArticleModel = FALSE;
-	
-	/**
-	 * Makes an article model available.
-	 * 
-	 * @param object $Value ArticleModel.
-	 * @return object ArticleModel.
-	 */
-	public function ArticleModel($Value = FALSE) {
-		if($Value !== FALSE) {
-			$this->_ArticleModel = $Value;
-		}
-		if($this->_ArticleModel === FALSE) {
-			require_once(dirname(__FILE__) . DS . 'class.articlemodel.php');
-			$this->_ArticleModel = new ArticleModel();
-		}
-		return $this->_ArticleModel;
-	}
-	
-	/**
-	 * Execute discussion search query.
-	 * 
-	 * @param object $SearchModel SearchModel (Dashboard)
-	 * @return object SQL result.
-	 */
-	public function ArticleSql($SearchModel) {
-		// TODO: Add in a search restriction based on category permissions
-		
-		// Build search part of query
-		$SearchModel->AddMatchSql($this->SQL, 'a.Name, a.Body', 'a.DateInserted');
-		
-		// Build base query
-		$this->SQL
-			->Select('a.ArticleID as PrimaryID, a.Name as Title, a.Excerpt as Summary, a.Format, a.ArticleCategoryID')
-			->Select('a.UrlCode', "concat('/article/', year(a.DateInserted), '/', %s)", 'Url')
-			->Select('a.DateInserted')
-			->Select('a.AttributionUserID as UserID')
+    /**
+     * @var object ArticleModel
+     */
+    protected $_ArticleModel = false;
+
+    /**
+     * Makes an article model available.
+     *
+     * @param object $Value ArticleModel.
+     * @return object ArticleModel.
+     */
+    public function ArticleModel($Value = false) {
+        if ($Value !== false) {
+            $this->_ArticleModel = $Value;
+        }
+        if ($this->_ArticleModel === false) {
+            require_once(dirname(__FILE__) . DS . 'class.articlemodel.php');
+            $this->_ArticleModel = new ArticleModel();
+        }
+
+        return $this->_ArticleModel;
+    }
+
+    /**
+     * Execute Article search query
+     *
+     * @param object $SearchModel SearchModel (Dashboard)
+     * @return object SQL result.
+     */
+    public function ArticleSql($SearchModel) {
+        // Build search part of query
+        $SearchModel->AddMatchSql($this->SQL, 'a.Name, a.Body', 'a.DateInserted');
+
+        // Build base query
+        $this->SQL
+            ->Select('a.ArticleID as PrimaryID, a.Name as Title, a.Excerpt as Summary, a.Format, '
+                . 'a.ArticleCategoryID, a.Closed')
+            ->Select('a.UrlCode', "concat('/article/', year(a.DateInserted), '/', %s)", 'Url')
+            ->Select('a.DateInserted')
+            ->Select('a.AttributionUserID as UserID')
             ->Select("'Article'", '', 'RecordType')
-			->From('Article a');
-		
-		// Execute query
-		$Result = $this->SQL->GetSelect();
-		
-		// Unset SQL
-		$this->SQL->Reset();
-		
-		return $Result;
-	}
-	
-	/**
-	 * Execute comment search query.
-	 * 
-	 * @param object $SearchModel SearchModel (Dashboard)
-	 * @return object SQL result.
-	 */
-	public function CommentSql($SearchModel) {
-		// TODO: Add in a search restriction based on category permissions
-		
-		// Build search part of query
-		$SearchModel->AddMatchSql($this->SQL, 'ac.Body', 'ac.DateInserted');
-		
-		// Build base query
-		$this->SQL
-			->Select('ac.ArticleCommentID as PrimaryID, a.Name as Title, ac.Body as Summary, ac.Format, a.ArticleCategoryID')
-			->Select("'/article/comment/', ac.ArticleCommentID, '/#Comment_', ac.ArticleCommentID", "concat", 'Url')
-			->Select('ac.DateInserted')
-			->Select('ac.InsertUserID as UserID')
+            ->From('Article a');
+
+        // Execute query
+        $Result = $this->SQL->GetSelect();
+
+        // Unset SQL
+        $this->SQL->Reset();
+
+        return $Result;
+    }
+
+    /**
+     * Execute ArticleComment search query
+     *
+     * @param object $SearchModel SearchModel (Dashboard)
+     * @return object SQL result.
+     */
+    public function CommentSql($SearchModel) {
+        // Build search part of query
+        $SearchModel->AddMatchSql($this->SQL, 'ac.Body', 'ac.DateInserted');
+
+        // Build base query
+        $this->SQL
+            ->Select('ac.ArticleCommentID as PrimaryID, a.Name as Title, ac.Body as Summary, ac.Format, '
+                . 'ac.GuestName, a.ArticleCategoryID')
+            ->Select("'/article/comment/', ac.ArticleCommentID, '/#Comment_', ac.ArticleCommentID", "concat", 'Url')
+            ->Select('ac.DateInserted')
+            ->Select('ac.InsertUserID as UserID')
             ->Select("'ArticleComment'", '', 'RecordType')
-			->From('ArticleComment ac')
-			->Join('Article a', 'a.ArticleID = ac.ArticleID');
-		
-		// Exectute query
-		$Result = $this->SQL->GetSelect();
-		
-		// Unset SQL
-		$this->SQL->Reset();
-		
-		return $Result;
-	}
-	
-	/**
-	 * Add the searches for Articles to the search model.
-	 * 
-	 * @param object $SearchModel SearchModel (Dashboard)
-	 */
-	public function Search($SearchModel) {
-		$SearchModel->AddSearch($this->ArticleSql($SearchModel));
-		$SearchModel->AddSearch($this->CommentSql($SearchModel));
-	}
+            ->From('ArticleComment ac')
+            ->Join('Article a', 'a.ArticleID = ac.ArticleID');
+
+        // Execute query
+        $Result = $this->SQL->GetSelect();
+
+        // Unset SQL
+        $this->SQL->Reset();
+
+        return $Result;
+    }
+
+    /**
+     * Add the searches for Articles to the search model.
+     *
+     * @param object $SearchModel SearchModel (Dashboard)
+     */
+    public function Search($SearchModel) {
+        $SearchModel->AddSearch($this->ArticleSql($SearchModel));
+        $SearchModel->AddSearch($this->CommentSql($SearchModel));
+    }
 }
