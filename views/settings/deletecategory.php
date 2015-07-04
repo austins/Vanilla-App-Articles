@@ -8,7 +8,7 @@ echo $this->Form->Errors();
 
 if (is_object($OtherCategories)) {
     ?>
-    <h1><?php echo T('Delete Article Category'); ?></h1>
+    <h1><?php echo $this->Title(); ?></h1>
     <ul>
     <?php
     if ($OtherCategories->NumRows() == 0) {

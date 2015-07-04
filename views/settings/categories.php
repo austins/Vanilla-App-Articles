@@ -2,7 +2,7 @@
 
 $Categories = $this->Data('Categories')->Result();
 ?>
-<h1><?php echo T('Manage Article Categories'); ?></h1>
+<h1><?php echo $this->Title(); ?></h1>
 
 <div class="Info">
     <?php echo T('Article categories are used to help organize articles.',

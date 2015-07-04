@@ -101,8 +101,6 @@ class ArticlesHooks extends Gdn_Plugin {
      * @param SettingsController $Sender
      */
     public function Controller_Index($Sender) {
-        $Sender->Title('Articles Settings');
-
         // Set required permission.
         $Sender->Permission('Garden.Settings.Manage');
 
@@ -142,8 +140,11 @@ class ArticlesHooks extends Gdn_Plugin {
 
         $Sender->ConfigurationModule = $ConfigModule;
 
+        $Sender->Title(T('Articles Settings'));
+
         $Sender->AddSideMenu('/settings/articles');
-        $ConfigModule->RenderAll();
+        $Sender->View = $Sender->FetchViewLocation('articles', 'settings', 'articles');
+        $Sender->Render();
     }
 
     /**
@@ -152,7 +153,7 @@ class ArticlesHooks extends Gdn_Plugin {
      * @param SettingsController $Sender
      */
     public function Controller_Categories($Sender) {
-        $Sender->Title('Article Categories');
+        $Sender->Title(T('Manage Article Categories'));
 
         // Set required permission.
         $Sender->Permission('Garden.Settings.Manage');
