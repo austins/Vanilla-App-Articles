@@ -146,6 +146,14 @@ class ArticleController extends Gdn_Controller {
         $this->Form->Action = Url('/compose/comment/' . $this->Article->ArticleID);
         $this->Form->AddHidden('ArticleID', $this->Article->ArticleID);
 
+        // Load data for similar articles
+        if (C('Articles.Articles.ShowSimilarArticles')) {
+            $SimilarArticles = $this->ArticleModel->GetSimilarArticles($this->Article->ArticleID,
+                $this->Article->ArticleCategoryID);
+
+            $this->SetData('SimilarArticles', $SimilarArticles);
+        }
+
         $this->View = 'index';
 
         $this->Render();

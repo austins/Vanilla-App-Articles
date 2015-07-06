@@ -120,6 +120,10 @@ class ArticlesHooks extends Gdn_Plugin {
                 'LabelCode' => 'Show author info (display name and bio) under articles?',
                 'Control' => 'Checkbox'
             ),
+            'Articles.Articles.ShowSimilarArticles' => array(
+                'LabelCode' => 'Show a list of articles readers may be interested in under articles?',
+                'Control' => 'Checkbox'
+            ),
             'Articles.Comments.EnableThreadedComments' => array(
                 'LabelCode' => 'Enable threaded (one level) comment replies?',
                 'Control' => 'Checkbox'

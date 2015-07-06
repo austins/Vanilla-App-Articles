@@ -128,3 +128,10 @@ body.Articles.category .Article .Options > .ToggleFlyout.Open,
     color: rgba(0, 0, 0, 0.28);
     text-transform: uppercase;
 }
+
+#SimilarArticles li.Article {
+    display: inline-block;
+    width: 48%;
+    border-bottom: 0;
+    margin-right: 10px;
+}

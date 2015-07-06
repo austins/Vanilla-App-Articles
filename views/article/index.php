@@ -72,7 +72,37 @@ if (c('Articles.Articles.ShowAuthorInfo', false) && (count($authorMeta) > 0) && 
             <?php echo $authorMeta['AuthorBio']; ?>
         </div>
     </div>
-<?php endif; ?>
+<?php
+endif;
+
+if (C('Articles.Articles.ShowSimilarArticles')) {
+    $SimilarArticles = $this->Data('SimilarArticles');
+
+    if ($SimilarArticles->NumRows() > 0) {
+        echo '<div id="SimilarArticles">
+            <h2 class="H">' . T('You may be interested in...') . '</h2>';
+
+        echo '<ul class="DataList SimilarArticles">';
+        foreach ($SimilarArticles as $SimilarArticle) {
+            $SimilarArticleCategory = $this->ArticleCategoryModel->GetByID($SimilarArticle->ArticleCategoryID);
+            $SimilarArticleAuthor = Gdn::UserModel()->GetID($SimilarArticle->AttributionUserID);
+
+            echo '<li class="Article">
+                ' . Anchor($SimilarArticle->Name, ArticleUrl($SimilarArticle)) . '
+
+                <div class="Meta Meta-Article">
+                    <span class="MItem ArticleCategory">' . Anchor($SimilarArticleCategory->Name, ArticleCategoryUrl($SimilarArticleCategory->UrlCode)) . '</span>
+                    <span class="MItem ArticleDate">' . Gdn_Format::Date($SimilarArticle->DateInserted, '%e %B %Y - %l:%M %p') . '</span>
+                    <span class="MItem ArticleAuthor">' . ArticleAuthorAnchor($SimilarArticleAuthor) . '</span>
+                </div>
+            </li>';
+        }
+        echo '</ul>';
+
+        echo '</div>';
+    }
+}
+?>
 
 <section id="comments">
 <?php

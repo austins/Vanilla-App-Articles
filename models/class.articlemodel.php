@@ -110,10 +110,13 @@ class ArticleModel extends Gdn_Model {
      * @param int $Offset Number of articles to skip.
      * @param bool $Limit Max number of articles to return.
      * @param array $Wheres SQL conditions.
+     * @param string $OrderByField Field to order results by.
+     * @param string $OrderByDirection Direction to order results by (asc/desc).
      *
      * @return Gdn_DataSet SQL result.
      */
-    public function Get($Offset = 0, $Limit = false, $Wheres = null) {
+    public function Get($Offset = 0, $Limit = false, $Wheres = null,
+                        $OrderByField = 'a.DateInserted', $OrderByDirection = 'desc') {
         // Set up selection query.
         $this->SQL->Select('a.*')->From('Article a');
 
@@ -143,7 +146,7 @@ class ArticleModel extends Gdn_Model {
             $this->SQL->Where($Wheres);
 
         // Set order of data.
-        $this->SQL->OrderBy('a.DateInserted', 'desc');
+        $this->SQL->OrderBy($OrderByField, $OrderByDirection);
 
         $this->JoinArticleCategoryInfo($ArticleCategoryID);
 
@@ -172,7 +175,7 @@ class ArticleModel extends Gdn_Model {
             ->Where('a.ArticleID', $ArticleID);
 
         $this->JoinArticleCategoryInfo();
-        
+
         // Fetch data.
         $Article = $this->SQL->Get()->FirstRow();
 
@@ -194,7 +197,7 @@ class ArticleModel extends Gdn_Model {
             ->Where('a.UrlCode', $ArticleUrlCode);
 
         $this->JoinArticleCategoryInfo();
-        
+
         // Fetch data.
         $Article = $this->SQL->Get()->FirstRow();
 
@@ -470,5 +473,41 @@ class ArticleModel extends Gdn_Model {
 
         if ($Activity)
             $ActivityModel->Delete(val('ActivityID', $Activity, false));
+    }
+
+    //
+    public function GetSimilarArticles($ArticleID, $ArticleCategoryID) {
+        if (!is_numeric($ArticleID) || !is_numeric($ArticleCategoryID))
+            throw new InvalidArgumentException('The article ID and article category ID must be a numeric value.');
+
+//        $ArticleCategoryModel = new ArticleCategoryModel();
+//        $Category = $ArticleCategoryModel->GetByID($ArticleCategoryID);
+//        if (!$Category)
+//            return false;
+
+        // Get articles from the same category, excluding the current article
+        $NumberOfSimilarArticles = 4;
+
+        $Wheres = array(
+            'ArticleID <>' => $ArticleID,
+            'ArticleCategoryID' => $ArticleCategoryID,
+            'Status' => self::STATUS_PUBLISHED
+        );
+
+        // Retrieve articles from DB in random order
+        $Articles = $this->Get(0, $NumberOfSimilarArticles, $Wheres, 'RAND()', '');
+
+        // Try to retrieve articles from other categories instead if articles
+        // retrieved in same category is less than the number to list
+        $ArticleCategoryModel = new ArticleCategoryModel();
+        $CategoriesCount = $ArticleCategoryModel->GetCount(array('CountArticles >' => '0')); // Prevent unnecessary select.
+
+        if (($Articles->NumRows() < $NumberOfSimilarArticles) && ($CategoriesCount > 1)) {
+            unset($Wheres['ArticleCategoryID']);
+
+            $Articles = $this->Get(0, $NumberOfSimilarArticles, $Wheres, 'RAND()', '');
+        }
+
+        return $Articles;
     }
 }
