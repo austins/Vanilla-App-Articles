@@ -82,12 +82,12 @@ if (C('Articles.Articles.ShowSimilarArticles')) {
         echo '<div id="SimilarArticles">
             <h2 class="H">' . T('You may be interested in...') . '</h2>';
 
-        echo '<ul class="DataList SimilarArticles">';
+        echo '<ul class="DataList">';
         foreach ($SimilarArticles as $SimilarArticle) {
             $SimilarArticleCategory = $this->ArticleCategoryModel->GetByID($SimilarArticle->ArticleCategoryID);
             $SimilarArticleAuthor = Gdn::UserModel()->GetID($SimilarArticle->AttributionUserID);
 
-            echo '<li class="Article">
+            echo '<li class="SimilarArticle">
                 ' . Anchor($SimilarArticle->Name, ArticleUrl($SimilarArticle)) . '
 
                 <div class="Meta Meta-Article">

@@ -129,7 +129,7 @@ body.Articles.category .Article .Options > .ToggleFlyout.Open,
     text-transform: uppercase;
 }
 
-#SimilarArticles li.Article {
+#SimilarArticles li {
     display: inline-block;
     width: 48%;
     border-bottom: 0;
