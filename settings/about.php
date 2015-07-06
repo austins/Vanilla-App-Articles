@@ -19,7 +19,7 @@
 // An associative array of information about this application.
 $ApplicationInfo['Articles'] = array(
     'Description' => 'Provides a way to create articles.',
-    'Version' => '1.0.0',
+    'Version' => '1.1.0',
     'Author' => 'Austin S.',
     'AuthorUrl' => 'https://github.com/austins',
     'Url' => 'http://vanillaforums.org/addon/articles-application',
