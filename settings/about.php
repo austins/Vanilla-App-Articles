@@ -27,5 +27,5 @@ $ApplicationInfo['Articles'] = array(
     'RequiredApplications' => array('Vanilla' => '2.1'),
     'RegisterPermissions' => false,
     'SetupController' => 'setup',
-    'Settings' => '/settings/articles/'
+    'SettingsUrl' => '/settings/articles/'
 );
