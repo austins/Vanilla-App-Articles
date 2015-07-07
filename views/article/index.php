@@ -102,12 +102,6 @@ if (C('Articles.Articles.ShowSimilarArticles')) {
         echo '</div>';
     }
 }
-?>
 
-<section id="comments">
-<?php
 include $this->FetchViewLocation('comments', 'article', 'Articles');
-
-ShowCommentForm();
 ?>
-</section>
