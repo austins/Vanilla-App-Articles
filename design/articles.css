@@ -129,9 +129,14 @@ body.Articles.category .Article .Options > .ToggleFlyout.Open,
     text-transform: uppercase;
 }
 
+#SimilarArticles {
+    margin: 10px 0 20px 0;
+}
+
 #SimilarArticles li {
     display: inline-block;
     width: 46%;
     border-bottom: 0;
-    margin-right: 20px;
+    padding: 2px 4px;
+    margin-right: 16px;
 }
