@@ -26,6 +26,8 @@ $Px = $Construct->DatabasePrefix();
 
 // Construct the ArticleCategory table.
 $Construct->Table('ArticleCategory');
+$ArticleCategoryExists = $Construct->TableExists();
+$PermissionArticleCategoryIDExists = $Construct->ColumnExists('PermissionArticleCategoryID');
 $Construct->PrimaryKey('ArticleCategoryID')
     ->Column('Name', 'varchar(255)')
     ->Column('UrlCode', 'varchar(255)', false, 'unique')
@@ -39,7 +41,43 @@ $Construct->PrimaryKey('ArticleCategoryID')
     ->Column('LastArticleID', 'int', null)
     ->Column('CountArticleComments', 'int', 0)
     ->Column('LastArticleCommentID', 'int', null)
+    ->Column('Sort', 'int', true)
+    ->Column('PermissionArticleCategoryID', 'int', '-1') // Default to root category
     ->Set($Explicit, $Drop);
+
+$SystemUserID = Gdn::UserModel()->GetSystemUserID();
+$Now = Gdn_Format::ToDateTime();
+
+if ($SQL->GetWhere('ArticleCategory', array('ArticleCategoryID' => -1))->NumRows() == 0) {
+    // Insert root article category for use with permissions.
+    $SQL->Insert('ArticleCategory', array(
+        'ArticleCategoryID' => -1,
+        'Name' => 'Root',
+        'UrlCode' => '',
+        'Description' => 'Root of article category tree. Users should never see this.',
+        'DateInserted' => $Now,
+        'InsertUserID' => $SystemUserID,
+        'PermissionArticleCategoryID' => -1));
+}
+
+if ($Drop || !$ArticleCategoryExists) {
+    // Insert first article category.
+    $SQL->Insert('ArticleCategory', array(
+        'Name' => 'General',
+        'UrlCode' => 'general',
+        'Description' => 'Uncategorized articles.',
+        'DateInserted' => $Now,
+        'InsertUserID' => $SystemUserID,
+        'LastDateInserted' => $Now,
+        'CountArticles' => 1,
+        'LastArticleID' => 1,
+        'PermissionArticleCategoryID' => -1
+    ));
+} elseif ($ArticleCategoryExists && !$PermissionArticleCategoryIDExists) {
+    // Existing installations need to be set up with per/ArticleCategory permissions.
+    $SQL->Update('ArticleCategory')->Set('PermissionArticleCategoryID', -1, false)->Put();
+    $SQL->Update('Permission')->Set('JunctionColumn', 'PermissionArticleCategoryID')->Where('JunctionColumn', 'ArticleCategoryID')->Put();
+}
 
 // Construct the Article table.
 $Construct->Table('Article');
@@ -119,43 +157,104 @@ $PermissionModel = Gdn::PermissionModel();
 $PermissionModel->Database = $Database;
 $PermissionModel->SQL = $SQL;
 
-// Define some global permissions.
+// Undefine old global permissions (Articles v1.1.1 and older)
+// before category-based permissions were implemented
+if (!$PermissionArticleCategoryIDExists) {
+    $PermissionModel->Undefine(array(
+        'Articles.Articles.Add',
+        'Articles.Articles.Close',
+        'Articles.Articles.Delete',
+        'Articles.Articles.Edit',
+        'Articles.Articles.View',
+        'Articles.Comments.Add',
+        'Articles.Comments.Delete',
+        'Articles.Comments.Edit'
+    ));
+}
+
+// Define some global category-based permissions.
 $PermissionModel->Define(array(
-    'Articles.Articles.Add' => 0,
-    'Articles.Articles.Close' => 0,
-    'Articles.Articles.Delete' => 0,
-    'Articles.Articles.Edit' => 0,
-    'Articles.Articles.View' => 1,
-    'Articles.Comments.Add' => 1,
-    'Articles.Comments.Delete' => 0,
-    'Articles.Comments.Edit' => 0
-));
+        'Articles.Articles.Add' => 0,
+        'Articles.Articles.Close' => 0,
+        'Articles.Articles.Delete' => 0,
+        'Articles.Articles.Edit' => 0,
+        'Articles.Articles.View' => 1,
+        'Articles.Comments.Add' => 1,
+        'Articles.Comments.Delete' => 0,
+        'Articles.Comments.Edit' => 0
+    ),
+    'tinyint',
+    'ArticleCategory',
+    'PermissionArticleCategoryID');
 
-// Set the initial guest permissions.
-$PermissionModel->Save(array(
-    'Role' => 'Guest',
-    'Articles.Articles.View' => 1,
-    'Articles.Comments.Add' => 0
-));
+// Set default permissions for roles.
+If (!$PermissionArticleCategoryIDExists) {
+    // Guest defaults
+    $PermissionModel->Save(array(
+        'Role' => 'Guest',
+        'JunctionTable' => 'ArticleCategory',
+        'JunctionColumn' => 'PermissionArticleCategoryID',
+        'JunctionID' => -1,
+        'Articles.Articles.View' => 1
+    ), true);
 
-// Set initial role permissions for the Moderator role.
-$PermissionModel->Save(array(
-    'Role' => 'Moderator',
-    'Articles.Articles.Add' => 1,
-    'Articles.Articles.Close' => 1,
-    'Articles.Articles.Delete' => 1,
-    'Articles.Articles.Edit' => 1,
-    'Articles.Comments.Delete' => 1,
-    'Articles.Comments.Edit' => 1
-));
+    // Unconfirmed defaults
+    $PermissionModel->Save(array(
+        'Role' => 'Unconfirmed',
+        'JunctionTable' => 'ArticleCategory',
+        'JunctionColumn' => 'PermissionArticleCategoryID',
+        'JunctionID' => -1,
+        'Articles.Articles.View' => 1
+    ), true);
 
-// Set initial role permissions for the Administrator role.
-$PermissionModel->Save(array(
-    'Role' => 'Administrator',
-    'Articles.Articles.Add' => 1,
-    'Articles.Articles.Close' => 1,
-    'Articles.Articles.Delete' => 1,
-    'Articles.Articles.Edit' => 1,
-    'Articles.Comments.Delete' => 1,
-    'Articles.Comments.Edit' => 1
-));
+    // Applicant defaults
+    $PermissionModel->Save(array(
+        'Role' => 'Applicant',
+        'JunctionTable' => 'ArticleCategory',
+        'JunctionColumn' => 'PermissionArticleCategoryID',
+        'JunctionID' => -1,
+        'Articles.Articles.View' => 1
+    ), true);
+
+    // Member defaults
+    $PermissionModel->Save(array(
+        'Role' => 'Member',
+        'JunctionTable' => 'ArticleCategory',
+        'JunctionColumn' => 'PermissionArticleCategoryID',
+        'JunctionID' => -1,
+        'Articles.Articles.View' => 1,
+        'Articles.Comments.Add' => 1
+    ), true);
+
+    // Moderator defaults
+    $PermissionModel->Save(array(
+        'Role' => 'Moderator',
+        'JunctionTable' => 'ArticleCategory',
+        'JunctionColumn' => 'PermissionArticleCategoryID',
+        'JunctionID' => -1,
+        'Articles.Articles.Add' => 1,
+        'Articles.Articles.Close' => 1,
+        'Articles.Articles.Delete' => 1,
+        'Articles.Articles.Edit' => 1,
+        'Articles.Articles.View' => 1,
+        'Articles.Comments.Add' => 1,
+        'Articles.Comments.Delete' => 1,
+        'Articles.Comments.Edit' => 1
+    ), true);
+
+    // Administrator defaults
+    $PermissionModel->Save(array(
+        'Role' => 'Administrator',
+        'JunctionTable' => 'ArticleCategory',
+        'JunctionColumn' => 'PermissionArticleCategoryID',
+        'JunctionID' => -1,
+        'Articles.Articles.Add' => 1,
+        'Articles.Articles.Close' => 1,
+        'Articles.Articles.Delete' => 1,
+        'Articles.Articles.Edit' => 1,
+        'Articles.Articles.View' => 1,
+        'Articles.Comments.Add' => 1,
+        'Articles.Comments.Delete' => 1,
+        'Articles.Comments.Edit' => 1
+    ), true);
+}

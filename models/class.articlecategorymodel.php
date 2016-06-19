@@ -107,7 +107,6 @@ class ArticleCategoryModel extends Gdn_Model {
                     ->Select('ca.ArticleCategoryID')
                     ->Select('a.DateInserted', '', 'DateLastArticle')
                     ->Select('ac.DateInserted', '', 'DateLastArticleComment')
-
                     ->From('ArticleCategory ca')
                     ->Join('Article a', 'a.ArticleID = ca.LastArticleID')
                     ->Join('ArticleComment ac', 'ac.ArticleCommentID = ca.LastArticleCommentID')
@@ -118,11 +117,13 @@ class ArticleCategoryModel extends Gdn_Model {
                     $DateLastArticleComment = val('DateLastArticleComment', $Category);
 
                     $MaxDate = $DateLastArticleComment;
-                    if (is_null($DateLastArticleComment) || $DateLastArticle > $MaxDate)
+                    if (is_null($DateLastArticleComment) || $DateLastArticle > $MaxDate) {
                         $MaxDate = $DateLastArticle;
+                    }
 
-                    if (is_null($MaxDate))
+                    if (is_null($MaxDate)) {
                         continue;
+                    }
 
                     $ArticleCategoryID = (int)$Category['ArticleCategoryID'];
                     $this->SetField($ArticleCategoryID, 'LastDateInserted', $MaxDate);
@@ -146,11 +147,15 @@ class ArticleCategoryModel extends Gdn_Model {
         $this->SQL->Select('ac.*')->From('ArticleCategory ac');
 
         // Handle SQL conditions for wheres.
-        $this->EventArguments['Wheres'] = & $Wheres;
+        $this->EventArguments['Wheres'] = &$Wheres;
         $this->FireEvent('BeforeGet');
 
-        if (is_array($Wheres))
+        if (is_array($Wheres)) {
             $this->SQL->Where($Wheres);
+        }
+
+        // Exclude root category
+        $this->SQL->Where('ArticleCategoryID <>', '-1');
 
         // Set order of data.
         $this->SQL->OrderBy('ac.Name', 'asc');
@@ -163,6 +168,168 @@ class ArticleCategoryModel extends Gdn_Model {
         $this->FireEvent('AfterGet');
 
         return $Categories;
+    }
+
+    /**
+     * Delete a single category and assign its articles to another.
+     *
+     * @return void
+     * @throws Exception on invalid category for deletion.
+     * @param object $Category
+     * @param int $ReplacementArticleCategoryID Unique ID of category all discussion are being move to.
+     */
+    public function Delete($Category, $ReplacementArticleCategoryID) {
+        // Don't do anything if the required category object & properties are not defined.
+        if (!is_object($Category)
+            || !property_exists($Category, 'ArticleCategoryID')
+            || !property_exists($Category, 'Name')
+            || $Category->ArticleCategoryID <= 0
+        ) {
+            throw new Exception(T('Invalid category for deletion.'));
+        } else {
+            // If there is a replacement category...
+            if ($ReplacementArticleCategoryID > 0) {
+                // Update articles.
+                $this->SQL
+                    ->Update('Article')
+                    ->Set('ArticleCategoryID', $ReplacementArticleCategoryID)
+                    ->Where('ArticleCategoryID', $Category->ArticleCategoryID)
+                    ->Put();
+
+                // Update the article count.
+                $Count = $this->SQL
+                    ->Select('ArticleID', 'count', 'ArticleCount')
+                    ->From('Article')
+                    ->Where('ArticleCategoryID', $ReplacementArticleCategoryID)
+                    ->Get()
+                    ->FirstRow()
+                    ->ArticleCount;
+
+                if (!is_numeric($Count)) {
+                    $Count = 0;
+                }
+
+                $this->SQL
+                    ->Update('ArticleCategory')->Set('CountArticles', $Count)
+                    ->Where('ArticleCategoryID', $ReplacementArticleCategoryID)
+                    ->Put();
+            } else {
+                // Delete comments in this category.
+                $this->SQL
+                    ->From('ArticleComment ac')
+                    ->Join('Article a', 'ac.ArticleID = a.ArticleID')
+                    ->Where('a.ArticleID', $Category->ArticleCategoryID)
+                    ->Delete();
+
+                // Delete articles in this category.
+                $this->SQL->Delete('Article', array('ArticleCategoryID' => $Category->ArticleCategoryID));
+            }
+
+            // Finally, delete the category.
+            $this->SQL->Delete('ArticleCategory', array('ArticleCategoryID' => $Category->ArticleCategoryID));
+        }
+    }
+
+    /**
+     * Saves the category.
+     *
+     * @param array $FormPostValues The values being posted back from the form.
+     * @return int ID of the saved category.
+     */
+    public function Save($FormPostValues) {
+        // Define the primary key in this model's table.
+        $this->defineSchema();
+
+        // Get data from form
+        $ArticleCategoryID = arrayValue('ArticleCategoryID', $FormPostValues);
+        $NewName = arrayValue('Name', $FormPostValues, '');
+        $UrlCode = arrayValue('UrlCode', $FormPostValues, '');
+        $CustomPermissions = (bool)val('CustomPermissions', $FormPostValues);
+
+        // Is this a new category?
+        $Insert = $ArticleCategoryID > 0 ? false : true;
+        if ($Insert) {
+            $this->AddInsertFields($FormPostValues);
+        }
+
+        $this->AddUpdateFields($FormPostValues);
+        $this->Validation->applyRule('UrlCode', 'Required');
+        $this->Validation->applyRule('UrlCode', 'UrlStringRelaxed');
+
+        // Make sure that the UrlCode is unique among categories.
+        $this->SQL->select('ArticleCategoryID')
+            ->from('ArticleCategory')
+            ->where('UrlCode', $UrlCode);
+
+        if ($ArticleCategoryID) {
+            $this->SQL->where('ArticleCategoryID <>', $ArticleCategoryID);
+        }
+
+        if ($this->SQL->get()->numRows()) {
+            $this->Validation->addValidationResult('UrlCode',
+                'The specified URL code is already in use by another article category.');
+        }
+
+        //	Prep and fire event.
+        $this->EventArguments['FormPostValues'] = &$FormPostValues;
+        $this->EventArguments['ArticleCategoryID'] = $ArticleCategoryID;
+        $this->fireEvent('BeforeSaveArticleCategory');
+
+        // Validate the form posted values
+        if ($this->validate($FormPostValues, $Insert)) {
+            $Fields = $this->Validation->SchemaValidationFields();
+            $Fields = RemoveKeyFromArray($Fields, 'ArticleCategoryID');
+
+            if ($Insert === false) {
+                $OldCategory = $this->getID($ArticleCategoryID, DATASET_TYPE_ARRAY);
+
+                $this->update($Fields, array('ArticleCategoryID' => $ArticleCategoryID));
+            } else {
+                $ArticleCategoryID = $this->insert($Fields);
+
+                if ($ArticleCategoryID) {
+                    if ($CustomPermissions) {
+                        $this->SQL->put('ArticleCategory', array('PermissionArticleCategoryID' => $ArticleCategoryID),
+                            array('ArticleCategoryID' => $ArticleCategoryID));
+                    }
+                }
+            }
+
+            // Save the permissions
+            if ($ArticleCategoryID) {
+                // Check to see if this category uses custom permissions.
+                if ($CustomPermissions) {
+                    $PermissionModel = Gdn::permissionModel();
+                    $Permissions = $PermissionModel->PivotPermissions(val('Permission', $FormPostValues, array()),
+                        array('JunctionID' => $ArticleCategoryID));
+                    $PermissionModel->SaveAll($Permissions,
+                        array('JunctionID' => $ArticleCategoryID, 'JunctionTable' => 'ArticleCategory'));
+
+                    if (!$Insert) {
+                        // Figure out my last permission.
+                        $Data = $this->SQL->select('PermissionArticleCategoryID')->from('ArticleCategory')
+                            ->where('ArticleCategoryID', $ArticleCategoryID)->get()->firstRow(DATASET_TYPE_ARRAY);
+
+                        // Update this category's permission.
+                        $this->SQL->put('ArticleCategory', array('PermissionArticleCategoryID' => $ArticleCategoryID),
+                            array('ArticleCategoryID' => $ArticleCategoryID));
+                    }
+                } elseif (!$Insert) {
+                    // Delete my custom permissions.
+                    $this->SQL->delete(
+                        'Permission',
+                        array('JunctionTable' => 'ArticleCategory', 'JunctionColumn' => 'PermissionArticleCategoryID', 'JunctionID' => $ArticleCategoryID)
+                    );
+                }
+            }
+
+            // Force the user permissions to refresh.
+            Gdn::userModel()->ClearPermissions();
+        } else {
+            $ArticleCategoryID = false;
+        }
+
+        return $ArticleCategoryID;
     }
 
     /**
@@ -202,65 +369,6 @@ class ArticleCategoryModel extends Gdn_Model {
     }
 
     /**
-     * Delete a single category and assign its articles to another.
-     *
-     * @return void
-     * @throws Exception on invalid category for deletion.
-     * @param object $Category
-     * @param int $ReplacementArticleCategoryID Unique ID of category all discussion are being move to.
-     */
-    public function Delete($Category, $ReplacementArticleCategoryID) {
-        // Don't do anything if the required category object & properties are not defined.
-        if (!is_object($Category)
-            || !property_exists($Category, 'ArticleCategoryID')
-            || !property_exists($Category, 'Name')
-            || $Category->ArticleCategoryID <= 0
-        ) {
-            throw new Exception(T('Invalid category for deletion.'));
-        } else {
-            // If there is a replacement category...
-            if ($ReplacementArticleCategoryID > 0) {
-                // Update articles.
-                $this->SQL
-                    ->Update('Article')
-                    ->Set('ArticleCategoryID', $ReplacementArticleCategoryID)
-                    ->Where('ArticleCategoryID', $Category->ArticleCategoryID)
-                    ->Put();
-
-                // Update the article count.
-                $Count = $this->SQL
-                    ->Select('ArticleID', 'count', 'ArticleCount')
-                    ->From('Article')
-                    ->Where('ArticleCategoryID', $ReplacementArticleCategoryID)
-                    ->Get()
-                    ->FirstRow()
-                    ->ArticleCount;
-
-                if (!is_numeric($Count))
-                    $Count = 0;
-
-                $this->SQL
-                    ->Update('ArticleCategory')->Set('CountArticles', $Count)
-                    ->Where('ArticleCategoryID', $ReplacementArticleCategoryID)
-                    ->Put();
-            } else {
-                // Delete comments in this category.
-                $this->SQL
-                   ->From('ArticleComment ac')
-                   ->Join('Article a', 'ac.ArticleID = a.ArticleID')
-                   ->Where('a.ArticleID', $Category->ArticleCategoryID)
-                   ->Delete();
-
-                // Delete articles in this category.
-                $this->SQL->Delete('Article', array('ArticleCategoryID' => $Category->ArticleCategoryID));
-            }
-
-            // Finally, delete the category.
-            $this->SQL->Delete('ArticleCategory', array('ArticleCategoryID' => $Category->ArticleCategoryID));
-        }
-    }
-
-    /**
      * Determines and sets the most recent post fields
      * for a specific article category ID.
      *
@@ -271,7 +379,7 @@ class ArticleCategoryModel extends Gdn_Model {
             ->GetWhere('Article', array('ArticleCategoryID' => $ArticleCategoryID), 'DateLastArticleComment', 'desc', 1)
             ->FirstRow(DATASET_TYPE_ARRAY);
 
-        $Fields = array('LastArticleCommentID' => NULL, 'LastArticleID' => NULL);
+        $Fields = array('LastArticleCommentID' => null, 'LastArticleID' => null);
 
         if ($Row) {
             $Fields['LastArticleCommentID'] = $Row['LastArticleCommentID'];

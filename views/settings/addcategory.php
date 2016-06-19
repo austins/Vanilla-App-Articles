@@ -28,6 +28,23 @@ echo $this->Form->Errors();
             echo $this->Form->TextBox('Description', array('MultiLine' => true));
             ?>
         </li>
+        <?php if (count($this->PermissionData) > 0) { ?>
+            <li id="Permissions">
+                <?php
+                echo $this->Form->CheckBox('CustomPermissions', 'This category has custom permissions.');
+
+                echo '<div class="CategoryPermissions">';
+
+                echo $this->Form->Simple(
+                    $this->data('_PermissionFields', array()),
+                    array('Wrap' => array('', ''), 'ItemWrap' => array('<div class="P">', '</div>')));
+
+                echo t('Check all permissions that apply for each role');
+                echo $this->Form->CheckBoxGridGroups($this->PermissionData, 'Permission');
+                echo '</div>';
+                ?>
+            </li>
+        <?php } ?>
     </ul>
 <?php
 echo $this->Form->Close('Save');
