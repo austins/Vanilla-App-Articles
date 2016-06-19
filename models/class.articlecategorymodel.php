@@ -306,10 +306,6 @@ class ArticleCategoryModel extends Gdn_Model {
                         array('JunctionID' => $ArticleCategoryID, 'JunctionTable' => 'ArticleCategory'));
 
                     if (!$Insert) {
-                        // Figure out my last permission.
-                        $Data = $this->SQL->select('PermissionArticleCategoryID')->from('ArticleCategory')
-                            ->where('ArticleCategoryID', $ArticleCategoryID)->get()->firstRow(DATASET_TYPE_ARRAY);
-
                         // Update this category's permission.
                         $this->SQL->put('ArticleCategory', array('PermissionArticleCategoryID' => $ArticleCategoryID),
                             array('ArticleCategoryID' => $ArticleCategoryID));
@@ -320,6 +316,10 @@ class ArticleCategoryModel extends Gdn_Model {
                         'Permission',
                         array('JunctionTable' => 'ArticleCategory', 'JunctionColumn' => 'PermissionArticleCategoryID', 'JunctionID' => $ArticleCategoryID)
                     );
+
+                    // Update this category's permission.
+                    $this->SQL->put('ArticleCategory', array('PermissionArticleCategoryID' => -1),
+                        array('ArticleCategoryID' => $ArticleCategoryID));
                 }
             }
 
