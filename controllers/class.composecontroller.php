@@ -512,8 +512,8 @@ class ComposeController extends Gdn_Controller {
             $UploadsSubdir = '/articles/' . $CurrentYear . '/' . $CurrentMonth;
 
             if ($isThumbnail) {
-                $SaveWidth = C('Articles.Articles.ThumbnailWidth', 260);
-                $SaveHeight = C('Articles.Articles.ThumbnailHeight', 146);
+                $SaveWidth = C('Articles.Articles.ThumbnailWidth', 280);
+                $SaveHeight = C('Articles.Articles.ThumbnailHeight', 200);
             } else {
                 $SaveWidth = null;
                 $SaveHeight = null;

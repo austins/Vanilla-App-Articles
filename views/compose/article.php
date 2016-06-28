@@ -80,8 +80,8 @@ echo $this->Form->Errors();
 
         <div class="P">
             <?php
-            echo $this->Form->Label('Upload a Thumbnail (Max dimensions: ' . C('Articles.Articles.ThumbnailWidth', 260)
-                . 'x' . C('Articles.Articles.ThumbnailHeight', 146) . ')', 'UploadThumbnail');
+            echo $this->Form->Label('Upload a Thumbnail (Max dimensions: ' . C('Articles.Articles.ThumbnailWidth', 280)
+                . 'x' . C('Articles.Articles.ThumbnailHeight', 200) . ')', 'UploadThumbnail');
             echo $this->Form->ImageUpload('UploadThumbnail');
             ?>
 

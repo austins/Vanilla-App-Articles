@@ -22,8 +22,8 @@
 $Configuration['Articles']['ShowArticlesMenuLink'] = true;
 $Configuration['Articles']['ShowCategoriesMenuLink'] = false;
 $Configuration['Articles']['Excerpt']['MaxLength'] = 160;
-$Configuration['Articles']['Articles']['ThumbnailWidth'] = 260;
-$Configuration['Articles']['Articles']['ThumbnailHeight'] = 146;
+$Configuration['Articles']['Articles']['ThumbnailWidth'] = 280;
+$Configuration['Articles']['Articles']['ThumbnailHeight'] = 200;
 $Configuration['Articles']['Articles']['AddActivity'] = true;
 $Configuration['Articles']['Articles']['ShowAuthorInfo'] = false;
 $Configuration['Articles']['Articles']['ShowSimilarArticles'] = true;
