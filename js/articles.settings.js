@@ -20,4 +20,16 @@ jQuery(document).ready(function($) {
         $('#ReplacementCategory,#ReplacementWarning').show();
         $('#DeleteArticles').hide();
     }
+
+    // Set custom category permissions display
+    var displayCategoryPermissions = function() {
+        var checked = $('#Form_CustomPermissions').prop('checked');
+        if (checked) {
+            $('.CategoryPermissions').show();
+        } else {
+            $('.CategoryPermissions').hide();
+        }
+    };
+    $('#Form_CustomPermissions').click(displayCategoryPermissions);
+    displayCategoryPermissions();
 });

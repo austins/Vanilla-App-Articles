@@ -32,21 +32,6 @@ if (Gdn::Config('Articles.Version') !== false)
 $SystemUserID = Gdn::UserModel()->GetSystemUserID();
 $Now = Gdn_Format::ToDateTime();
 
-// Insert first article category.
-$ArticleCategoryModel = new ArticleCategoryModel();
-if ($ArticleCategoryModel->GetCount() == 0) {
-    $FirstArticleCategoryID = $ArticleCategoryModel->Save(array(
-        'Name' => 'Uncategorized',
-        'UrlCode' => 'uncategorized',
-        'Description' => 'Uncategorized articles.',
-        'DateInserted' => $Now,
-        'InsertUserID' => $SystemUserID,
-        'LastDateInserted' => $Now,
-        'CountArticles' => 1,
-        'LastArticleID' => 1
-    ));
-}
-
 // Insert first article.
 $ArticleModel = new ArticleModel();
 

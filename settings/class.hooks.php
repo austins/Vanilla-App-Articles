@@ -187,6 +187,7 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->Permission('Garden.Settings.Manage');
 
         // Add asset.
+        $Sender->addJsFile('jquery.gardencheckboxgrid.js');
         $Sender->AddJsFile('articles.js', 'articles');
         $Sender->AddJsFile('articles.settings.js', 'articles');
 
@@ -202,6 +203,8 @@ class ArticlesHooks extends Gdn_Plugin {
 
             if (is_numeric($ArticleCategoryID)) {
                 $Category = $ArticleCategoryModel->GetByID($ArticleCategoryID);
+
+                $Category->CustomPermissions = $ArticleCategoryID == $Category->PermissionArticleCategoryID;
 
                 if ($Category)
                     $Sender->Form->SetData($Category);
@@ -260,6 +263,18 @@ class ArticlesHooks extends Gdn_Plugin {
                     }
                 }
             }
+        }
+
+        // Get all of the currently selected role/permission combinations for this junction.
+        $PermissionModel = Gdn::PermissionModel();
+        if ($Category) {
+            $Permissions = $PermissionModel->GetJunctionPermissions(array('JunctionID' => $ArticleCategoryID), 'ArticleCategory', '', array('AddDefaults' => !$Category->CustomPermissions));
+        } else {
+            $Permissions = $PermissionModel->GetJunctionPermissions(array('JunctionID' => isset($ArticleCategoryID) ? $ArticleCategoryID : 0), 'ArticleCategory');
+        }
+        $Permissions = $PermissionModel->UnpivotPermissions($Permissions, true);
+        if ($Sender->deliveryType() == DELIVERY_TYPE_ALL) {
+            $Sender->setData('PermissionData', $Permissions, true);
         }
 
         $Sender->AddSideMenu('/settings/articles/categories/');
@@ -786,5 +801,63 @@ class ArticlesHooks extends Gdn_Plugin {
 
     public function CategoriesController_Render_Before($Sender) {
         $Sender->AddModule('ArticlesModule');
+    }
+
+    /**
+     * Provide default permissions for roles, based on the value in their Type column.
+     *
+     * @param PermissionModel $Sender Instance of permission model that fired the event
+     */
+    public function PermissionModel_DefaultPermissions_Handler($Sender) {
+        // Guest defaults
+        $guestDefaults = array('Articles.Articles.View' => 1);
+        $Sender->AddDefault(RoleModel::TYPE_GUEST, $guestDefaults);
+        $Sender->AddDefault(RoleModel::TYPE_GUEST, $guestDefaults, 'ArticleCategory', -1);
+
+        // Unconfirmed defaults
+        $unconfirmedDefaults = array('Articles.Articles.View' => 1);
+        $Sender->AddDefault(RoleModel::TYPE_UNCONFIRMED, $unconfirmedDefaults);
+        $Sender->AddDefault(RoleModel::TYPE_UNCONFIRMED, $unconfirmedDefaults, 'ArticleCategory', -1);
+
+        // Applicant defaults
+        $applicantDefaults = array('Articles.Articles.View' => 1);
+        $Sender->AddDefault(RoleModel::TYPE_APPLICANT, $applicantDefaults);
+        $Sender->AddDefault(RoleModel::TYPE_APPLICANT, $applicantDefaults, 'ArticleCategory', -1);
+
+        // Member defaults
+        $memberDefaults = array(
+            'Articles.Articles.View' => 1,
+            'Articles.Comments.Add' => 1
+        );
+        $Sender->AddDefault(RoleModel::TYPE_MEMBER, $memberDefaults);
+        $Sender->AddDefault(RoleModel::TYPE_MEMBER, $memberDefaults, 'ArticleCategory', -1);
+
+        // Moderator defaults
+        $moderatorDefaults = array(
+            'Articles.Articles.Add' => 1,
+            'Articles.Articles.Close' => 1,
+            'Articles.Articles.Delete' => 1,
+            'Articles.Articles.Edit' => 1,
+            'Articles.Articles.View' => 1,
+            'Articles.Comments.Add' => 1,
+            'Articles.Comments.Delete' => 1,
+            'Articles.Comments.Edit' => 1
+        );
+        $Sender->AddDefault(RoleModel::TYPE_MODERATOR, $moderatorDefaults);
+        $Sender->AddDefault(RoleModel::TYPE_MODERATOR, $moderatorDefaults, 'ArticleCategory', -1);
+
+        // Administrator defaults
+        $administratorDefaults = array(
+            'Articles.Articles.Add' => 1,
+            'Articles.Articles.Close' => 1,
+            'Articles.Articles.Delete' => 1,
+            'Articles.Articles.Edit' => 1,
+            'Articles.Articles.View' => 1,
+            'Articles.Comments.Add' => 1,
+            'Articles.Comments.Delete' => 1,
+            'Articles.Comments.Edit' => 1
+        );
+        $Sender->AddDefault(RoleModel::TYPE_ADMINISTRATOR, $administratorDefaults);
+        $Sender->AddDefault(RoleModel::TYPE_ADMINISTRATOR, $administratorDefaults, 'ArticleCategory', -1);
     }
 }
