@@ -25,7 +25,7 @@ jQuery(document).ready(function($) {
                 $(this).wrap('<form>').closest('form').get(0).reset();
                 $(this).unwrap();
 
-                var imagePath = gdn.url('/uploads' + response.Path);
+                var imagePath = gdn.definition('WebRoot') + '/uploads' + response.Path;
 
                 // Show new image in form.
                 $('#UploadedImages').append('<div id="ArticleMedia_' + response.ArticleMediaID + '" class="UploadedImageWrap">' +
@@ -68,7 +68,7 @@ jQuery(document).ready(function($) {
 
                 $(this).hide();
 
-                var imagePath = gdn.url('/uploads' + response.Path);
+                var imagePath = gdn.definition('WebRoot') + '/uploads' + response.Path;
 
                 // Show new image in form.
                 $('#UploadedThumbnail').append('<div id="ArticleMedia_' + response.ArticleMediaID + '" class="UploadedImageWrap">' +

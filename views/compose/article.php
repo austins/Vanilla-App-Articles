@@ -64,7 +64,7 @@ echo $this->Form->Errors();
                         $UploadedImagesResult = $UploadedImages->Result();
 
                         foreach ($UploadedImages as $UploadedImage) {
-                            $ImagePath = Url('/uploads' . $UploadedImage->Path);
+                            $ImagePath = Gdn_UploadImage::url($UploadedImage->Path);
 
                             echo '<div id="ArticleMedia_' . $UploadedImage->ArticleMediaID . '" class="UploadedImageWrap">' .
                                 '<div class="UploadedImage"><img src="' . $ImagePath . '" alt="" /></div>' .
@@ -91,7 +91,7 @@ echo $this->Form->Errors();
                     $UploadedThumbnail = $this->Data('UploadedThumbnail');
 
                     if ($UploadedThumbnail) {
-                        $ImagePath = Url('/uploads' . $UploadedThumbnail->Path);
+                        $ImagePath = Gdn_UploadImage::url($UploadedThumbnail->Path);
 
                         echo '<div id="ArticleMedia_' . $UploadedThumbnail->ArticleMediaID . '" class="UploadedImageWrap">' .
                             '<div class="UploadedImage"><img src="' . $ImagePath . '" alt="" /></div>' .
