@@ -41,12 +41,6 @@ class ArticlesHooks extends Gdn_Plugin {
      * Automatically executed when this application is enabled.
      */
     public function Setup() {
-        // Initialize variables that are used for the structuring and stub inserts.
-        $Database = Gdn::Database();
-        $SQL = $Database->SQL();
-        $Drop = false; // Gdn::Config('Articles.Version') === false ? true : false;
-        $Explicit = true;
-
         // Call structure.php to update database.
         include(PATH_APPLICATIONS . DS . 'articles' . DS . 'settings' . DS . 'structure.php');
         include(PATH_APPLICATIONS . DS . 'articles' . DS . 'settings' . DS . 'stub.php');

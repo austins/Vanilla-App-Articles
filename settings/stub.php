@@ -56,7 +56,6 @@ if ($ArticleModel->GetCount() == 0) {
         'Format' => 'Html',
         'Status' => ArticleModel::STATUS_PUBLISHED,
         'DateInserted' => $Now,
-        'AttributionUserID' => $SystemUserID,
         'InsertUserID' => $SystemUserID,
         'InsertIPAddress' => '0.0.0.0'
     ));

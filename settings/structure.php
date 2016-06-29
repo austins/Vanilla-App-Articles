@@ -21,8 +21,13 @@
  *
  * Called by ArticleHooks->Setup() to update database upon enabling app.
  */
+$Database = Gdn::Database();
+$SQL = $Database->SQL();
 $Construct = $Database->Structure();
 $Px = $Construct->DatabasePrefix();
+
+$Drop = false;
+$Explicit = true;
 
 // Construct the ArticleCategory table.
 $Construct->Table('ArticleCategory');
@@ -81,6 +86,18 @@ if ($Drop || !$ArticleCategoryExists) {
 
 // Construct the Article table.
 $Construct->Table('Article');
+$ArticleExists = $Construct->TableExists();
+
+$AttributionUserIDExists = $Construct->ColumnExists('AttributionUserID');
+if ($ArticleExists && $AttributionUserIDExists) {
+    $AttributionUserIDNotSameCount = $SQL->Query('SELECT COUNT(CASE WHEN AttributionUserID != InsertUserID'
+        . ' THEN 1 ELSE NULL END) AS NotSameCount FROM ' . $Px . 'Article;')->FirstRow()->NotSameCount;
+
+    if ($AttributionUserIDNotSameCount > 0) {
+        $SQL->Update('Article a')->Set('a.InsertUserID', 'a.AttributionUserID', false, false)->Put();
+    }
+}
+
 $Construct->PrimaryKey('ArticleID')
     ->Column('ArticleCategoryID', 'int', false, array('key', 'index.CategoryPages'))
     ->Column('Name', 'varchar(100)', false, 'fulltext')
@@ -92,7 +109,6 @@ $Construct->PrimaryKey('ArticleID')
     ->Column('Closed', 'tinyint(1)', 0)
     ->Column('DateInserted', 'datetime', false, 'index')
     ->Column('DateUpdated', 'datetime', true)
-    ->Column('AttributionUserID', 'int', false, 'key')
     ->Column('InsertUserID', 'int', false, 'key')
     ->Column('UpdateUserID', 'int', true)
     ->Column('InsertIPAddress', 'varchar(15)', true)
