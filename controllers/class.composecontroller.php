@@ -580,7 +580,7 @@ class ComposeController extends Gdn_Controller {
 
         // Check permission.
         $Session = Gdn::Session();
-        if (!$Session->CheckPermission('Articles.Articles.Add')) {
+        if (!$Session->CheckPermission('Articles.Articles.Add', true, 'ArticleCategory', 'any')) {
             throw PermissionException('Articles.Articles.Add');
         }
 
