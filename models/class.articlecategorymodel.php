@@ -335,7 +335,7 @@ class ArticleCategoryModel extends Gdn_Model {
      *
      * @return Gdn_DataSet SQL result.
      */
-    public function Get($Wheres = null) {
+    public function Get($Wheres = null, $PermFilter = 'Articles.Articles.View') {
         // Set up selection query.
         $this->SQL->Select('ac.*')->From('ArticleCategory ac');
 
@@ -352,7 +352,7 @@ class ArticleCategoryModel extends Gdn_Model {
 
         // Respect user permission
         $this->SQL->BeginWhereGroup()
-            ->Permission('Articles.Articles.View', 'ac', 'PermissionArticleCategoryID', 'ArticleCategory')
+            ->Permission($PermFilter, 'ac', 'PermissionArticleCategoryID', 'ArticleCategory')
             ->EndWhereGroup();
 
         // Set order of data.

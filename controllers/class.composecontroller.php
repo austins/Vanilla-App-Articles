@@ -214,7 +214,7 @@ class ComposeController extends Gdn_Controller {
         $this->AddJsFile('jquery.ajaxfileupload.js');
 
         // Get categories.
-        $Categories = $this->ArticleCategoryModel->Get();
+        $Categories = $this->ArticleCategoryModel->Get(null, array('Articles.Articles.View', 'Articles.Articles.Add'));
 
         if ($Categories->NumRows() === 0) {
             throw new Gdn_UserException(T('At least one article category must exist to compose an article.'));
