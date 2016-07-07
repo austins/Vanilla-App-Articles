@@ -132,7 +132,6 @@ class ArticleCommentModel extends Gdn_Model {
      * @param int $UserID Which user to get comments for.
      * @param int $Limit Max number to get.
      * @param int $Offset Number to skip.
-     * @param int $LastCommentID A hint for quicker paging.
      * @return object SQL results.
      */
     public function GetByUser($UserID, $Offset = 0, $Limit = false) {
