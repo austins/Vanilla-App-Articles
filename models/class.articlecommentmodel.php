@@ -67,6 +67,14 @@ class ArticleCommentModel extends Gdn_Model {
         // Fetch data.
         $Comments = $this->SQL->Get();
 
+        $Result =& $Comments->Result();
+        $this->LastCommentCount = $Comments->NumRows();
+        if (count($Result) > 0) {
+            $this->LastArticleCommentID = $Result[count($Result) - 1]->ArticleCommentID;
+        } else {
+            $this->LastArticleCommentID = null;
+        }
+
         Gdn::UserModel()->JoinUsers($Comments, array('InsertUserID', 'UpdateUserID'));
 
         // Prepare and fire event.
@@ -124,13 +132,14 @@ class ArticleCommentModel extends Gdn_Model {
      * @param int $UserID Which user to get comments for.
      * @param int $Limit Max number to get.
      * @param int $Offset Number to skip.
+     * @param int $LastCommentID A hint for quicker paging.
      * @return object SQL results.
      */
     public function GetByUser($UserID, $Offset = 0, $Limit = false) {
         if (!is_numeric($UserID))
             throw new InvalidArgumentException('The user ID must be a numeric value.');
 
-        $Wheres = array('ac.InsertUserID', $UserID);
+        $Wheres = array('ac.InsertUserID' => $UserID);
 
         $Comments = $this->Get($Offset, $Limit, $Wheres);
 

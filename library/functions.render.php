@@ -135,7 +135,7 @@ if (!function_exists('ArticleAuthorAnchor')) {
         $UserID = GetValue($Px.'UserID', $User, 0);
 
         $AuthorMeta = UserModel::GetMeta($User->UserID, 'Articles.%', 'Articles.');
-        if ($AuthorMeta['AuthorDisplayName'] != "")
+        if (isset($AuthorMeta['AuthorDisplayName']) && $AuthorMeta['AuthorDisplayName'] != "")
             $Text = $AuthorMeta['AuthorDisplayName'];
         else
             $Text = GetValue('Text', $Options, htmlspecialchars($Name)); // Allow anchor text to be overridden.

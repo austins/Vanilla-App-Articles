@@ -183,8 +183,9 @@ class ArticleController extends Gdn_Controller {
                 'content' => date(DATE_ISO8601, strtotime($Article->DateUpdated))));
         }
 
+        $Author = Gdn::UserModel()->GetID($Article->InsertUserID);
         $HeadModule->AddTag('meta',
-            array('property' => 'article:author', 'content' => Url('profile/articles/' . $Article->InsertUserID . '/' . $Article->AuthorName, true)));
+            array('property' => 'article:author', 'content' => Url(UserUrl($Author), true)));
         $HeadModule->AddTag('meta', array('property' => 'article:section', 'content' => $this->ArticleCategory->Name));
 
         // Image meta info

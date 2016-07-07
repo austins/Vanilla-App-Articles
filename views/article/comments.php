@@ -37,7 +37,8 @@ $Session = Gdn::Session();
 
                     // Get user meta for articles app.
                     $UserMeta = Gdn::UserModel()->GetMeta($User->UserID, 'Articles.%', 'Articles.');
-                    if (is_array($UserMeta)) {
+                    $AuthorDisplayName = false;
+                    if (isset($UserMeta['AuthorDisplayName'])) {
                         $AuthorDisplayName = $UserMeta['AuthorDisplayName'];
                     }
 
@@ -126,8 +127,8 @@ $Session = Gdn::Session();
             $this->FireEvent('AfterComments');
             if ($this->Pager->LastPage()) {
                 $LastCommentID = $this->AddDefinition('LastCommentID');
-                if (!$LastCommentID || $this->Data('Article')->LastCommentID > $LastCommentID)
-                    $this->AddDefinition('LastCommentID', (int)$this->Data('Article')->LastCommentID);
+                if (!$LastCommentID || $this->ArticleCommentModel->LastArticleCommentID > $LastCommentID)
+                    $this->AddDefinition('LastCommentID', (int)$this->ArticleCommentModel->LastArticleCommentID);
             }
 
             echo '<div class="P PagerWrap">';
