@@ -24,7 +24,7 @@ else {
     echo '<ul class="DataList Articles">';
     foreach ($Articles as $Article):
         $ArticleUrl = ArticleUrl($Article);
-        $Author = Gdn::UserModel()->GetID($Article->AttributionUserID);
+        $Author = Gdn::UserModel()->GetID($Article->InsertUserID);
 
         $Category = $this->ArticleCategoryModel->GetByID($Article->ArticleCategoryID);
 
@@ -33,7 +33,7 @@ else {
 
         $CssClass = 'Item ItemArticle';
 
-        if ($Article->AttributionUserID == Gdn::Session()->UserID)
+        if ($Article->InsertUserID == Gdn::Session()->UserID)
             $CssClass .= ' Mine';
         ?>
         <li id="Article_<?php echo $Article->ArticleID; ?>" class="<?php echo $CssClass; ?>">

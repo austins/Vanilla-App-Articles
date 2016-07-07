@@ -6,7 +6,7 @@ if (!function_exists('ShowArticleOptions'))
 $Article = $this->Article;
 
 $ArticleUrl = ArticleUrl($Article);
-$Author = Gdn::UserModel()->GetID($Article->AttributionUserID);
+$Author = Gdn::UserModel()->GetID($Article->InsertUserID);
 
 $Category = $this->ArticleCategory;
 
@@ -85,7 +85,7 @@ if (C('Articles.Articles.ShowSimilarArticles')) {
         echo '<ul class="DataList">';
         foreach ($SimilarArticles as $SimilarArticle) {
             $SimilarArticleCategory = $this->ArticleCategoryModel->GetByID($SimilarArticle->ArticleCategoryID);
-            $SimilarArticleAuthor = Gdn::UserModel()->GetID($SimilarArticle->AttributionUserID);
+            $SimilarArticleAuthor = Gdn::UserModel()->GetID($SimilarArticle->InsertUserID);
 
             echo '<li class="SimilarArticle">
                 ' . Anchor($SimilarArticle->Name, ArticleUrl($SimilarArticle)) . '

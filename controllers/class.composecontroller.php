@@ -177,7 +177,7 @@ class ComposeController extends Gdn_Controller {
         $Session = Gdn::Session();
         $Wheres = false;
         if (!$Session->CheckPermission('Articles.Articles.Edit')) {
-            $Wheres = array('a.AttributionUserID' => $Session->UserID);
+            $Wheres = array('a.InsertUserID' => $Session->UserID);
         }
 
         // Get the articles.
@@ -240,12 +240,7 @@ class ComposeController extends Gdn_Controller {
                 $this->Form->AddHidden('UrlCodeIsDefined', '1');
 
                 // Set author field.
-                $Author = $UserModel->GetID($Article->AttributionUserID);
-
-                // If the user with AttributionUserID doesn't exist.
-                if (!$Author) {
-                    $Author = $UserModel->GetID($Article->InsertUserID);
-                }
+                $Author = $UserModel->GetID($Article->InsertUserID);
 
                 $UploadedImages = $this->ArticleMediaModel->GetByArticleID($Article->ArticleID);
                 $this->SetData('UploadedImages', $UploadedImages, true);
@@ -320,7 +315,7 @@ class ComposeController extends Gdn_Controller {
                 }
             }
 
-            $this->Form->SetFormValue('AttributionUserID', (int)$Author->UserID);
+            $this->Form->SetFormValue('InsertUserID', (int)$Author->UserID);
 
             // If this was a preview click, create an article shell with the values for this article.
             $Preview = $this->Form->ButtonExists('Preview') ? true : false;
@@ -328,7 +323,7 @@ class ComposeController extends Gdn_Controller {
                 $this->Article = new stdClass();
                 $this->Article->Name = $this->Form->GetValue('Name', '');
                 $this->Preview = new stdClass();
-                $this->Preview->InsertUserID = $Session->User->UserID;
+                $this->Preview->InsertUserID = isset($Author->UserID) ? $Author->UserID : $Session->User->UserID;
                 $this->Preview->InsertName = $Session->User->Name;
                 $this->Preview->InsertPhoto = $Session->User->Photo;
                 $this->Preview->DateInserted = Gdn_Format::Date();
@@ -356,10 +351,10 @@ class ComposeController extends Gdn_Controller {
                         if ($Article) {
                             // If the author has changed from the initial article, then update the counts
                             // for the initial author after the article has been saved.
-                            $InitialAttributionUserID = val('AttributionUserID', $Article, false);
+                            $InitialInsertUserID = val('InsertUserID', $Article, false);
 
-                            if ($InitialAttributionUserID != $Author->UserID) {
-                                $this->ArticleModel->UpdateUserArticleCount($InitialAttributionUserID);
+                            if ($InitialInsertUserID != $Author->UserID) {
+                                $this->ArticleModel->UpdateUserArticleCount($InitialInsertUserID);
 
                                 // Update the count for the new author.
                                 $this->ArticleModel->UpdateUserArticleCount($Author->UserID);

@@ -61,7 +61,7 @@ class ArticleSearchModel extends Gdn_Model {
                 . 'a.ArticleCategoryID, a.Closed')
             ->Select('a.UrlCode', "concat('/article/', year(a.DateInserted), '/', %s)", 'Url')
             ->Select('a.DateInserted')
-            ->Select('a.AttributionUserID as UserID')
+            ->Select('a.InsertUserID as UserID')
             ->Select("'Article'", '', 'RecordType')
             ->From('Article a');
 

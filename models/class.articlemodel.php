@@ -153,7 +153,7 @@ class ArticleModel extends Gdn_Model {
         // Fetch data.
         $Articles = $this->SQL->Get();
 
-        Gdn::UserModel()->JoinUsers($Articles, array('InsertUserID', 'UpdateUserID', 'AttributionUserID'));
+        Gdn::UserModel()->JoinUsers($Articles, array('InsertUserID', 'UpdateUserID'));
 
         // Prepare and fire event.
         $this->EventArguments['Data'] = $Articles;
@@ -179,7 +179,7 @@ class ArticleModel extends Gdn_Model {
         // Fetch data.
         $Article = $this->SQL->Get()->FirstRow();
 
-        Gdn::UserModel()->JoinUsers($Article, array('InsertUserID', 'UpdateUserID', 'AttributionUserID'));
+        Gdn::UserModel()->JoinUsers($Article, array('InsertUserID', 'UpdateUserID'));
 
         return $Article;
     }
@@ -201,7 +201,7 @@ class ArticleModel extends Gdn_Model {
         // Fetch data.
         $Article = $this->SQL->Get()->FirstRow();
 
-        Gdn::UserModel()->JoinUsers($Article, array('InsertUserID', 'UpdateUserID', 'AttributionUserID'));
+        Gdn::UserModel()->JoinUsers($Article, array('InsertUserID', 'UpdateUserID'));
 
         return $Article;
     }
@@ -219,7 +219,7 @@ class ArticleModel extends Gdn_Model {
         if (!$Wheres)
             $Wheres = array();
 
-        $Wheres['AttributionUserID'] = $UserID;
+        $Wheres['InsertUserID'] = $UserID;
 
         $Articles = $this->Get($Offset, $Limit, $Wheres);
         $this->LastArticleCount = $Articles->NumRows();
@@ -282,7 +282,7 @@ class ArticleModel extends Gdn_Model {
             $ArticleCategoryID = val('ArticleCategoryID', $Article, false);
 
             $this->UpdateArticleCount($ArticleCategoryID, $Article);
-            $this->UpdateUserArticleCount(val('AttributionUserID', $Article, false));
+            $this->UpdateUserArticleCount(val('InsertUserID', $Article, false));
         } else {
             $PrimaryKeyVal = false;
         }
@@ -328,7 +328,7 @@ class ArticleModel extends Gdn_Model {
 
             // Update article count for affected category and user.
             $this->UpdateArticleCount($ArticleToDelete->ArticleCategoryID, $LastArticle);
-            $this->UpdateUserArticleCount(val('AttributionUserID', $ArticleToDelete, false));
+            $this->UpdateUserArticleCount(val('InsertUserID', $ArticleToDelete, false));
 
             // See if LastDateInserted should be the latest comment.
             $LastComment = $this->SQL
@@ -402,7 +402,7 @@ class ArticleModel extends Gdn_Model {
         $CountArticles = $this->SQL
             ->Select('a.ArticleID', 'count', 'CountArticles')
             ->From('Article a')
-            ->Where('a.AttributionUserID', $UserID)
+            ->Where('a.InsertUserID', $UserID)
             ->Get()->Value('CountArticles', 0);
 
         Gdn::UserModel()->SetField($UserID, 'CountArticles', $CountArticles);
@@ -447,7 +447,7 @@ class ArticleModel extends Gdn_Model {
             $ActivityModel = new ActivityModel();
             $Activity = array(
                 'ActivityType' => 'Article',
-                'ActivityUserID' => $Fields['AttributionUserID'],
+                'ActivityUserID' => $Fields['InsertUserID'],
                 'NotifyUserID' => ActivityModel::NOTIFY_PUBLIC,
                 'HeadlineFormat' => '{ActivityUserID,user} posted the "<a href="{Url,html}">{Data.Name}</a>" article.',
                 //'Story' => $ActivityStory,

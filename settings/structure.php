@@ -88,6 +88,7 @@ if ($Drop || !$ArticleCategoryExists) {
 $Construct->Table('Article');
 $ArticleExists = $Construct->TableExists();
 
+// AttributionUserID has been depreciated. InsertUserID is now used.
 $AttributionUserIDExists = $Construct->ColumnExists('AttributionUserID');
 if ($ArticleExists && $AttributionUserIDExists) {
     $AttributionUserIDNotSameCount = $SQL->Query('SELECT COUNT(CASE WHEN AttributionUserID != InsertUserID'

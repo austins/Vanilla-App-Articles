@@ -80,8 +80,8 @@ class ArticleController extends Gdn_Controller {
         // Set required permission.
         $UserModel = new UserModel();
         if ($this->Article->Status != ArticleModel::STATUS_PUBLISHED)
-            if (($this->Article->AttributionUserID == Gdn::Session()->UserID)
-                && !$UserModel->CheckPermission($this->Article->AttributionUserID, 'Articles.Articles.Edit')
+            if (($this->Article->InsertUserID == Gdn::Session()->UserID)
+                && !$UserModel->CheckPermission($this->Article->InsertUserID, 'Articles.Articles.Edit')
             )
                 $this->Permission('Articles.Articles.View');
             else
@@ -183,7 +183,7 @@ class ArticleController extends Gdn_Controller {
         }
 
         $HeadModule->AddTag('meta',
-            array('property' => 'article:author', 'content' => Url('profile/articles/' . $Article->AttributionUserID . '/' . $Article->AuthorName, true)));
+            array('property' => 'article:author', 'content' => Url('profile/articles/' . $Article->InsertUserID . '/' . $Article->AuthorName, true)));
         $HeadModule->AddTag('meta', array('property' => 'article:section', 'content' => $this->ArticleCategory->Name));
 
         // Image meta info

@@ -21,7 +21,7 @@ if (count($Articles) == 0) {
 } else {
     foreach ($Articles as $Article):
         $ArticleUrl = ArticleUrl($Article);
-        $Author = Gdn::UserModel()->GetID($Article->AttributionUserID);
+        $Author = Gdn::UserModel()->GetID($Article->InsertUserID);
 
         $CommentCountText = ($Article->CountArticleComments == 0) ? 'Comments' :
             Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));

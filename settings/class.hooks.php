@@ -708,7 +708,7 @@ class ArticlesHooks extends Gdn_Plugin {
                 ->Get('Article');
 
             // Delete the user's articles
-            Gdn::UserModel()->GetDelete('Article', array('AttributionUserID' => $UserID), $Data);
+            Gdn::UserModel()->GetDelete('Article', array('InsertUserID' => $UserID), $Data);
 
             // Update the appropriate recent posts in the categories.
             $ArticleCategoryModel = new ArticleCategoryModel();
