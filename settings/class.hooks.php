@@ -362,7 +362,7 @@ class ArticlesHooks extends Gdn_Plugin {
             $UserID = $Sender->User->UserID;
 
             // Add the article tab
-            if (($Sender->User->CountArticles > 0) || Gdn::UserModel()->CheckPermission($Sender->User, 'Articles.Articles.Add')) {
+            if (($Sender->User->CountArticles > 0) || ArticleModel::CanAdd('any', $UserID)) {
                 $ArticlesLabel = Sprite('SpArticles', 'SpMyDrafts Sprite') . ' ' . T('Articles');
 
                 if (C('Articles.Profile.ShowCounts', true))
@@ -375,7 +375,7 @@ class ArticlesHooks extends Gdn_Plugin {
             }
 
             // Add the article comments tab
-            if (($Sender->User->CountArticleComments > 0) || Gdn::UserModel()->CheckPermission($Sender->User, 'Articles.Comments.Add')) {
+            if (($Sender->User->CountArticleComments > 0) || ArticleCommentModel::CanAdd('any', $UserID)) {
                 $ArticleCommentsLabel = Sprite('SpArticleComments', 'SpQuote Sprite') . ' ' . T('Article Comments');
 
                 if (C('Articles.Profile.ShowCounts', true))
@@ -405,7 +405,7 @@ class ArticlesHooks extends Gdn_Plugin {
         else if (is_string($UserReference))
             $User = Gdn::UserModel()->GetByUsername($UserReference);
 
-        $UserCanAddArticle = Gdn::UserModel()->CheckPermission($User, 'Articles.Articles.Add');
+        $UserCanAddArticle = ArticleModel::CanAdd('any', $User->UserID);
         if ($User && (!$UserCanAddArticle || (!$UserCanAddArticle && ($User->CountArticles == 0))))
             Redirect(UserUrl($User));
 
@@ -477,7 +477,7 @@ class ArticlesHooks extends Gdn_Plugin {
         else if (is_string($UserReference))
             $User = Gdn::UserModel()->GetByUsername($UserReference);
 
-        $UserCanAddComment = Gdn::UserModel()->CheckPermission($User, 'Articles.Comments.Add');
+        $UserCanAddComment = ArticleCommentModel::CanAdd('any', $User->UserID);
         if ($User && (!$UserCanAddComment || (!$UserCanAddComment && ($User->CountArticleComments == 0))))
             Redirect(UserUrl($User));
 
@@ -556,7 +556,7 @@ class ArticlesHooks extends Gdn_Plugin {
      * @param ProfileController $Sender ProfileController
      */
     public function ProfileController_EditMyAccountAfter_Handler($Sender) {
-        if (Gdn::Session()->CheckPermission(array('Garden.Users.Edit', 'Articles.Articles.Add'), false)) {
+        if (Gdn::Session()->CheckPermission(array('Garden.Users.Edit', 'Articles.Articles.Add'), false, 'ArticleCategory', 'any')) {
             echo Wrap(
                 $Sender->Form->Label('Author Display Name', 'Articles.AuthorDisplayName') .
                 $Sender->Form->Textbox('Articles.AuthorDisplayName'),
@@ -784,7 +784,7 @@ class ArticlesHooks extends Gdn_Plugin {
         $Session = Gdn::Session();
 
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
-        if ($Session->CheckPermission($PermissionsAllowed, false)) {
+        if ($Session->CheckPermission($PermissionsAllowed, false, 'ArticleCategory', 'any')) {
             echo Wrap(Anchor(Sprite('SpMyDiscussions').' '.T('Articles Dashboard'), '/compose'), 'li');
         }
     }

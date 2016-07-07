@@ -27,6 +27,40 @@ class ArticleCommentModel extends Gdn_Model {
         parent::__construct('ArticleComment');
     }
 
+    // This method is needed since Gdn::UserModel()->CheckPermission() doesn't handle junctions yet.
+    public static function CanAdd($PermissionArticleCategoryID = 'any', $UserID = false) {
+        $AddPermission = 'Articles.Comments.Add';
+
+        // If no UserID passed, check current session permission.
+        if (!$UserID && Gdn::Session()->CheckPermission($AddPermission, true, 'ArticleCategory', $PermissionArticleCategoryID)) {
+            return true;
+        }
+
+        // UserID passed, check specific user's permission.
+        $ForeignKey = false;
+        $ForeignID = false;
+        if (is_numeric($PermissionArticleCategoryID)) {
+            $ForeignKey = 'ArticleCategoryID';
+            $ForeignID = $PermissionArticleCategoryID;
+        }
+
+        $UserPerms = Gdn::PermissionModel()->GetUserPermissions($UserID, $AddPermission,
+            'ArticleCategory', 'PermissionArticleCategoryID', $ForeignKey, $ForeignID);
+
+        $CanAdd = false;
+        foreach ($UserPerms as $CategoryPerms) {
+            foreach ($CategoryPerms as $Key => $Val) {
+                if ($Key === $AddPermission && (bool)$Val === true) {
+                    $CanAdd = true;
+
+                    break 2;
+                }
+            }
+        }
+
+        return $CanAdd;
+    }
+
     /**
      * Gets the data for multiple comments based on given criteria.
      *
