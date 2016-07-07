@@ -111,7 +111,7 @@ echo $this->Form->Errors();
             ?>
         </div>
 
-        <?php if (Gdn::Session()->CheckPermission('Articles.Articles.Edit')): ?>
+        <?php if (Gdn::Session()->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')): ?>
             <div class="P">
                 <?php
                 echo $this->Form->Label('Author', 'AuthorUserName');

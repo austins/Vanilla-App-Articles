@@ -11,13 +11,13 @@ if (!function_exists('ShowArticleOptions')) {
         $Options = array();
 
         // Can the user edit?
-        if ($Session->CheckPermission('Articles.Articles.Edit'))
+        if ($Session->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
             $Options['EditArticle'] = array(
                 'Label' => T('Edit'),
                 'Url' => '/compose/editarticle/' . $Article->ArticleID);
 
         // Can the user close?
-        if ($Session->CheckPermission('Articles.Articles.Close')) {
+        if ($Session->CheckPermission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
             $NewClosed = (int)!$Article->Closed;
             $Options['CloseArticle'] = array(
                 'Label' => T($Article->Closed ? 'Reopen' : 'Close'),
@@ -26,7 +26,7 @@ if (!function_exists('ShowArticleOptions')) {
         }
 
         // Can the user delete?
-        if ($Session->CheckPermission('Articles.Articles.Delete')) {
+        if ($Session->CheckPermission('Articles.Articles.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
             $ArticleCategoryModel = new ArticleCategoryModel();
             $Category = $ArticleCategoryModel->GetByID(val('ArticleCategoryID', $Article));
 
@@ -78,8 +78,8 @@ if (!function_exists('ShowCommentForm')) {
         $Session = Gdn::Session();
         $Controller = Gdn::Controller();
         $Article = $Controller->Article;
-        $UserCanClose = $Session->CheckPermission('Articles.Articles.Close');
-        $UserCanComment = $Session->CheckPermission('Articles.Comments.Add');
+        $UserCanClose = $Session->CheckPermission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
+        $UserCanComment = $Session->CheckPermission('Articles.Comments.Add', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
         $canGuestsComment = C('Articles.Comments.AllowGuests', false);
 
         // Closed notification
@@ -163,19 +163,19 @@ if (!function_exists('GetCommentOptions')):
 
         $TimeLeft = '';
 
-        if ($CanEdit && $EditContentTimeout > 0 && !$Session->CheckPermission('Articles.Articles.Edit')) {
+        if ($CanEdit && $EditContentTimeout > 0 && !$Session->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
             $TimeLeft = strtotime($Comment->DateInserted) + $EditContentTimeout - time();
             $TimeLeft = $TimeLeft > 0 ? ' (' . Gdn_Format::Seconds($TimeLeft) . ')' : '';
         }
 
         // Can the user edit the comment?
-        if (($CanEdit && $Session->UserID == $Comment->InsertUserID) || $Session->CheckPermission('Articles.Comments.Edit'))
+        if (($CanEdit && $Session->UserID == $Comment->InsertUserID) || $Session->CheckPermission('Articles.Comments.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
             $Options['EditComment'] = array('Label' => T('Edit') . ' ' . $TimeLeft,
                 'Url' => '/articles/compose/editcomment/' . $Comment->ArticleCommentID, 'EditComment');
 
         // Can the user delete the comment?
         $SelfDeleting = ($CanEdit && $Session->UserID == $Comment->InsertUserID && C('Articles.Comments.AllowSelfDelete'));
-        if ($SelfDeleting || $Session->CheckPermission('Articles.Comments.Delete'))
+        if ($SelfDeleting || $Session->CheckPermission('Articles.Comments.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
             $Options['DeleteComment'] = array('Label' => T('Delete'),
                 'Url' => '/articles/article/deletecomment/' . $Comment->ArticleCommentID . '/' . $Session->TransientKey()
                     . '/?Target=' . urlencode('/article/' . Gdn_Format::Date($Article->DateInserted, '%Y') . '/'

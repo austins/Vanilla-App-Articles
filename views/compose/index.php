@@ -74,7 +74,7 @@
         </ul>
     </div>
 
-    <?php if (Gdn::Session()->CheckPermission('Articles.Articles.Edit')): ?>
+    <?php if (Gdn::Session()->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')): ?>
         <div class="PendingArticles">
             <h2>Pending Articles</h2>
             <ul class="DataList">
