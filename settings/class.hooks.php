@@ -720,7 +720,7 @@ class ArticlesHooks extends Gdn_Plugin {
             // Erase the user's articles
             $SQL->Update('Article')
                 ->Set('Status', 'Trash')
-                ->Where('AuthorUserID', $UserID)
+                ->Where('InsertUserID', $UserID)
                 ->Put();
 
             $SQL->Update('ArticleComment')

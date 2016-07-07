@@ -20,11 +20,204 @@
  * Handles data for articles.
  */
 class ArticleCategoryModel extends Gdn_Model {
+    /** Cache grace. */
+    const CACHE_GRACE = 60;
+    /** Cache key. */
+    const CACHE_KEY = 'ArticleCategories';
+    /** Cache time to live. */
+    const CACHE_TTL = 600;
+    /** Cache master vote key. */
+    const MASTER_VOTE_KEY = 'ArticleCategories.Rebuild.Vote';
+
+    /** @var array Merged ArticleCategory data */
+    public static $ArticleCategories = null;
+
+    /** @var bool Whether or not to explicitly shard the categories cache. */
+    public static $ShardCache = false;
+
     /**
      * Class constructor. Defines the related database table name.
      */
     public function __construct() {
         parent::__construct('ArticleCategory');
+    }
+
+    /**
+     * Gets either all of the ArticleCategories or a single ArticleCategory.
+     *
+     * @param int|string|bool $ID Either the ArticleCategoryID or the ArticleCategory url code.
+     *
+     * @return array Returns either one or all ArticleCategories (if nothing is passed then all categories are
+     *     returned).
+     */
+    public static function Categories($ID = false) {
+        if (self::$ArticleCategories == null) {
+            // Try and get the ArticleCategories from the cache.
+            $CategoriesCache = Gdn::Cache()->Get(self::CACHE_KEY);
+            $Rebuild = true;
+
+            // If we received a valid data structure, extract the embedded expiry
+            // and re-store the real ArticleCategories on our static property.
+            if (is_array($CategoriesCache)) {
+                // Test if it's time to rebuild
+                $RebuildAfter = val('expiry', $CategoriesCache, null);
+                if (!is_null($RebuildAfter) && time() < $RebuildAfter) {
+                    $Rebuild = false;
+                }
+                self::$ArticleCategories = val('articlecategories', $CategoriesCache, null);
+            }
+            unset($CategoriesCache);
+
+            if ($Rebuild) {
+                // Try to get a rebuild lock
+                $HaveRebuildLock = self::RebuildLock();
+                if ($HaveRebuildLock || !self::$ArticleCategories) {
+                    $Sql = Gdn::Sql();
+                    $Sql = clone $Sql;
+                    $Sql->Reset();
+
+                    $Sql->Select('ac.*')
+                        ->From('ArticleCategory ac')
+                        ->Where('ac.ArticleCategoryID <>', '-1')
+                        ->OrderBy('ac.Name', 'asc');
+
+                    self::$ArticleCategories = array_merge(array(), $Sql->get()->resultArray());
+                    self::$ArticleCategories = Gdn_DataSet::Index(self::$ArticleCategories, 'ArticleCategoryID');
+                    self::BuildCache();
+
+                    // Release lock
+                    if ($HaveRebuildLock) {
+                        self::RebuildLock(true);
+                    }
+                }
+            }
+
+            if (self::$ArticleCategories) {
+                self::JoinUserData(self::$ArticleCategories);
+            } else {
+                return null;
+            }
+        }
+
+        if ($ID !== false) {
+            if (!is_numeric($ID) && $ID) {
+                $Code = $ID;
+                foreach (self::$ArticleCategories as $Category) {
+                    if (strcasecmp($Category['UrlCode'], $Code) === 0) {
+                        $ID = $Category['ArticleCategoryID'];
+                        break;
+                    }
+                }
+            }
+
+            if (isset(self::$ArticleCategories[$ID])) {
+                $Result = self::$ArticleCategories[$ID];
+
+                return $Result;
+            } else {
+                return null;
+            }
+        } else {
+            $Result = self::$ArticleCategories;
+
+            return $Result;
+        }
+    }
+
+    /**
+     * Update &$Categories in memory by applying modifiers for the currently logged-in user.
+     *
+     * @param array &$Categories
+     */
+    public static function JoinUserData(&$Categories) {
+        $IDs = array_keys($Categories);
+
+        // Add permissions.
+        $Session = Gdn::Session();
+        foreach ($IDs as $CID) {
+            $Category = $Categories[$CID];
+
+            $Categories[$CID]['PermsArticlesView'] = $Session->CheckPermission('Articles.Articles.View', true,
+                'ArticleCategory', $Category['PermissionArticleCategoryID']);
+            $Categories[$CID]['PermsArticlesAdd'] = $Session->CheckPermission('Articles.Articles.Add', true,
+                'ArticleCategory', $Category['PermissionArticleCategoryID']);
+            $Categories[$CID]['PermsArticlesEdit'] = $Session->CheckPermission('Articles.Articles.Edit', true,
+                'ArticleCategory', $Category['PermissionArticleCategoryID']);
+            $Categories[$CID]['PermsCommentsAdd'] = $Session->CheckPermission('Articles.Comments.Add', true,
+                'ArticleCategory', $Category['PermissionArticleCategoryID']);
+        }
+    }
+
+    public static function JoinCategories(&$Data, $Column = 'ArticleCategoryID', $Options = array()) {
+        $Join = val('Join', $Options,
+            array('Name' => 'ArticleCategoryName', 'UrlCode' => 'ArticleCategoryUrlCode', 'PermissionArticleCategoryID'));
+
+        if ($Data instanceof Gdn_DataSet) {
+            $Data2 = $Data->result();
+        } else {
+            $Data2 =& $Data;
+        }
+
+        foreach ($Data2 as &$Row) {
+            $ID = val($Column, $Row);
+            $Category = self::Categories($ID);
+            foreach ($Join as $N => $V) {
+                if (is_numeric($N)) {
+                    $N = $V;
+                }
+
+                if ($Category) {
+                    $Value = $Category[$N];
+                } else {
+                    $Value = null;
+                }
+
+                setValue($V, $Row, $Value);
+            }
+        }
+    }
+
+    /**
+     * Request rebuild mutex
+     *
+     * Allows competing instances to "vote" on the process that gets to rebuild
+     * the ArticleCategory cache.
+     *
+     * @return boolean whether we may rebuild
+     */
+    protected static function RebuildLock($Release = false) {
+        static $IsMaster = null;
+        if ($Release) {
+            Gdn::Cache()->Remove(self::MASTER_VOTE_KEY);
+
+            return;
+        }
+
+        if (is_null($IsMaster)) {
+            // Vote for master
+            $InstanceKey = getmypid();
+            $MasterKey = Gdn::Cache()->Add(self::MASTER_VOTE_KEY, $InstanceKey, array(
+                Gdn_Cache::FEATURE_EXPIRY => self::CACHE_GRACE
+            ));
+
+            $IsMaster = ($InstanceKey == $MasterKey);
+        }
+
+        return (bool)$IsMaster;
+    }
+
+    /**
+     * Build and augment the ArticleCategory cache
+     */
+    protected static function BuildCache() {
+        $expiry = self::CACHE_TTL + self::CACHE_GRACE;
+        Gdn::Cache()->Store(self::CACHE_KEY, array(
+            'expiry' => time() + $expiry,
+            'articlecategories' => self::$ArticleCategories
+        ), array(
+            Gdn_Cache::FEATURE_EXPIRY => $expiry,
+            Gdn_Cache::FEATURE_SHARD => self::$ShardCache
+        ));
     }
 
     /**
@@ -136,7 +329,7 @@ class ArticleCategoryModel extends Gdn_Model {
     }
 
     /**
-     * Gets the data for multiple articles based on given criteria.
+     * Gets multiple ArticleCategories based on given criteria (respecting user permission).
      *
      * @param array $Wheres SQL conditions.
      *
@@ -156,6 +349,11 @@ class ArticleCategoryModel extends Gdn_Model {
 
         // Exclude root category
         $this->SQL->Where('ArticleCategoryID <>', '-1');
+
+        // Respect user permission
+        $this->SQL->BeginWhereGroup()
+            ->Permission('Articles.Articles.View', 'ac', 'PermissionArticleCategoryID', 'ArticleCategory')
+            ->EndWhereGroup();
 
         // Set order of data.
         $this->SQL->OrderBy('ac.Name', 'asc');

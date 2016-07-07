@@ -46,7 +46,7 @@ class ComposeFilterModule extends Gdn_Module {
         $Controller->FireEvent('BeforeComposeFilterModule');
 
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
-        if (!$Session->CheckPermission($PermissionsAllowed, false))
+        if (!$Session->CheckPermission($PermissionsAllowed, false, 'ArticleCategory', 'any'))
             return '';
 
         return parent::ToString();

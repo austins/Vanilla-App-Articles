@@ -68,7 +68,7 @@ class ComposeController extends Gdn_Controller {
         // Set allowed permissions.
         // The user only needs one of the specified permissions.
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
-        $this->Permission($PermissionsAllowed, false);
+        $this->Permission($PermissionsAllowed, false, 'ArticleCategory', 'any');
 
         $this->AddModule('ComposeFilterModule');
 
@@ -88,7 +88,7 @@ class ComposeController extends Gdn_Controller {
         $this->SetData('RecentComments', $RecentComments);
 
         // Get recent articles pending review.
-        if (Gdn::Session()->CheckPermission('Articles.Articles.Edit')) {
+        if (Gdn::Session()->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')) {
             $PendingArticlesOffset = 0;
             $PendingArticlesLimit = 5;
             $PendingArticlesWheres = array('a.Status' => ArticleModel::STATUS_PENDING);
@@ -113,8 +113,8 @@ class ComposeController extends Gdn_Controller {
             ArticleModel::STATUS_PENDING => T('Pending Review'),
         );
 
-        if (Gdn::Session()->CheckPermission('Articles.Articles.Edit')
-            || ($Article && ((int)$Article->Status == 2))
+        if (Gdn::Session()->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')
+            || ($Article && ($Article->Status == ArticleModel::STATUS_PUBLISHED))
         ) {
             $StatusOptions[ArticleModel::STATUS_PUBLISHED] = T('Published');
         }
@@ -134,7 +134,7 @@ class ComposeController extends Gdn_Controller {
         // Set allowed permissions.
         // The user only needs one of the specified permissions.
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
-        $this->Permission($PermissionsAllowed, false);
+        $this->Permission($PermissionsAllowed, false, 'ArticleCategory', 'any');
 
         $this->SetData('Breadcrumbs', array(
             array('Name' => T('Compose'), 'Url' => '/compose'),
@@ -176,7 +176,7 @@ class ComposeController extends Gdn_Controller {
         // If the user is not an article editor, then only show their own articles.
         $Session = Gdn::Session();
         $Wheres = false;
-        if (!$Session->CheckPermission('Articles.Articles.Edit')) {
+        if (!$Session->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')) {
             $Wheres = array('a.InsertUserID' => $Session->UserID);
         }
 
@@ -200,7 +200,7 @@ class ComposeController extends Gdn_Controller {
             $this->Title(T('Add Article'));
 
             // Set allowed permission.
-            $this->Permission('Articles.Articles.Add');
+            $this->Permission('Articles.Articles.Add', true, 'ArticleCategory', 'any');
         }
 
         $this->SetData('Breadcrumbs', array(
@@ -304,9 +304,14 @@ class ComposeController extends Gdn_Controller {
             if (!$Author) {
                 $Session = Gdn::Session();
 
-                if (!$Session->CheckPermission('Articles.Articles.Edit') && ($FormValues['AuthorUserName'] == "")) {
+                $Category = ArticleCategoryModel::Categories($FormValues['ArticleCategoryID']);
+                $PermissionArticleCategoryID = val('PermissionArticleCategoryID', $Category, 'any');
+                if (!$Session->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', $PermissionArticleCategoryID)
+                        && ($FormValues['AuthorUserName'] == "")) {
+                    // Set author to current user if current user does not have Edit permission.
                     $Author = $Session->User;
                 } else {
+                    // Show friendly error messages for author field if user has Edit permission.
                     if ($FormValues['AuthorUserName'] == "") {
                         $this->Form->AddError('Author is required.', 'AuthorUserName');
                     } else {
@@ -422,9 +427,6 @@ class ComposeController extends Gdn_Controller {
     public function EditArticle($ArticleID = false) {
         $this->Title(T('Edit Article'));
 
-        // Set allowed permission.
-        $this->Permission('Articles.Articles.Edit');
-
         // Get article.
         if (is_numeric($ArticleID)) {
             $Article = $this->ArticleModel->GetByID($ArticleID);
@@ -434,6 +436,9 @@ class ComposeController extends Gdn_Controller {
         if (!$Article) {
             throw NotFoundException('Article');
         }
+
+        // Set allowed permission.
+        $this->Permission('Articles.Articles.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
 
         $this->SetData('Article', $Article, true);
 
@@ -458,12 +463,6 @@ class ComposeController extends Gdn_Controller {
             throw NotFoundException('Page');
         }
 
-        // Check permission.
-        $Session = Gdn::Session();
-        if (!$Session->CheckPermission('Articles.Articles.Add')) {
-            throw PermissionException('Articles.Articles.Add');
-        }
-
         // Handle the file data.
         $this->DeliveryMethod(DELIVERY_METHOD_JSON);
         $this->DeliveryType(DELIVERY_TYPE_VIEW);
@@ -473,6 +472,21 @@ class ComposeController extends Gdn_Controller {
         $ArticleID = $_POST['ArticleID'];
         if (!is_numeric($ArticleID) || ($ArticleID <= 0)) {
             $ArticleID = null;
+        }
+
+        // Check permission.
+        $Session = Gdn::Session();
+        $PermissionArticleCategoryID = 'any';
+        if (is_numeric($ArticleID)) {
+            $ArticleModel = new ArticleModel();
+
+            $Article = $ArticleModel->GetByID($ArticleID);
+            if ($Article) {
+                $PermissionArticleCategoryID = $Article->PermissionArticleCategoryID;
+            }
+        }
+        if (!$Session->CheckPermission('Articles.Articles.Add', true, 'ArticleCategory', $PermissionArticleCategoryID)) {
+            throw PermissionException('Articles.Articles.Add');
         }
 
         /*
@@ -573,15 +587,24 @@ class ComposeController extends Gdn_Controller {
             throw NotFoundException('Page');
         }
 
-        // Check permission.
-        $Session = Gdn::Session();
-        if (!$Session->CheckPermission('Articles.Articles.Add', true, 'ArticleCategory', 'any')) {
-            throw PermissionException('Articles.Articles.Add');
-        }
-
         $Media = $this->ArticleMediaModel->GetByID($ArticleMediaID);
         if (!$Media) {
             throw NotFoundException('Article media');
+        }
+
+        // Check permission.
+        $Session = Gdn::Session();
+        $PermissionArticleCategoryID = 'any';
+        if (is_numeric($Media->ArticleID)) {
+            $ArticleModel = new ArticleModel();
+
+            $Article = $ArticleModel->GetByID($Media->ArticleID);
+            if ($Article) {
+                $PermissionArticleCategoryID = $Article->PermissionArticleCategoryID;
+            }
+        }
+        if (!$Session->CheckPermission('Articles.Articles.Add', true, 'ArticleCategory', $PermissionArticleCategoryID)) {
+            throw PermissionException('Articles.Articles.Add');
         }
 
         $this->_DeliveryMethod = DELIVERY_METHOD_JSON;
@@ -613,18 +636,18 @@ class ComposeController extends Gdn_Controller {
         // Set required permission.
         $Session = Gdn::Session();
 
+        // Get the article.
+        $Article = $this->ArticleModel->GetByID($ArticleID);
+
         // Determine if this is a guest commenting
         $GuestCommenting = false;
         if (!$Session->IsValid()) { // Not logged in, so this could be a guest
             if (C('Articles.Comments.AllowGuests', false)) { // If guest commenting is enabled
                 $GuestCommenting = true;
             } else { // Require permission to add comment
-                $this->Permission('Articles.Comments.Add');
+                $this->Permission('Articles.Comments.Add', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
             }
         }
-
-        // Get the article.
-        $Article = $this->ArticleModel->GetByID($ArticleID);
 
         // Determine whether we are editing.
         $ArticleCommentID = isset($this->Comment) && property_exists($this->Comment, 'ArticleCommentID') ? $this->Comment->ArticleCommentID : false;
@@ -632,7 +655,8 @@ class ComposeController extends Gdn_Controller {
         $Editing = ($ArticleCommentID > 0);
 
         // If closed, cancel and go to article.
-        if ($Article && $Article->Closed == 1 && !$Editing && !$Session->CheckPermission('Articles.Articles.Close')) {
+        if ($Article && $Article->Closed == 1 && !$Editing
+                && !$Session->CheckPermission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
             Redirect(ArticleUrl($Article));
         }
 
@@ -645,24 +669,24 @@ class ComposeController extends Gdn_Controller {
             if ($Article && $Editing) {
                 // Permission to edit
                 if ($this->Comment->InsertUserID != $Session->UserID) {
-                    $this->Permission('Articles.Comments.Edit');
+                    $this->Permission('Articles.Comments.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
                 }
 
                 // Make sure that content can (still) be edited.
                 $EditContentTimeout = C('Garden.EditContentTimeout', -1);
                 $CanEdit = $EditContentTimeout == -1 || strtotime($this->Comment->DateInserted) + $EditContentTimeout > time();
                 if (!$CanEdit) {
-                    $this->Permission('Articles.Comments.Edit');
+                    $this->Permission('Articles.Comments.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
                 }
 
                 // Make sure only moderators can edit closed things
                 if ($Article->Closed) {
-                    $this->Permission('Articles.Comments.Edit');
+                    $this->Permission('Articles.Comments.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
                 }
             } else {
                 if ($Article) {
                     // Permission to add
-                    $this->Permission('Articles.Comments.Add');
+                    $this->Permission('Articles.Comments.Add', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
                 }
             }
         }

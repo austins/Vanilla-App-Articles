@@ -74,7 +74,7 @@ class ArticlesController extends Gdn_Controller {
         // TODO: Set title appropriately if not first page of index.
 
         // Set required permission.
-        $this->Permission('Articles.Articles.View');
+        $this->Permission('Articles.Articles.View', true, 'ArticleCategory', 'any');
 
         // Get total article count.
         $CountArticles = $this->ArticleModel->GetCount();
@@ -122,7 +122,7 @@ class ArticlesController extends Gdn_Controller {
      */
     public function Category($UrlCode = '', $Page = false) {
         // Set required permission.
-        $this->Permission('Articles.Articles.View');
+        $this->Permission('Articles.Articles.View', true, 'ArticleCategory', 'any');
 
         list($Offset, $Limit) = OffsetLimit($Page, C('Articles.Articles.PerPage', 12));
         $Page = PageNumber($Offset, $Limit);
@@ -168,7 +168,7 @@ class ArticlesController extends Gdn_Controller {
     }
 
     public function Categories() {
-        $this->Permission('Articles.Articles.View'); // Set required permission.
+        $this->Permission('Articles.Articles.View', true, 'ArticleCategory', 'any'); // Set required permission.
 
         $this->Title(T('Article Categories'));
 

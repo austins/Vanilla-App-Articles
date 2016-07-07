@@ -24,11 +24,80 @@ class ArticleModel extends Gdn_Model {
     const STATUS_PENDING = 'Pending';
     const STATUS_PUBLISHED = 'Published';
 
+    /** @var array */
+    protected static $_ArticleCategoryPermissions = null;
+
     /**
      * Class constructor. Defines the related database table name.
      */
     public function __construct() {
         parent::__construct('Article');
+    }
+
+    /**
+     * Determines whether or not the current user can edit an article.
+     *
+     * @param object|array $Article The article to examine.
+     *
+     * @return bool Returns true if the user can edit or false otherwise.
+     */
+    public static function CanEdit($Article) {
+        if (!($PermissionArticleCategoryID = val('PermissionArticleCategoryID', $Article))) {
+            $ArticleCategoryModel = new ArticleCategoryModel();
+            $ArticleCategory = $ArticleCategoryModel->GetByID(val('ArticleCategoryID', $Article));
+            $PermissionArticleCategoryID = val('PermissionArticleCategoryID', $ArticleCategory);
+        }
+
+        // Users with category edit permission can edit.
+        if (Gdn::Session()->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', $PermissionArticleCategoryID)) {
+            return true;
+        }
+
+        // Authors can edit article even if they don't have edit permission.
+        if (Gdn::Session()->UserID == val('InsertUserID', $Article)) {
+            return false;
+        }
+
+        return false;
+    }
+
+    /**
+     * Identify current user's ArticleCategory permissions and set as local array.
+     *
+     * @param bool $Escape Prepends category IDs with @
+     * @return array Protected local _CategoryPermissions
+     */
+    public static function ArticleCategoryPermissions($Escape = false) {
+        if (is_null(self::$_ArticleCategoryPermissions)) {
+            $Session = Gdn::Session();
+
+            if ((is_object($Session->User) && $Session->User->Admin)) {
+                self::$_ArticleCategoryPermissions = true;
+            } else {
+                $Categories = ArticleCategoryModel::Categories();
+                $IDs = array();
+
+                foreach ($Categories as $ID => $Category) {
+                    if ($Category['PermsArticlesView']) {
+                        $IDs[] = $ID;
+                    }
+                }
+
+                // Check to see if the user has permission to all categories. This is for speed.
+                $CategoryCount = count($Categories);
+
+                if (count($IDs) === $CategoryCount) {
+                    self::$_ArticleCategoryPermissions = true;
+                } else {
+                    self::$_ArticleCategoryPermissions = array();
+                    foreach ($IDs as $ID) {
+                        self::$_ArticleCategoryPermissions[] = ($Escape ? '@' : '') . $ID;
+                    }
+                }
+            }
+        }
+
+        return self::$_ArticleCategoryPermissions;
     }
 
     /**
@@ -117,6 +186,11 @@ class ArticleModel extends Gdn_Model {
      */
     public function Get($Offset = 0, $Limit = false, $Wheres = null,
                         $OrderByField = 'a.DateInserted', $OrderByDirection = 'desc') {
+        $Perms = self::ArticleCategoryPermissions();
+        if (is_array($Perms) && empty($Perms)) {
+            return new Gdn_DataSet(array());
+        }
+
         // Set up selection query.
         $this->SQL->Select('a.*')->From('Article a');
 
@@ -148,12 +222,30 @@ class ArticleModel extends Gdn_Model {
         // Set order of data.
         $this->SQL->OrderBy($OrderByField, $OrderByDirection);
 
-        $this->JoinArticleCategoryInfo($ArticleCategoryID);
-
         // Fetch data.
         $Articles = $this->SQL->Get();
+        $Result =& $Articles->result();
+
+        // Now that we have the articles, we can filter out the ones we don't have permission to.
+        if ($Perms !== true) {
+            $Remove = array();
+
+            foreach ($Articles->Result() as $Index => $Row) {
+                if (!in_array($Row->ArticleCategoryID, $Perms)) {
+                    $Remove[] = $Index;
+                }
+            }
+
+            if (count($Remove) > 0) {
+                foreach ($Remove as $Index) {
+                    unset($Result[$Index]);
+                }
+                $Result = array_values($Result);
+            }
+        }
 
         Gdn::UserModel()->JoinUsers($Articles, array('InsertUserID', 'UpdateUserID'));
+        ArticleCategoryModel::JoinCategories($Articles);
 
         // Prepare and fire event.
         $this->EventArguments['Data'] = $Articles;
@@ -174,12 +266,14 @@ class ArticleModel extends Gdn_Model {
             ->From('Article a')
             ->Where('a.ArticleID', $ArticleID);
 
-        $this->JoinArticleCategoryInfo();
-
         // Fetch data.
         $Article = $this->SQL->Get()->FirstRow();
 
+        // Join in the users and category.
+        $Article = array($Article);
         Gdn::UserModel()->JoinUsers($Article, array('InsertUserID', 'UpdateUserID'));
+        ArticleCategoryModel::JoinCategories($Article);
+        $Article = $Article[0];
 
         return $Article;
     }
@@ -196,12 +290,14 @@ class ArticleModel extends Gdn_Model {
             ->From('Article a')
             ->Where('a.UrlCode', $ArticleUrlCode);
 
-        $this->JoinArticleCategoryInfo();
-
         // Fetch data.
         $Article = $this->SQL->Get()->FirstRow();
 
+        // Join in the users and category.
+        $Article = array($Article);
         Gdn::UserModel()->JoinUsers($Article, array('InsertUserID', 'UpdateUserID'));
+        ArticleCategoryModel::JoinCategories($Article);
+        $Article = $Article[0];
 
         return $Article;
     }
@@ -225,16 +321,6 @@ class ArticleModel extends Gdn_Model {
         $this->LastArticleCount = $Articles->NumRows();
 
         return $Articles;
-    }
-
-    private function JoinArticleCategoryInfo($ArticleCategoryID = false) {
-        $this->SQL->Select('ac.Name', '', 'ArticleCategoryName')
-            ->Select('ac.UrlCode', '', 'ArticleCategoryUrlCode');
-
-        if (is_numeric($ArticleCategoryID))
-            $this->SQL->LeftJoin('ArticleCategory ac', 'ac.ArticleCategoryID = ' . $ArticleCategoryID);
-        else
-            $this->SQL->LeftJoin('ArticleCategory ac', 'a.ArticleCategoryID = ac.ArticleCategoryID');
     }
 
     /**

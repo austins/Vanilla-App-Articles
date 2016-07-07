@@ -53,7 +53,7 @@ class ArticleCategoriesModule extends Gdn_Module {
         $Controller->EventArguments['ArticleCategoriesModule'] = &$this;
         $Controller->FireEvent('BeforeArticleCategoriesModule');
 
-        if (!$Session->CheckPermission('Articles.Articles.View'))
+        if (!$Session->CheckPermission('Articles.Articles.View', true, 'ArticleCategory', 'any'))
             return '';
 
         return parent::ToString();

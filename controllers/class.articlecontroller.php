@@ -78,16 +78,17 @@ class ArticleController extends Gdn_Controller {
             throw NotFoundException('Article');
 
         // Set required permission.
-        $UserModel = new UserModel();
-        if ($this->Article->Status != ArticleModel::STATUS_PUBLISHED)
-            if (($this->Article->InsertUserID == Gdn::Session()->UserID)
-                && !$UserModel->CheckPermission($this->Article->InsertUserID, 'Articles.Articles.Edit')
-            )
-                $this->Permission('Articles.Articles.View');
-            else
-                $this->Permission('Articles.Articles.Edit');
-        else
-            $this->Permission('Articles.Articles.View');
+        // If not published...
+        if ($this->Article->Status != ArticleModel::STATUS_PUBLISHED) {
+            // If author, only require View permission.
+            if ($this->Article->InsertUserID == Gdn::Session()->UserID) {
+                $this->Permission('Articles.Articles.View', true, 'ArticleCategory', $this->Article->PermissionArticleCategoryID);
+            } else {
+                $this->Permission('Articles.Articles.Edit', true, 'ArticleCategory', $this->Article->PermissionArticleCategoryID);
+            }
+        } else {
+            $this->Permission('Articles.Articles.View', true, 'ArticleCategory', $this->Article->PermissionArticleCategoryID);
+        }
 
         // Get the category.
         $this->ArticleCategory = $this->ArticleCategoryModel->GetByID($this->Article->ArticleCategoryID);
@@ -245,13 +246,12 @@ class ArticleController extends Gdn_Controller {
             throw PermissionException('Javascript');
         }
 
-        $this->Permission('Articles.Articles.Close');
-
-        $Article = $this->ArticleModel->GetID($ArticleID);
-
+        $Article = $this->ArticleModel->GetByID($ArticleID);
         if (!$Article) {
             throw NotFoundException('Article');
         }
+
+        $this->Permission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
 
         // Close the article.
         $this->ArticleModel->SetField($ArticleID, 'Closed', $Close);
@@ -289,11 +289,12 @@ class ArticleController extends Gdn_Controller {
      * @throws NotFoundException if article not found
      */
     public function Delete($ArticleID, $Target = '') {
-        $this->Permission('Articles.Articles.Delete');
-
-        $Article = $this->ArticleModel->GetID($ArticleID);
-        if (!$Article)
+        $Article = $this->ArticleModel->GetByID($ArticleID);
+        if (!$Article) {
             throw NotFoundException('Article');
+        }
+
+        $this->Permission('Articles.Articles.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
 
         if ($this->Form->AuthenticatedPostBack()) {
             if (!$this->ArticleModel->Delete($ArticleID))
@@ -344,13 +345,13 @@ class ArticleController extends Gdn_Controller {
 
                 // Make sure comment is this user's or they have Delete permission
                 if ($Comment->InsertUserID != $Session->UserID || !C('Articles.Comments.AllowSelfDelete'))
-                    $this->Permission('Articles.Comments.Delete');
+                    $this->Permission('Articles.Comments.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
 
                 // Make sure that content can (still) be edited
                 $EditContentTimeout = C('Garden.EditContentTimeout', -1);
                 $CanEdit = $EditContentTimeout == -1 || strtotime($Comment->DateInserted) + $EditContentTimeout > time();
                 if (!$CanEdit)
-                    $this->Permission('Articles.Comments.Delete');
+                    $this->Permission('Articles.Comments.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
 
                 // Delete the comment
                 if (!$this->ArticleCommentModel->Delete($ArticleCommentID)) {
