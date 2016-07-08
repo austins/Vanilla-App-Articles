@@ -28,12 +28,27 @@ class ArticlesHooks extends Gdn_Plugin {
      */
     public function Base_Render_Before($Sender) {
         if ($Sender->Menu) {
-            if (C('Articles.ShowArticlesMenuLink', true))
-                $Sender->Menu->AddLink('Articles', T('Articles'), '/articles', 'Articles.Articles.View');
+            $isMobileThemeActive = Gdn::ThemeManager()->CurrentTheme() === 'mobile';
+            $isArticlesDefaultController = Gdn::Router()->GetDestination('DefaultController') === 'articles';
 
-            if (C('Articles.ShowCategoriesMenuLink', false))
+            // Show Articles menu link.
+            // If the mobile theme is enabled, it will only show on the mobile theme's
+            // menu if articles isn't set as the DefaultController route.
+            if (C('Articles.ShowArticlesMenuLink', true)
+                    && (!$isMobileThemeActive || ($isMobileThemeActive && !$isArticlesDefaultController))) {
+                $Sender->Menu->AddLink('Articles', T('Articles'), '/articles', 'Articles.Articles.View');
+            }
+
+            // Show Discussions menu link on mobile theme if articles is set as the DefaultController route
+            // and if Vanilla is enabled because the mobile theme has a Home link.
+            if ($isMobileThemeActive && $isArticlesDefaultController && Gdn::ApplicationManager()->IsEnabled('Vanilla')) {
+                $Sender->Menu->AddLink('Discussions', T('Discussions'), '/discussions', 'Vanilla.Discussions.View');
+            }
+
+            if (C('Articles.ShowCategoriesMenuLink', false)) {
                 $Sender->Menu->AddLink('ArticleCategories', T('Article Categories'), '/articles/categories',
                     'Articles.Articles.View');
+            }
         }
     }
 
@@ -551,7 +566,7 @@ class ArticlesHooks extends Gdn_Plugin {
 
         if (isset($UserMeta['AuthorDisplayName']))
             $Sender->Form->SetValue('Articles.AuthorDisplayName', $UserMeta['AuthorDisplayName']);
-        
+
         if (isset($UserMeta['AuthorBio']))
             $Sender->Form->SetValue('Articles.AuthorBio', $UserMeta['AuthorBio']);
     }
