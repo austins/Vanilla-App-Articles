@@ -49,7 +49,12 @@
 }
 
 #UploadedImages .UploadedImageWrap,
-#UploadedThumbnail .UploadedImageWrap{
+#UploadedThumbnail .UploadedImageWrap {
     display: inline-block;
     margin-right: 20px;
+}
+
+.UploadedImage img {
+    max-width: 100%;
+    height: auto;
 }

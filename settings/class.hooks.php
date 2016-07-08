@@ -461,6 +461,12 @@ class ArticlesHooks extends Gdn_Plugin {
 
         // Render the ProfileController
         $Sender->AddCssFile('articles.css', 'articles');
+
+        // Add CSS file for mobile theme if active.
+        if (Gdn::ThemeManager()->CurrentTheme() === 'mobile') {
+            $Sender->AddCssFile('articles.mobile.css', 'articles');
+        }
+
         $Sender->Render();
     }
 

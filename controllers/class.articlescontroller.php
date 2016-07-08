@@ -50,6 +50,11 @@ class ArticlesController extends Gdn_Controller {
         $this->AddCssFile('style.css');
         $this->AddCssFile('articles.css');
 
+        // Add CSS file for mobile theme if active.
+        if (Gdn::ThemeManager()->CurrentTheme() === 'mobile') {
+            $this->AddCssFile('articles.mobile.css');
+        }
+
         // Add modules.
         $this->AddModule('GuestModule');
         $this->AddModule('SignedInModule');

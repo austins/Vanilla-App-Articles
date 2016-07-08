@@ -1,0 +1,35 @@
+/* Phones horizontal (wide) responsive */
+@media only screen and (max-width: 770px) {
+    #SimilarArticles li {
+        width: auto !important;
+        display: block !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+        margin-right: 0 !important;
+    }
+}
+
+/* Phones vertical (tall) responsive */
+@media only screen and (max-width: 580px) {
+    .ArticleThumbnail {
+        float: none !important;
+        margin-right: 0 !important;
+    }
+
+    #articles_articles_index .ArticleBody p,
+    #articles_articles_category .ArticleBody p,
+    #dashboard_profile_articles .ArticleBody p {
+        text-align: justify;
+    }
+
+    .ArticleThumbnail,
+    .ArticleInner > header {
+        text-align: center;
+    }
+
+    .ArticleBody .AlignLeft,
+    .ArticleBody .AlignRight {
+        float: none;
+        margin: 0 auto 15px;
+        display: block;
+    }
+}

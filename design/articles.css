@@ -140,3 +140,18 @@ body.Articles.category .Article .Options > .ToggleFlyout.Open,
     padding: 2px 4px;
     margin-right: 16px;
 }
+
+.ArticleBody .AlignLeft {
+    float: left;
+    margin: 0 10px 10px 0;
+}
+
+.ArticleBody .AlignCenter {
+    margin: 0 auto;
+    display: block;
+}
+
+.ArticleBody .AlignRight {
+    float: right;
+    margin: 0 0 10px 10px;
+}
