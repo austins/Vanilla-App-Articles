@@ -23,3 +23,7 @@ The word "article" stands for content produced by both bloggers and journalists,
 This add-on is an application, not a plugin.
 
 To install it, extract this project into a folder called `articles` within your Vanilla installation's `/applications` folder.
+
+## Upgrading
+
+If upgrading to Articles 1.2.0 from any earlier version, you must reconfigure your role permissions for this application since global permissions have been replaced with category-based permissions.
