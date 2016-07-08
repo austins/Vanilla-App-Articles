@@ -30,7 +30,7 @@ class ArticleCategoryModel extends Gdn_Model {
     const MASTER_VOTE_KEY = 'ArticleCategories.Rebuild.Vote';
 
     /** @var array Merged ArticleCategory data */
-    public static $ArticleCategories = null;
+    public static $Categories = null;
 
     /** @var bool Whether or not to explicitly shard the categories cache. */
     public static $ShardCache = false;
@@ -51,7 +51,7 @@ class ArticleCategoryModel extends Gdn_Model {
      *     returned).
      */
     public static function Categories($ID = false) {
-        if (self::$ArticleCategories == null) {
+        if (self::$Categories == null) {
             // Try and get the ArticleCategories from the cache.
             $CategoriesCache = Gdn::Cache()->Get(self::CACHE_KEY);
             $Rebuild = true;
@@ -64,14 +64,14 @@ class ArticleCategoryModel extends Gdn_Model {
                 if (!is_null($RebuildAfter) && time() < $RebuildAfter) {
                     $Rebuild = false;
                 }
-                self::$ArticleCategories = val('articlecategories', $CategoriesCache, null);
+                self::$Categories = val('categories', $CategoriesCache, null);
             }
             unset($CategoriesCache);
 
             if ($Rebuild) {
                 // Try to get a rebuild lock
                 $HaveRebuildLock = self::RebuildLock();
-                if ($HaveRebuildLock || !self::$ArticleCategories) {
+                if ($HaveRebuildLock || !self::$Categories) {
                     $Sql = Gdn::Sql();
                     $Sql = clone $Sql;
                     $Sql->Reset();
@@ -81,8 +81,8 @@ class ArticleCategoryModel extends Gdn_Model {
                         ->Where('ac.ArticleCategoryID <>', '-1')
                         ->OrderBy('ac.Name', 'asc');
 
-                    self::$ArticleCategories = array_merge(array(), $Sql->get()->resultArray());
-                    self::$ArticleCategories = Gdn_DataSet::Index(self::$ArticleCategories, 'ArticleCategoryID');
+                    self::$Categories = array_merge(array(), $Sql->get()->resultArray());
+                    self::$Categories = Gdn_DataSet::Index(self::$Categories, 'ArticleCategoryID');
                     self::BuildCache();
 
                     // Release lock
@@ -92,8 +92,8 @@ class ArticleCategoryModel extends Gdn_Model {
                 }
             }
 
-            if (self::$ArticleCategories) {
-                self::JoinUserData(self::$ArticleCategories);
+            if (self::$Categories) {
+                self::JoinUserData(self::$Categories);
             } else {
                 return null;
             }
@@ -102,7 +102,7 @@ class ArticleCategoryModel extends Gdn_Model {
         if ($ID !== false) {
             if (!is_numeric($ID) && $ID) {
                 $Code = $ID;
-                foreach (self::$ArticleCategories as $Category) {
+                foreach (self::$Categories as $Category) {
                     if (strcasecmp($Category['UrlCode'], $Code) === 0) {
                         $ID = $Category['ArticleCategoryID'];
                         break;
@@ -110,15 +110,15 @@ class ArticleCategoryModel extends Gdn_Model {
                 }
             }
 
-            if (isset(self::$ArticleCategories[$ID])) {
-                $Result = self::$ArticleCategories[$ID];
+            if (isset(self::$Categories[$ID])) {
+                $Result = self::$Categories[$ID];
 
                 return $Result;
             } else {
                 return null;
             }
         } else {
-            $Result = self::$ArticleCategories;
+            $Result = self::$Categories;
 
             return $Result;
         }
@@ -213,11 +213,54 @@ class ArticleCategoryModel extends Gdn_Model {
         $expiry = self::CACHE_TTL + self::CACHE_GRACE;
         Gdn::Cache()->Store(self::CACHE_KEY, array(
             'expiry' => time() + $expiry,
-            'articlecategories' => self::$ArticleCategories
+            'categories' => self::$Categories
         ), array(
             Gdn_Cache::FEATURE_EXPIRY => $expiry,
             Gdn_Cache::FEATURE_SHARD => self::$ShardCache
         ));
+    }
+
+    public static function ClearCache() {
+        Gdn::Cache()->Remove(self::CACHE_KEY);
+    }
+
+    /**
+     * Grab and update the category cache
+     *
+     * @param int $ID
+     * @param array $Data
+     */
+    public static function SetCache($ID = false, $Data = false) {
+        $Categories = Gdn::Cache()->Get(self::CACHE_KEY);
+        self::$Categories = null;
+
+        if (!$Categories) {
+            return;
+        }
+
+        // Extract actual category list, remove key if malformed
+        if (!$ID || !is_array($Categories) || !array_key_exists('categories', $Categories)) {
+            Gdn::Cache()->Remove(self::CACHE_KEY);
+            return;
+        }
+        $Categories = $Categories['categories'];
+
+        // Check for category in list, otherwise remove key if not found
+        if (!array_key_exists($ID, $Categories)) {
+            Gdn::Cache()->Remove(self::CACHE_KEY);
+            return;
+        }
+
+        $Category = $Categories[$ID];
+        $Category = array_merge($Category, $Data);
+        $Categories[$ID] = $Category;
+
+        // Update memcache entry
+        self::$Categories = $Categories;
+        unset($Categories);
+        self::BuildCache();
+
+        self::JoinUserData(self::$Categories);
     }
 
     /**
@@ -252,10 +295,10 @@ class ArticleCategoryModel extends Gdn_Model {
                     ->GroupBy('a.ArticleCategoryID')
                     ->Get()->ResultArray();
 
-                // Now we have to grab the discussions associated with these comments.
+                // Now we have to grab the articles associated with these comments.
                 $ArticleCommentIDs = ConsolidateArrayValuesByKey($Data, 'LastArticleCommentID');
 
-                // Grab the discussions for the comments.
+                // Grab the articles for the comments.
                 $this->SQL
                     ->Select('ac.ArticleCommentID, ac.ArticleID')
                     ->From('ArticleComment ac')
@@ -324,6 +367,8 @@ class ArticleCategoryModel extends Gdn_Model {
 
                 break;
         }
+
+        self::ClearCache();
 
         return $Result;
     }
@@ -482,6 +527,8 @@ class ArticleCategoryModel extends Gdn_Model {
                 $OldCategory = $this->getID($ArticleCategoryID, DATASET_TYPE_ARRAY);
 
                 $this->update($Fields, array('ArticleCategoryID' => $ArticleCategoryID));
+
+                $this->SetCache($ArticleCategoryID, $Fields);
             } else {
                 $ArticleCategoryID = $this->insert($Fields);
 
@@ -519,15 +566,46 @@ class ArticleCategoryModel extends Gdn_Model {
                     $this->SQL->put('ArticleCategory', array('PermissionArticleCategoryID' => -1),
                         array('ArticleCategoryID' => $ArticleCategoryID));
                 }
+
+                self::ClearCache();
             }
 
             // Force the user permissions to refresh.
-            Gdn::userModel()->ClearPermissions();
+            Gdn::UserModel()->ClearPermissions();
         } else {
             $ArticleCategoryID = false;
         }
 
         return $ArticleCategoryID;
+    }
+
+    /**
+     * Update a row in the database.
+     *
+     * @param int $RowID
+     * @param array|string $Property
+     * @param mixed $Value
+     */
+    public function SetField($RowID, $Property, $Value = false) {
+        parent::SetField($RowID, $Property, $Value);
+
+        // Set the cache.
+        self::SetCache($RowID, $Property);
+    }
+
+    /**
+     * Update fields of rows in the database.
+     *
+     * @param array $Fields
+     * @param array $Where
+     * @param array $Limit
+     * @return Gdn_Dataset
+     */
+    public function Update($Fields, $Where = false, $Limit = false) {
+        parent::Update($Fields, $Where, $Limit);
+
+        // Clear the cache.
+        self::ClearCache();
     }
 
     /**
