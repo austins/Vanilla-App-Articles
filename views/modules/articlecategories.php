@@ -6,8 +6,8 @@ $RequestMethod = strtolower($this->_Sender->RequestMethod);
 $OnArticlesController = ($ControllerName === 'articlescontroller');
 $OnAllCategoriesMethod = ($OnArticlesController && ($RequestMethod === 'categories'));
 
-$Categories = $this->Data->Result();
-$CurrentCategoryID = val('ArticleCategoryID', $this->_Sender->Data('ArticleCategory'), false);
+$Categories = $this->Data->result();
+$CurrentCategoryID = val('ArticleCategoryID', $this->_Sender->data('ArticleCategory'), false);
 ?>
 <div class="Box BoxArticleCategories">
     <h4><?php echo T('Article Categories'); ?></h4>
@@ -26,7 +26,7 @@ $CurrentCategoryID = val('ArticleCategoryID', $this->_Sender->Data('ArticleCateg
             foreach ($Categories as $Category) {
                 // Category must have at least one published article.
                 $ArticleWheres['a.ArticleCategoryID'] = $Category->ArticleCategoryID;
-                $Article = $ArticleModel->Get($ArticleOffset, $ArticleLimit, $ArticleWheres)->FirstRow();
+                $Article = $ArticleModel->get($ArticleOffset, $ArticleLimit, $ArticleWheres)->firstRow();
                 $PublishedArticleExists = isset($Article->ArticleID);
 
                 if (!$PublishedArticleExists)
@@ -35,7 +35,7 @@ $CurrentCategoryID = val('ArticleCategoryID', $this->_Sender->Data('ArticleCateg
                 // Output category link
                 $CategoryClass = ($CurrentCategoryID === $Category->ArticleCategoryID) ? array('class' => 'Active') :
                     '';
-                echo Wrap(Anchor($Category->Name, ArticleCategoryUrl($Category)), 'li', $CategoryClass);
+                echo Wrap(Anchor($Category->Name, articleCategoryUrl($Category)), 'li', $CategoryClass);
             }
             ?>
         </ul>

@@ -7,23 +7,23 @@
         <ul class="DataList">
             <?php
             // Render the recently published block.
-            $RecentlyPublished = $this->Data('RecentlyPublished')->Result();
+            $RecentlyPublished = $this->data('RecentlyPublished')->result();
 
             if (count($RecentlyPublished) == 0)
                 echo 'None.';
             else {
                 foreach ($RecentlyPublished as $Article) {
-                    $Author = Gdn::UserModel()->GetID($Article->InsertUserID);
+                    $Author = Gdn::userModel()->getID($Article->InsertUserID);
 
                     echo '<li class="Item RecentlyPublishedArticle">';
-                    echo Wrap(Anchor($Article->Name, ArticleUrl($Article)), 'div');
+                    echo Wrap(Anchor($Article->Name, articleUrl($Article)), 'div');
 
                     echo '<div class="Meta Meta-Article">';
                     echo '<span class="MItem ArticleCategory">' . Anchor($Article->ArticleCategoryName,
-                            ArticleCategoryUrl($Article->ArticleCategoryUrlCode)) . '</span>';
-                    echo '<span class="MItem ArticleDate">' . Gdn_Format::Date($Article->DateInserted,
+                            articleCategoryUrl($Article->ArticleCategoryUrlCode)) . '</span>';
+                    echo '<span class="MItem ArticleDate">' . Gdn_Format::date($Article->DateInserted,
                             '%e %B %Y - %l:%M %p') . '</span>';
-                    echo '<span class="MItem ArticleAuthor">' . ArticleAuthorAnchor($Author) . '</span>';
+                    echo '<span class="MItem ArticleAuthor">' . articleAuthorAnchor($Author) . '</span>';
                     echo '</div>';
                     echo '</li>';
                 }
@@ -37,7 +37,7 @@
         <ul class="DataList">
             <?php
             // Render the recent comments block.
-            $RecentComments = $this->Data('RecentComments')->Result();
+            $RecentComments = $this->data('RecentComments')->result();
 
             if (count($RecentComments) == 0)
                 echo 'None.';
@@ -47,12 +47,12 @@
 
                     $UserName = $Comment->GuestName;
                     if ($Comment->InsertUserID > 0) {
-                        $User = Gdn::UserModel()->GetID($Comment->InsertUserID);
+                        $User = Gdn::userModel()->getID($Comment->InsertUserID);
                         $UserName = UserAnchor($User);
                     }
                     ?>
                     <li id="<?php echo 'Comment_' . $Comment->ArticleCommentID; ?>" class="Item">
-                        <?php $this->FireEvent('BeforeItemContent'); ?>
+                        <?php $this->fireEvent('BeforeItemContent'); ?>
                         <div class="ItemContent">
                             <div class="Message"><?php
                                 echo SliceString(Gdn_Format::Text(Gdn_Format::To($Comment->Body, $Comment->Format),
@@ -62,7 +62,7 @@
                     <span class="MItem"><?php echo T('Comment in', 'in') . ' '; ?>
                         <b><?php echo Anchor(Gdn_Format::Text($Comment->ArticleName), $Permalink); ?></b></span>
                                 <span class="MItem"><?php printf(T('Comment by %s'), $UserName); ?></span>
-                                <span class="MItem"><?php echo Anchor(Gdn_Format::Date($Comment->DateInserted),
+                                <span class="MItem"><?php echo Anchor(Gdn_Format::date($Comment->DateInserted),
                                         $Permalink); ?></span>
                             </div>
                         </div>
@@ -74,28 +74,28 @@
         </ul>
     </div>
 
-    <?php if (Gdn::Session()->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')): ?>
+    <?php if (Gdn::session()->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')): ?>
         <div class="PendingArticles">
             <h2>Pending Articles</h2>
             <ul class="DataList">
                 <?php
                 // Render the recently published block.
-                $PendingArticles = $this->Data('PendingArticles')->Result();
+                $PendingArticles = $this->data('PendingArticles')->result();
 
                 if (count($PendingArticles) == 0)
                     echo 'None.';
                 else {
                     foreach ($PendingArticles as $Article) {
-                        $Author = Gdn::UserModel()->GetID($Article->InsertUserID);
+                        $Author = Gdn::userModel()->getID($Article->InsertUserID);
 
                         echo '<li class="Item PendingArticle">';
-                        echo Wrap(Anchor($Article->Name, ArticleUrl($Article)), 'div',
+                        echo Wrap(Anchor($Article->Name, articleUrl($Article)), 'div',
                             array('class' => 'ArticleTitle'));
 
                         echo '<div class="ArticleMeta">';
-                        echo '<span class="ArticleDate">' . Gdn_Format::Date($Article->DateInserted,
+                        echo '<span class="ArticleDate">' . Gdn_Format::date($Article->DateInserted,
                                 '%e %B %Y - %l:%M %p') . '</span>';
-                        echo '<span class="ArticleAuthor">' . ArticleAuthorAnchor($Author) . '</span>';
+                        echo '<span class="ArticleAuthor">' . articleAuthorAnchor($Author) . '</span>';
                         echo '</div>';
                         echo '</li>';
                     }

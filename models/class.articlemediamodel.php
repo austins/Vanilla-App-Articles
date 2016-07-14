@@ -1,23 +1,13 @@
-<?php defined('APPLICATION') or exit();
+<?php
 /**
- * Copyright (C) 2015  Austin S.
+ * ArticleMedia model
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @copyright 2015-2016 Austin S.
+ * @license http://www.opensource.org/licenses/gpl-2.0.php GNU GPL v2
  */
 
 /**
- * Handles data for articles.
+ * Handles data for article media.
  */
 class ArticleMediaModel extends Gdn_Model {
     /**
@@ -30,56 +20,56 @@ class ArticleMediaModel extends Gdn_Model {
     /**
      * Get article media by ID.
      *
-     * @param int $ArticleMediaID
+     * @param int $articleMediaID
      * @return bool|object
      */
-    public function GetByID($ArticleMediaID) {
+    public function getByID($articleMediaID) {
         // Set up the query.
-        $this->SQL->Select('am.*')
-            ->From('ArticleMedia am')
-            ->Where('am.ArticleMediaID', $ArticleMediaID);
+        $this->SQL->select('am.*')
+            ->from('ArticleMedia am')
+            ->where('am.ArticleMediaID', $articleMediaID);
 
         // Fetch data.
-        $Media = $this->SQL->Get()->FirstRow();
+        $media = $this->SQL->get()->firstRow();
 
-        return $Media;
+        return $media;
     }
 
     /**
      * Get multiple article media by article ID.
      *
-     * @param int $ArticleID
+     * @param int $articleID
      * @return bool|object
      */
-    public function GetByArticleID($ArticleID) {
+    public function getByArticleID($articleID) {
         // Set up the query.
-        $this->SQL->Select('am.*')
-            ->From('ArticleMedia am')
-            ->Where('am.ArticleID', $ArticleID)
-            ->Where('am.IsThumbnail', 0);
+        $this->SQL->select('am.*')
+            ->from('ArticleMedia am')
+            ->where('am.ArticleID', $articleID)
+            ->where('am.IsThumbnail', 0);
 
         // Fetch data.
-        $Media = $this->SQL->Get();
+        $media = $this->SQL->get();
 
-        return $Media;
+        return $media;
     }
 
     /**
      * Get thumbnail by article ID.
      *
-     * @param int $ArticleID
+     * @param int $articleID
      * @return bool|object
      */
-    public function GetThumbnailByArticleID($ArticleID) {
+    public function getThumbnailByArticleID($articleID) {
         // Set up the query.
-        $this->SQL->Select('am.*')
-            ->From('ArticleMedia am')
-            ->Where('am.ArticleID', $ArticleID)
-            ->Where('am.IsThumbnail', 1);
+        $this->SQL->select('am.*')
+            ->from('ArticleMedia am')
+            ->where('am.ArticleID', $articleID)
+            ->where('am.IsThumbnail', 1);
 
         // Fetch data.
-        $Media = $this->SQL->Get()->FirstRow();
+        $media = $this->SQL->get()->firstRow();
 
-        return $Media;
+        return $media;
     }
 }

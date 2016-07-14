@@ -1,6 +1,6 @@
 <?php defined('APPLICATION') or exit();
 
-$Session = Gdn::Session();
+$session = Gdn::session();
 ?>
 <div class="MessageForm EditCommentForm FormTitleWrapper">
     <div class="Form-BodyWrap">

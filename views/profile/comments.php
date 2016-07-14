@@ -2,7 +2,7 @@
 
 echo '<h2 class="H">' . T('Article Comments') . '</h2>';
 
-$Comments = $this->Data('Comments');
+$Comments = $this->data('Comments');
 
 if (!$Comments || count($Comments) == 0) {
     echo Wrap(T("This user has not posted any article comments yet."), 'div', array('Class' => 'Empty'));
@@ -14,7 +14,7 @@ if (!$Comments || count($Comments) == 0) {
         $User = UserBuilder($Comment, 'Insert');
         ?>
         <li id="<?php echo 'Comment_' . $Comment->ArticleCommentID; ?>" class="Item">
-            <?php $this->FireEvent('BeforeItemContent'); ?>
+            <?php $this->fireEvent('BeforeItemContent'); ?>
             <div class="ItemContent">
                 <div class="Message"><?php
                     echo SliceString(Gdn_Format::Text(Gdn_Format::To($Comment->Body, $Comment->Format), false), 250);
@@ -23,7 +23,7 @@ if (!$Comments || count($Comments) == 0) {
                     <span class="MItem"><?php echo T('Comment in', 'in') . ' '; ?>
                         <b><?php echo Anchor(Gdn_Format::Text($Comment->ArticleName), $Permalink); ?></b></span>
                     <span class="MItem"><?php printf(T('Comment by %s'), UserAnchor($User)); ?></span>
-                    <span class="MItem"><?php echo Anchor(Gdn_Format::Date($Comment->DateInserted), $Permalink); ?></span>
+                    <span class="MItem"><?php echo Anchor(Gdn_Format::date($Comment->DateInserted), $Permalink); ?></span>
                 </div>
             </div>
         </li>

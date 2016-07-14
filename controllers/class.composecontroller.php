@@ -25,37 +25,49 @@ class ComposeController extends Gdn_Controller {
      */
     public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'ArticleCommentModel', 'ArticleMediaModel', 'Form');
 
+    /** @var ArticleModel */
+    public $ArticleModel;
+
+    /** @var ArticleCategoryModel */
+    public $ArticleCategoryModel;
+
+    /** @var ArticleCommentModel */
+    public $ArticleCommentModel;
+
+    /** @var ArticleMediaModel */
+    public $ArticleMediaModel;
+
     /**
      * Include JS, CSS, and modules used by all methods.
      * Extended by all other controllers in this application.
      * Always called by dispatcher before controller's requested method.
      */
-    public function Initialize() {
+    public function initialize() {
         // Set up head.
         $this->Head = new HeadModule($this);
 
         // Add JS files.
-        $this->AddJsFile('jquery.js');
-        $this->AddJsFile('jquery.livequery.js');
-        $this->AddJsFile('jquery.form.js');
-        $this->AddJsFile('jquery.popup.js');
-        $this->AddJsFile('jquery.gardenhandleajaxform.js');
-        $this->AddJsFile('jquery.autogrow.js');
-        $this->AddJsFile('jquery.autocomplete.js');
-        $this->AddJsFile('global.js');
-        $this->AddJsFile('articles.js');
-        $this->AddJsFile('articles.compose.js');
+        $this->addJsFile('jquery.js');
+        $this->addJsFile('jquery.livequery.js');
+        $this->addJsFile('jquery.form.js');
+        $this->addJsFile('jquery.popup.js');
+        $this->addJsFile('jquery.gardenhandleajaxform.js');
+        $this->addJsFile('jquery.autogrow.js');
+        $this->addJsFile('jquery.autocomplete.js');
+        $this->addJsFile('global.js');
+        $this->addJsFile('articles.js');
+        $this->addJsFile('articles.compose.js');
 
         // Add CSS files.
-        $this->AddCssFile('style.css');
-        $this->AddCssFile('articles.css');
-        $this->AddCssFile('articles.compose.css');
+        $this->addCssFile('style.css');
+        $this->addCssFile('articles.css');
+        $this->addCssFile('articles.compose.css');
 
         // Add modules.
-        $this->AddModule('GuestModule');
-        $this->AddModule('SignedInModule');
+        $this->addModule('GuestModule');
+        $this->addModule('SignedInModule');
 
-        parent::Initialize();
+        parent::initialize();
     }
 
     /**
@@ -63,42 +75,42 @@ class ComposeController extends Gdn_Controller {
      * Only visible to users that have permission.
      */
     public function Index() {
-        $this->Title(T('Articles Dashboard'));
+        $this->title(T('Articles Dashboard'));
 
         // Set allowed permissions.
         // The user only needs one of the specified permissions.
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
-        $this->Permission($PermissionsAllowed, false, 'ArticleCategory', 'any');
+        $this->permission($PermissionsAllowed, false, 'ArticleCategory', 'any');
 
-        $this->AddModule('ComposeFilterModule');
+        $this->addModule('ComposeFilterModule');
 
         // Get recently published articles.
         $RecentlyPublishedOffset = 0;
         $RecentlyPublishedLimit = 5;
         $RecentlyPublishedWheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED);
-        $RecentlyPublished = $this->ArticleModel->Get($RecentlyPublishedOffset, $RecentlyPublishedLimit,
+        $RecentlyPublished = $this->ArticleModel->get($RecentlyPublishedOffset, $RecentlyPublishedLimit,
             $RecentlyPublishedWheres);
-        $this->SetData('RecentlyPublished', $RecentlyPublished);
+        $this->setData('RecentlyPublished', $RecentlyPublished);
 
         // Get recent article comments.
         $RecentCommentsOffset = 0;
         $RecentCommentsLimit = 5;
-        $RecentComments = $this->ArticleCommentModel->Get($RecentCommentsOffset,
+        $RecentComments = $this->ArticleCommentModel->get($RecentCommentsOffset,
             $RecentCommentsLimit, null, 'desc');
-        $this->SetData('RecentComments', $RecentComments);
+        $this->setData('RecentComments', $RecentComments);
 
         // Get recent articles pending review.
-        if (Gdn::Session()->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')) {
+        if (Gdn::session()->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')) {
             $PendingArticlesOffset = 0;
             $PendingArticlesLimit = 5;
             $PendingArticlesWheres = array('a.Status' => ArticleModel::STATUS_PENDING);
-            $PendingArticles = $this->ArticleModel->Get($PendingArticlesOffset, $PendingArticlesLimit,
+            $PendingArticles = $this->ArticleModel->get($PendingArticlesOffset, $PendingArticlesLimit,
                 $PendingArticlesWheres);
-            $this->SetData('PendingArticles', $PendingArticles);
+            $this->setData('PendingArticles', $PendingArticles);
         }
 
         $this->View = 'index';
-        $this->Render();
+        $this->render();
     }
 
     /**
@@ -113,7 +125,7 @@ class ComposeController extends Gdn_Controller {
             ArticleModel::STATUS_PENDING => T('Pending Review'),
         );
 
-        if (Gdn::Session()->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')
+        if (Gdn::session()->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')
             || ($Article && ($Article->Status == ArticleModel::STATUS_PUBLISHED))
         ) {
             $StatusOptions[ArticleModel::STATUS_PUBLISHED] = T('Published');
@@ -129,63 +141,63 @@ class ComposeController extends Gdn_Controller {
      * @throws NotFoundException if no articles found
      */
     public function Posts($Page = false) {
-        $this->Title(T('Article Posts'));
+        $this->title(T('Article Posts'));
 
         // Set allowed permissions.
         // The user only needs one of the specified permissions.
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
-        $this->Permission($PermissionsAllowed, false, 'ArticleCategory', 'any');
+        $this->permission($PermissionsAllowed, false, 'ArticleCategory', 'any');
 
-        $this->SetData('Breadcrumbs', array(
+        $this->setData('Breadcrumbs', array(
             array('Name' => T('Compose'), 'Url' => '/compose'),
             array('Name' => T('Posts'), 'Url' => '/compose/posts')
         ));
 
-        $this->AddModule('ComposeFilterModule');
+        $this->addModule('ComposeFilterModule');
 
         // Get total article count.
-        $CountArticles = $this->ArticleModel->GetCount();
-        $this->SetData('CountArticles', $CountArticles);
+        $CountArticles = $this->ArticleModel->getCount();
+        $this->setData('CountArticles', $CountArticles);
 
         // Determine offset from $Page.
-        list($Offset, $Limit) = OffsetLimit($Page, C('Articles.Articles.PerPage', 12));
-        $Page = PageNumber($Offset, $Limit);
-        $this->CanonicalUrl(Url(ConcatSep('/', 'articles', PageNumber($Offset, $Limit, true, false)), true));
+        list($Offset, $Limit) = offsetLimit($Page, c('Articles.Articles.PerPage', 12));
+        $Page = pageNumber($Offset, $Limit);
+        $this->canonicalUrl(url(concatSep('/', 'articles', pageNumber($Offset, $Limit, true, false)), true));
 
         // Have a way to limit the number of pages on large databases
         // because requesting a super-high page can kill the db.
-        $MaxPages = C('Articles.Articles.MaxPages', false);
+        $MaxPages = c('Articles.Articles.MaxPages', false);
         if ($MaxPages && $Page > $MaxPages) {
-            throw NotFoundException();
+            throw notFoundException();
         }
 
         // Build a pager
         $PagerFactory = new Gdn_PagerFactory();
         $this->EventArguments['PagerType'] = 'Pager';
-        $this->FireEvent('BeforeBuildPager');
-        $this->Pager = $PagerFactory->GetPager($this->EventArguments['PagerType'], $this);
+        $this->fireEvent('BeforeBuildPager');
+        $this->Pager = $PagerFactory->getPager($this->EventArguments['PagerType'], $this);
         $this->Pager->ClientID = 'Pager';
-        $this->Pager->Configure($Offset, $Limit, $CountArticles, 'articles/%1$s');
-        if (!$this->Data('_PagerUrl')) {
-            $this->SetData('_PagerUrl', 'articles/{Page}');
+        $this->Pager->configure($Offset, $Limit, $CountArticles, 'articles/%1$s');
+        if (!$this->data('_PagerUrl')) {
+            $this->setData('_PagerUrl', 'articles/{Page}');
         }
-        $this->SetData('_Page', $Page);
-        $this->SetData('_Limit', $Limit);
-        $this->FireEvent('AfterBuildPager');
+        $this->setData('_Page', $Page);
+        $this->setData('_Limit', $Limit);
+        $this->fireEvent('AfterBuildPager');
 
         // If the user is not an article editor, then only show their own articles.
-        $Session = Gdn::Session();
+        $session = Gdn::session();
         $Wheres = false;
-        if (!$Session->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')) {
-            $Wheres = array('a.InsertUserID' => $Session->UserID);
+        if (!$session->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')) {
+            $Wheres = array('a.InsertUserID' => $session->UserID);
         }
 
         // Get the articles.
-        $Articles = $this->ArticleModel->Get($Offset, $Limit, $Wheres);
-        $this->SetData('Articles', $Articles);
+        $Articles = $this->ArticleModel->get($Offset, $Limit, $Wheres);
+        $this->setData('Articles', $Articles);
 
         $this->View = 'posts';
-        $this->Render();
+        $this->render();
     }
 
     /**
@@ -197,64 +209,64 @@ class ComposeController extends Gdn_Controller {
     public function Article($Article = false) {
         // If not editing...
         if (!$Article) {
-            $this->Title(T('Add Article'));
+            $this->title(T('Add Article'));
 
             // Set allowed permission.
-            $this->Permission('Articles.Articles.Add', true, 'ArticleCategory', 'any');
+            $this->permission('Articles.Articles.Add', true, 'ArticleCategory', 'any');
         }
 
-        $this->SetData('Breadcrumbs', array(
+        $this->setData('Breadcrumbs', array(
             array('Name' => T('Compose'), 'Url' => '/compose'),
             array('Name' => T('New Article'), 'Url' => '/compose/article')
         ));
 
         // Set the model on the form.
-        $this->Form->SetModel($this->ArticleModel);
+        $this->Form->setModel($this->ArticleModel);
 
-        $this->AddJsFile('jquery.ajaxfileupload.js');
+        $this->addJsFile('jquery.ajaxfileupload.js');
 
         // Get categories.
-        $Categories = $this->ArticleCategoryModel->Get(null, array('Articles.Articles.View', 'Articles.Articles.Add'));
+        $Categories = $this->ArticleCategoryModel->get(null, array('Articles.Articles.View', 'Articles.Articles.Add'));
 
-        if ($Categories->NumRows() === 0) {
+        if ($Categories->numRows() === 0) {
             throw new Gdn_UserException(T('At least one article category must exist to compose an article.'));
         }
 
-        $this->SetData('Categories', $Categories, true);
+        $this->setData('Categories', $Categories, true);
 
         // Set status options.
-        $this->SetData('StatusOptions', $this->GetArticleStatusOptions($Article), true);
+        $this->setData('StatusOptions', $this->GetArticleStatusOptions($Article), true);
 
         $UserModel = new UserModel();
         $Author = false;
         $Preview = false;
 
         // The form has not been submitted yet.
-        if (!$this->Form->AuthenticatedPostBack()) {
+        if (!$this->Form->authenticatedPostBack()) {
             // If editing...
             if ($Article) {
                 $this->AddDefinition('ArticleID', $Article->ArticleID);
-                $this->SetData('Article', $Article, true);
-                $this->Form->SetData($Article);
+                $this->setData('Article', $Article, true);
+                $this->Form->setData($Article);
 
-                $this->Form->AddHidden('UrlCodeIsDefined', '1');
+                $this->Form->addHidden('UrlCodeIsDefined', '1');
 
                 // Set author field.
-                $Author = $UserModel->GetID($Article->InsertUserID);
+                $Author = $UserModel->getID($Article->InsertUserID);
 
-                $UploadedImages = $this->ArticleMediaModel->GetByArticleID($Article->ArticleID);
-                $this->SetData('UploadedImages', $UploadedImages, true);
+                $UploadedImages = $this->ArticleMediaModel->getByArticleID($Article->ArticleID);
+                $this->setData('UploadedImages', $UploadedImages, true);
 
-                $UploadedThumbnail = $this->ArticleMediaModel->GetThumbnailByArticleID($Article->ArticleID);
-                $this->SetData('UploadedThumbnail', $UploadedThumbnail, true);
+                $UploadedThumbnail = $this->ArticleMediaModel->getThumbnailByArticleID($Article->ArticleID);
+                $this->setData('UploadedThumbnail', $UploadedThumbnail, true);
             } else {
                 // If not editing...
-                $this->Form->AddHidden('UrlCodeIsDefined', '0');
+                $this->Form->addHidden('UrlCodeIsDefined', '0');
             }
 
             // If the user with InsertUserID doesn't exist.
             if (!$Author) {
-                $Author = Gdn::Session()->User;
+                $Author = Gdn::session()->User;
             }
 
             $this->Form->SetValue('AuthorUserName', $Author->Name);
@@ -281,18 +293,18 @@ class ComposeController extends Gdn_Controller {
             }
 
             // Make sure that the UrlCode is unique among articles.
-            $SQL->Select('a.ArticleID')
-                ->From('Article a')
-                ->Where('a.UrlCode', $FormValues['UrlCode']);
+            $SQL->select('a.ArticleID')
+                ->from('Article a')
+                ->where('a.UrlCode', $FormValues['UrlCode']);
 
             if ($Article) {
-                $SQL->Where('a.ArticleID <>', $Article->ArticleID);
+                $SQL->where('a.ArticleID <>', $Article->ArticleID);
             }
 
-            $UrlCodeExists = isset($SQL->Get()->FirstRow()->ArticleID);
+            $UrlCodeExists = isset($SQL->get()->firstRow()->ArticleID);
 
             if ($UrlCodeExists) {
-                $this->Form->AddError('The specified URL code is already in use by another article.', 'UrlCode');
+                $this->Form->addError('The specified URL code is already in use by another article.', 'UrlCode');
             }
 
             // Retrieve author user ID.
@@ -302,20 +314,20 @@ class ComposeController extends Gdn_Controller {
 
             // If the inputted author doesn't exist.
             if (!$Author) {
-                $Session = Gdn::Session();
+                $session = Gdn::session();
 
-                $Category = ArticleCategoryModel::Categories($FormValues['ArticleCategoryID']);
+                $Category = ArticleCategoryModel::categories($FormValues['ArticleCategoryID']);
                 $PermissionArticleCategoryID = val('PermissionArticleCategoryID', $Category, 'any');
-                if (!$Session->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', $PermissionArticleCategoryID)
+                if (!$session->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', $PermissionArticleCategoryID)
                         && ($FormValues['AuthorUserName'] == "")) {
                     // Set author to current user if current user does not have Edit permission.
-                    $Author = $Session->User;
+                    $Author = $session->User;
                 } else {
                     // Show friendly error messages for author field if user has Edit permission.
                     if ($FormValues['AuthorUserName'] == "") {
-                        $this->Form->AddError('Author is required.', 'AuthorUserName');
+                        $this->Form->addError('Author is required.', 'AuthorUserName');
                     } else {
-                        $this->Form->AddError('The user for the author field does not exist.', 'AuthorUserName');
+                        $this->Form->addError('The user for the author field does not exist.', 'AuthorUserName');
                     }
                 }
             }
@@ -328,16 +340,16 @@ class ComposeController extends Gdn_Controller {
                 $this->Article = new stdClass();
                 $this->Article->Name = $this->Form->GetValue('Name', '');
                 $this->Preview = new stdClass();
-                $this->Preview->InsertUserID = isset($Author->UserID) ? $Author->UserID : $Session->User->UserID;
-                $this->Preview->InsertName = $Session->User->Name;
-                $this->Preview->InsertPhoto = $Session->User->Photo;
-                $this->Preview->DateInserted = Gdn_Format::Date();
+                $this->Preview->InsertUserID = isset($Author->UserID) ? $Author->UserID : $session->User->UserID;
+                $this->Preview->InsertName = $session->User->Name;
+                $this->Preview->InsertPhoto = $session->User->Photo;
+                $this->Preview->DateInserted = Gdn_Format::date();
                 $this->Preview->Body = ArrayValue('Body', $FormValues, '');
-                $this->Preview->Format = GetValue('Format', $FormValues, C('Garden.InputFormatter'));
+                $this->Preview->Format = GetValue('Format', $FormValues, c('Garden.InputFormatter'));
 
                 $this->EventArguments['Article'] = &$this->Article;
                 $this->EventArguments['Preview'] = &$this->Preview;
-                $this->FireEvent('BeforeArticlePreview');
+                $this->fireEvent('BeforeArticlePreview');
 
                 if ($this->_DeliveryType == DELIVERY_TYPE_ALL) {
                     $this->AddAsset('Content', $this->FetchView('preview'));
@@ -345,12 +357,12 @@ class ComposeController extends Gdn_Controller {
                     $this->View = 'preview';
                 }
             } else {
-                if ($this->Form->ErrorCount() == 0) {
+                if ($this->Form->errorCount() == 0) {
                     $ArticleID = $this->Form->Save($FormValues);
 
                     // If the article was saved successfully.
                     if ($ArticleID) {
-                        $NewArticle = $this->ArticleModel->GetByID($ArticleID);
+                        $NewArticle = $this->ArticleModel->getByID($ArticleID);
 
                         // If editing.
                         if ($Article) {
@@ -359,10 +371,10 @@ class ComposeController extends Gdn_Controller {
                             $InitialInsertUserID = val('InsertUserID', $Article, false);
 
                             if ($InitialInsertUserID != $Author->UserID) {
-                                $this->ArticleModel->UpdateUserArticleCount($InitialInsertUserID);
+                                $this->ArticleModel->updateUserArticleCount($InitialInsertUserID);
 
                                 // Update the count for the new author.
-                                $this->ArticleModel->UpdateUserArticleCount($Author->UserID);
+                                $this->ArticleModel->updateUserArticleCount($Author->UserID);
                             }
 
                             // If the status has changed from non-published to published, then update the DateInserted date.
@@ -371,13 +383,13 @@ class ComposeController extends Gdn_Controller {
                             if (($InitialStatus != ArticleModel::STATUS_PUBLISHED)
                                 && ($NewArticle->Status == ArticleModel::STATUS_PUBLISHED)
                             ) {
-                                $this->ArticleModel->SetField($ArticleID, 'DateInserted', Gdn_Format::ToDateTime());
+                                $this->ArticleModel->setField($ArticleID, 'DateInserted', Gdn_Format::ToDateTime());
                             }
 
                             // Set thumbnail ID.
-                            $UploadedThumbnail = $this->ArticleMediaModel->GetThumbnailByArticleID($Article->ArticleID);
+                            $UploadedThumbnail = $this->ArticleMediaModel->getThumbnailByArticleID($Article->ArticleID);
                             if (is_object($UploadedThumbnail) && ($UploadedThumbnail->ArticleMediaID > 0)) {
-                                $this->ArticleModel->SetField($ArticleID, 'ThumbnailID', $UploadedThumbnail->ArticleMediaID);
+                                $this->ArticleModel->setField($ArticleID, 'ThumbnailID', $UploadedThumbnail->ArticleMediaID);
                             }
                         } else {
                             // If not editing.
@@ -385,23 +397,23 @@ class ComposeController extends Gdn_Controller {
                             $UploadedImageIDs = $FormValues['UploadedImageIDs'];
                             if (is_array($UploadedImageIDs)) {
                                 foreach ($UploadedImageIDs as $ArticleMediaID) {
-                                    $this->ArticleMediaModel->SetField($ArticleMediaID, 'ArticleID', $ArticleID);
+                                    $this->ArticleMediaModel->setField($ArticleMediaID, 'ArticleID', $ArticleID);
                                 }
                             }
 
                             // Set thumbnail ID.
                             $UploadedThumbnailID = (int)$FormValues['UploadedThumbnailID'];
                             if ($UploadedThumbnailID > 0) {
-                                $this->ArticleModel->SetField($ArticleID, 'ThumbnailID', $UploadedThumbnailID);
-                                $this->ArticleMediaModel->SetField($UploadedThumbnailID, 'ArticleID', $ArticleID);
+                                $this->ArticleModel->setField($ArticleID, 'ThumbnailID', $UploadedThumbnailID);
+                                $this->ArticleMediaModel->setField($UploadedThumbnailID, 'ArticleID', $ArticleID);
                             }
                         }
 
                         // Redirect to the article.
                         if ($this->_DeliveryType == DELIVERY_TYPE_ALL) {
-                            Redirect(ArticleUrl($NewArticle));
+                            Redirect(articleUrl($NewArticle));
                         } else {
-                            $this->RedirectUrl = ArticleUrl($NewArticle, '', true);
+                            $this->RedirectUrl = articleUrl($NewArticle, '', true);
                         }
                     }
                 }
@@ -414,7 +426,7 @@ class ComposeController extends Gdn_Controller {
 
         $this->CssClass = 'NoPanel';
 
-        $this->Render();
+        $this->render();
     }
 
     /**
@@ -425,26 +437,26 @@ class ComposeController extends Gdn_Controller {
      * @throws NotFoundException if article not found
      */
     public function EditArticle($ArticleID = false) {
-        $this->Title(T('Edit Article'));
+        $this->title(T('Edit Article'));
 
         // Get article.
         if (is_numeric($ArticleID)) {
-            $Article = $this->ArticleModel->GetByID($ArticleID);
+            $Article = $this->ArticleModel->getByID($ArticleID);
         }
 
         // If the article doesn't exist, then throw an exception.
         if (!$Article) {
-            throw NotFoundException('Article');
+            throw notFoundException('Article');
         }
 
         // Set allowed permission.
-        $this->Permission('Articles.Articles.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
+        $this->permission('Articles.Articles.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
 
-        $this->SetData('Article', $Article, true);
+        $this->setData('Article', $Article, true);
 
         // Get category.
-        $Category = $this->ArticleCategoryModel->GetByID($Article->ArticleCategoryID);
-        $this->SetData('Category', $Category, true);
+        $Category = $this->ArticleCategoryModel->getByID($Article->ArticleCategoryID);
+        $this->setData('Category', $Category, true);
 
         $this->View = 'article';
         $this->Article($Article);
@@ -460,7 +472,7 @@ class ComposeController extends Gdn_Controller {
     public function UploadImage() {
         // Check for file data.
         if (!$_FILES) {
-            throw NotFoundException('Page');
+            throw notFoundException('Page');
         }
 
         // Handle the file data.
@@ -475,18 +487,18 @@ class ComposeController extends Gdn_Controller {
         }
 
         // Check permission.
-        $Session = Gdn::Session();
+        $session = Gdn::session();
         $PermissionArticleCategoryID = 'any';
         if (is_numeric($ArticleID)) {
             $ArticleModel = new ArticleModel();
 
-            $Article = $ArticleModel->GetByID($ArticleID);
+            $Article = $ArticleModel->getByID($ArticleID);
             if ($Article) {
                 $PermissionArticleCategoryID = $Article->PermissionArticleCategoryID;
             }
         }
-        if (!$Session->CheckPermission('Articles.Articles.Add', true, 'ArticleCategory', $PermissionArticleCategoryID)) {
-            throw PermissionException('Articles.Articles.Add');
+        if (!$session->checkPermission('Articles.Articles.Add', true, 'ArticleCategory', $PermissionArticleCategoryID)) {
+            throw permissionException('Articles.Articles.Add');
         }
 
         /*
@@ -521,8 +533,8 @@ class ComposeController extends Gdn_Controller {
             $UploadsSubdir = '/articles/' . $CurrentYear . '/' . $CurrentMonth;
 
             if ($isThumbnail) {
-                $SaveWidth = C('Articles.Articles.ThumbnailWidth', 280);
-                $SaveHeight = C('Articles.Articles.ThumbnailHeight', 200);
+                $SaveWidth = c('Articles.Articles.ThumbnailWidth', 280);
+                $SaveHeight = c('Articles.Articles.ThumbnailHeight', 200);
             } else {
                 $SaveWidth = null;
                 $SaveHeight = null;
@@ -534,7 +546,7 @@ class ComposeController extends Gdn_Controller {
                 $UploadsSubdir . '/' . $Basename,
                 $SaveHeight,
                 $SaveWidth, // change these configs and add quality etc.
-                array('OutputType' => $Extension, 'ImageQuality' => C('Garden.UploadImage.Quality', 75))
+                array('OutputType' => $Extension, 'ImageQuality' => c('Garden.UploadImage.Quality', 75))
             );
 
             $UploadedImagePath = sprintf($Props['SaveFormat'], $UploadsSubdir . '/' . $Basename);
@@ -555,10 +567,10 @@ class ComposeController extends Gdn_Controller {
             'IsThumbnail' => $isThumbnail,
             'Path' => $UploadedImagePath,
             'DateInserted' => Gdn_Format::ToDateTime(),
-            'InsertUserID' => $Session->UserID,
+            'InsertUserID' => $session->UserID,
         );
 
-        $ArticleMediaID = $this->ArticleMediaModel->Save($MediaValues);
+        $ArticleMediaID = $this->ArticleMediaModel->save($MediaValues);
 
         // Return path to the uploaded image in the following format.
         // Example: '/articles/year/month/filename.jpg'
@@ -584,34 +596,34 @@ class ComposeController extends Gdn_Controller {
         if (!is_numeric($ArticleMediaID)
             || ($this->_DeliveryMethod != DELIVERY_METHOD_JSON) || ($this->_DeliveryType != DELIVERY_TYPE_BOOL)
         ) {
-            throw NotFoundException('Page');
+            throw notFoundException('Page');
         }
 
-        $Media = $this->ArticleMediaModel->GetByID($ArticleMediaID);
+        $Media = $this->ArticleMediaModel->getByID($ArticleMediaID);
         if (!$Media) {
-            throw NotFoundException('Article media');
+            throw notFoundException('Article media');
         }
 
         // Check permission.
-        $Session = Gdn::Session();
+        $session = Gdn::session();
         $PermissionArticleCategoryID = 'any';
         if (is_numeric($Media->ArticleID)) {
             $ArticleModel = new ArticleModel();
 
-            $Article = $ArticleModel->GetByID($Media->ArticleID);
+            $Article = $ArticleModel->getByID($Media->ArticleID);
             if ($Article) {
                 $PermissionArticleCategoryID = $Article->PermissionArticleCategoryID;
             }
         }
-        if (!$Session->CheckPermission('Articles.Articles.Add', true, 'ArticleCategory', $PermissionArticleCategoryID)) {
-            throw PermissionException('Articles.Articles.Add');
+        if (!$session->checkPermission('Articles.Articles.Add', true, 'ArticleCategory', $PermissionArticleCategoryID)) {
+            throw permissionException('Articles.Articles.Add');
         }
 
         $this->_DeliveryMethod = DELIVERY_METHOD_JSON;
         $this->_DeliveryType = DELIVERY_TYPE_BOOL;
 
         // Delete the image from the database.
-        $Deleted = $this->ArticleMediaModel->Delete($ArticleMediaID);
+        $Deleted = $this->ArticleMediaModel->delete($ArticleMediaID);
 
         // Delete the image file.
         $ImagePath = PATH_UPLOADS . DS . val('Path', $Media);
@@ -619,7 +631,7 @@ class ComposeController extends Gdn_Controller {
             @unlink($ImagePath);
         }
 
-        $this->Render('Blank', 'Utility', 'Dashboard');
+        $this->render('Blank', 'Utility', 'Dashboard');
     }
 
     /**
@@ -631,21 +643,21 @@ class ComposeController extends Gdn_Controller {
      * @throws ForbiddenException if invalid reply
      */
     public function Comment($ArticleID, $ParentArticleCommentID = false) {
-        $this->Title(T('Post Article Comment'));
+        $this->title(T('Post Article Comment'));
 
         // Set required permission.
-        $Session = Gdn::Session();
+        $session = Gdn::session();
 
         // Get the article.
-        $Article = $this->ArticleModel->GetByID($ArticleID);
+        $Article = $this->ArticleModel->getByID($ArticleID);
 
         // Determine if this is a guest commenting
         $GuestCommenting = false;
-        if (!$Session->IsValid()) { // Not logged in, so this could be a guest
-            if (C('Articles.Comments.AllowGuests', false)) { // If guest commenting is enabled
+        if (!$session->isValid()) { // Not logged in, so this could be a guest
+            if (c('Articles.Comments.AllowGuests', false)) { // If guest commenting is enabled
                 $GuestCommenting = true;
             } else { // Require permission to add comment
-                $this->Permission('Articles.Comments.Add', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
+                $this->permission('Articles.Comments.Add', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
             }
         }
 
@@ -656,54 +668,54 @@ class ComposeController extends Gdn_Controller {
 
         // If closed, cancel and go to article.
         if ($Article && $Article->Closed == 1 && !$Editing
-                && !$Session->CheckPermission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
-            Redirect(ArticleUrl($Article));
+                && !$session->checkPermission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
+            Redirect(articleUrl($Article));
         }
 
         // Add hidden IDs to form.
-        $this->Form->AddHidden('ArticleID', $ArticleID);
-        $this->Form->AddHidden('ArticleCommentID', $ArticleCommentID);
+        $this->Form->addHidden('ArticleID', $ArticleID);
+        $this->Form->addHidden('ArticleCommentID', $ArticleCommentID);
 
         // Check permissions.
-        if ($Session->IsValid()) {
+        if ($session->isValid()) {
             if ($Article && $Editing) {
                 // Permission to edit
-                if ($this->Comment->InsertUserID != $Session->UserID) {
-                    $this->Permission('Articles.Comments.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
+                if ($this->Comment->InsertUserID != $session->UserID) {
+                    $this->permission('Articles.Comments.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
                 }
 
                 // Make sure that content can (still) be edited.
-                $EditContentTimeout = C('Garden.EditContentTimeout', -1);
+                $EditContentTimeout = c('Garden.EditContentTimeout', -1);
                 $CanEdit = $EditContentTimeout == -1 || strtotime($this->Comment->DateInserted) + $EditContentTimeout > time();
                 if (!$CanEdit) {
-                    $this->Permission('Articles.Comments.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
+                    $this->permission('Articles.Comments.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
                 }
 
                 // Make sure only moderators can edit closed things
                 if ($Article->Closed) {
-                    $this->Permission('Articles.Comments.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
+                    $this->permission('Articles.Comments.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
                 }
             } else {
                 if ($Article) {
                     // Permission to add
-                    $this->Permission('Articles.Comments.Add', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
+                    $this->permission('Articles.Comments.Add', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
                 }
             }
         }
 
         // Set the model on the form.
-        $this->Form->SetModel($this->ArticleCommentModel);
+        $this->Form->setModel($this->ArticleCommentModel);
 
-        if (!$this->Form->AuthenticatedPostBack()) {
+        if (!$this->Form->authenticatedPostBack()) {
             if (isset($this->Comment)) {
-                $this->Form->SetData((array)$this->Comment);
+                $this->Form->setData((array)$this->Comment);
             }
         } else {
             // Form was validly submitted.
             // Validate fields.
             $FormValues = $this->Form->FormValues();
 
-            $Type = GetIncomingValue('Type');
+            $Type = getIncomingValue('Type');
             $Preview = ($Type == 'Preview');
 
             $this->Form->ValidateRule('Body', 'ValidateRequired');
@@ -723,11 +735,11 @@ class ComposeController extends Gdn_Controller {
             // Validate parent comment.
             $ParentComment = false;
             if (is_numeric($FormValues['ParentArticleCommentID'])) {
-                $ParentComment = $this->ArticleCommentModel->GetByID($FormValues['ParentArticleCommentID']);
+                $ParentComment = $this->ArticleCommentModel->getByID($FormValues['ParentArticleCommentID']);
 
                 // Parent comment doesn't exist.
                 if (!$ParentComment) {
-                    throw NotFoundException('Parent comment');
+                    throw notFoundException('Parent comment');
                 }
 
                 // Only allow one level of threading.
@@ -752,15 +764,15 @@ class ComposeController extends Gdn_Controller {
                     $this->Form->ValidateRule('GuestEmail', 'ValidateEmail', T('That email address is not valid.'));
 
                     // Sanitize the guest properties.
-                    $FormValues['GuestName'] = Gdn_Format::PlainText($FormValues['GuestName']);
-                    $FormValues['GuestEmail'] = Gdn_Format::PlainText($FormValues['GuestEmail']);
+                    $FormValues['GuestName'] = Gdn_Format::plainText($FormValues['GuestName']);
+                    $FormValues['GuestEmail'] = Gdn_Format::plainText($FormValues['GuestEmail']);
                 }
 
                 $this->Form->SetFormValue('GuestName', $FormValues['GuestName']);
                 $this->Form->SetFormValue('GuestEmail', $FormValues['GuestEmail']);
             }
 
-            if ($this->Form->ErrorCount() > 0) {
+            if ($this->Form->errorCount() > 0) {
                 // Return the form errors.
                 $this->ErrorMessage($this->Form->Errors());
             } else {
@@ -768,15 +780,15 @@ class ComposeController extends Gdn_Controller {
                 if ($Preview) {
                     // If this was a preview click, create a comment shell with the values for this comment
                     $this->Preview = new stdClass();
-                    $this->Preview->InsertUserID = $Session->User->UserID;
-                    $this->Preview->InsertName = $Session->User->Name;
-                    $this->Preview->InsertPhoto = $Session->User->Photo;
-                    $this->Preview->DateInserted = Gdn_Format::Date();
+                    $this->Preview->InsertUserID = $session->User->UserID;
+                    $this->Preview->InsertName = $session->User->Name;
+                    $this->Preview->InsertPhoto = $session->User->Photo;
+                    $this->Preview->DateInserted = Gdn_Format::date();
                     $this->Preview->Body = ArrayValue('Body', $FormValues, '');
 
                     if ($this->_DeliveryType == DELIVERY_TYPE_ALL) {
                         $this->AddAsset('Content', $this->FetchView('preview'));
-                        $this->Preview->Format = GetValue('Format', $FormValues, C('Garden.InputFormatter'));
+                        $this->Preview->Format = GetValue('Format', $FormValues, c('Garden.InputFormatter'));
                     } else {
                         $this->View = 'preview';
                     }
@@ -784,7 +796,7 @@ class ComposeController extends Gdn_Controller {
                     $CommentID = $this->Form->Save($FormValues);
 
                     if ($CommentID) {
-                        $this->RedirectUrl = ArticleCommentUrl($CommentID);
+                        $this->RedirectUrl = articleCommentUrl($CommentID);
                     }
                 }
             }
@@ -794,7 +806,7 @@ class ComposeController extends Gdn_Controller {
             $this->View = 'comment';
         }
 
-        $this->Render();
+        $this->render();
     }
 
     /**
@@ -808,7 +820,7 @@ class ComposeController extends Gdn_Controller {
         }
 
         if ($ArticleCommentID > 0) {
-            $this->Comment = $this->ArticleCommentModel->GetByID($ArticleCommentID);
+            $this->Comment = $this->ArticleCommentModel->getByID($ArticleCommentID);
         }
 
         $this->Form->SetFormValue('Format', val('Format', $this->Comment));

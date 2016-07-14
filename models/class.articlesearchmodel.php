@@ -1,25 +1,13 @@
-<?php defined('APPLICATION') or exit();
+<?php
 /**
- * Copyright (C) 2015  Austin S.
+ * ArticleSearch model
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @copyright 2015-2016 Austin S.
+ * @license http://www.opensource.org/licenses/gpl-2.0.php GNU GPL v2
  */
 
 /**
  * Manages searches for Articles and associated comments.
- *
- * @package Articles
  */
 class ArticleSearchModel extends Gdn_Model {
     /**
@@ -30,12 +18,12 @@ class ArticleSearchModel extends Gdn_Model {
     /**
      * Makes an article model available.
      *
-     * @param object $Value ArticleModel.
+     * @param object $value ArticleModel.
      * @return object ArticleModel.
      */
-    public function ArticleModel($Value = false) {
-        if ($Value !== false) {
-            $this->_ArticleModel = $Value;
+    public function articleModel($value = false) {
+        if ($value !== false) {
+            $this->_ArticleModel = $value;
         }
         if ($this->_ArticleModel === false) {
             require_once(dirname(__FILE__) . DS . 'class.articlemodel.php');
@@ -48,69 +36,69 @@ class ArticleSearchModel extends Gdn_Model {
     /**
      * Execute Article search query
      *
-     * @param object $SearchModel SearchModel (Dashboard)
+     * @param object $searchModel SearchModel (Dashboard)
      * @return object SQL result.
      */
-    public function ArticleSql($SearchModel) {
+    public function articleSql($searchModel) {
         // Build search part of query
-        $SearchModel->AddMatchSql($this->SQL, 'a.Name, a.Body', 'a.DateInserted');
+        $searchModel->addMatchSql($this->SQL, 'a.Name, a.Body', 'a.DateInserted');
 
         // Build base query
         $this->SQL
-            ->Select('a.ArticleID as PrimaryID, a.Name as Title, a.Excerpt as Summary, a.Format, '
+            ->select('a.ArticleID as PrimaryID, a.Name as Title, a.Excerpt as Summary, a.Format, '
                 . 'a.ArticleCategoryID, a.Closed')
-            ->Select('a.UrlCode', "concat('/article/', year(a.DateInserted), '/', %s)", 'Url')
-            ->Select('a.DateInserted')
-            ->Select('a.InsertUserID as UserID')
-            ->Select("'Article'", '', 'RecordType')
-            ->From('Article a');
+            ->select('a.UrlCode', "concat('/article/', year(a.DateInserted), '/', %s)", 'Url')
+            ->select('a.DateInserted')
+            ->select('a.InsertUserID as UserID')
+            ->select("'Article'", '', 'RecordType')
+            ->from('Article a');
 
         // Execute query
-        $Result = $this->SQL->GetSelect();
+        $result = $this->SQL->getSelect();
 
         // Unset SQL
-        $this->SQL->Reset();
+        $this->SQL->reset();
 
-        return $Result;
+        return $result;
     }
 
     /**
      * Execute ArticleComment search query
      *
-     * @param object $SearchModel SearchModel (Dashboard)
+     * @param object $searchModel SearchModel (Dashboard)
      * @return object SQL result.
      */
-    public function ArticleCommentSql($SearchModel) {
+    public function articleCommentSql($searchModel) {
         // Build search part of query
-        $SearchModel->AddMatchSql($this->SQL, 'ac.Body', 'ac.DateInserted');
+        $searchModel->addMatchSql($this->SQL, 'ac.Body', 'ac.DateInserted');
 
         // Build base query
         $this->SQL
-            ->Select('ac.ArticleCommentID as PrimaryID, a.Name as Title, ac.Body as Summary, ac.Format, '
+            ->select('ac.ArticleCommentID as PrimaryID, a.Name as Title, ac.Body as Summary, ac.Format, '
                 . 'ac.GuestName, a.ArticleCategoryID')
-            ->Select("'/article/comment/', ac.ArticleCommentID, '/#Comment_', ac.ArticleCommentID", "concat", 'Url')
-            ->Select('ac.DateInserted')
-            ->Select('ac.InsertUserID as UserID')
-            ->Select("'ArticleComment'", '', 'RecordType')
-            ->From('ArticleComment ac')
-            ->Join('Article a', 'a.ArticleID = ac.ArticleID');
+            ->select("'/article/comment/', ac.ArticleCommentID, '/#Comment_', ac.ArticleCommentID", "concat", 'Url')
+            ->select('ac.DateInserted')
+            ->select('ac.InsertUserID as UserID')
+            ->select("'ArticleComment'", '', 'RecordType')
+            ->from('ArticleComment ac')
+            ->join('Article a', 'a.ArticleID = ac.ArticleID');
 
         // Execute query
-        $Result = $this->SQL->GetSelect();
+        $result = $this->SQL->getSelect();
 
         // Unset SQL
-        $this->SQL->Reset();
+        $this->SQL->reset();
 
-        return $Result;
+        return $result;
     }
 
     /**
      * Add the searches for Articles to the search model.
      *
-     * @param object $SearchModel SearchModel (Dashboard)
+     * @param object $searchModel SearchModel (Dashboard)
      */
-    public function Search($SearchModel) {
-        $SearchModel->AddSearch($this->ArticleSql($SearchModel));
-        $SearchModel->AddSearch($this->ArticleCommentSql($SearchModel));
+    public function search($searchModel) {
+        $searchModel->addSearch($this->articleSql($searchModel));
+        $searchModel->addSearch($this->articleCommentSql($searchModel));
     }
 }

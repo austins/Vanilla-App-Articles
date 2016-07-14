@@ -1,23 +1,13 @@
-<?php defined('APPLICATION') or exit();
+<?php
 /**
- * Copyright (C) 2015  Austin S.
+ * ArticleCategory model
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @copyright 2015-2016 Austin S.
+ * @license http://www.opensource.org/licenses/gpl-2.0.php GNU GPL v2
  */
 
 /**
- * Handles data for articles.
+ * Handles data for article categories.
  */
 class ArticleCategoryModel extends Gdn_Model {
     /** Cache grace. */
@@ -50,50 +40,50 @@ class ArticleCategoryModel extends Gdn_Model {
      * @return array Returns either one or all ArticleCategories (if nothing is passed then all categories are
      *     returned).
      */
-    public static function Categories($ID = false) {
+    public static function categories($ID = false) {
         if (self::$Categories == null) {
             // Try and get the ArticleCategories from the cache.
-            $CategoriesCache = Gdn::Cache()->Get(self::CACHE_KEY);
-            $Rebuild = true;
+            $categoriesCache = Gdn::cache()->get(self::CACHE_KEY);
+            $rebuild = true;
 
             // If we received a valid data structure, extract the embedded expiry
             // and re-store the real ArticleCategories on our static property.
-            if (is_array($CategoriesCache)) {
+            if (is_array($categoriesCache)) {
                 // Test if it's time to rebuild
-                $RebuildAfter = val('expiry', $CategoriesCache, null);
-                if (!is_null($RebuildAfter) && time() < $RebuildAfter) {
-                    $Rebuild = false;
+                $rebuildAfter = val('expiry', $categoriesCache, null);
+                if (!is_null($rebuildAfter) && time() < $rebuildAfter) {
+                    $rebuild = false;
                 }
-                self::$Categories = val('categories', $CategoriesCache, null);
+                self::$Categories = val('categories', $categoriesCache, null);
             }
-            unset($CategoriesCache);
+            unset($categoriesCache);
 
-            if ($Rebuild) {
+            if ($rebuild) {
                 // Try to get a rebuild lock
-                $HaveRebuildLock = self::RebuildLock();
-                if ($HaveRebuildLock || !self::$Categories) {
-                    $Sql = Gdn::Sql();
-                    $Sql = clone $Sql;
-                    $Sql->Reset();
+                $haveRebuildLock = self::rebuildLock();
+                if ($haveRebuildLock || !self::$Categories) {
+                    $sql = Gdn::sql();
+                    $sql = clone $sql;
+                    $sql->reset();
 
-                    $Sql->Select('ac.*')
-                        ->From('ArticleCategory ac')
-                        ->Where('ac.ArticleCategoryID <>', '-1')
-                        ->OrderBy('ac.Name', 'asc');
+                    $sql->select('ac.*')
+                        ->from('ArticleCategory ac')
+                        ->where('ac.ArticleCategoryID <>', '-1')
+                        ->orderBy('ac.Name', 'asc');
 
-                    self::$Categories = array_merge(array(), $Sql->get()->resultArray());
-                    self::$Categories = Gdn_DataSet::Index(self::$Categories, 'ArticleCategoryID');
-                    self::BuildCache();
+                    self::$Categories = array_merge(array(), $sql->get()->resultArray());
+                    self::$Categories = Gdn_DataSet::index(self::$Categories, 'ArticleCategoryID');
+                    self::buildCache();
 
                     // Release lock
-                    if ($HaveRebuildLock) {
-                        self::RebuildLock(true);
+                    if ($haveRebuildLock) {
+                        self::rebuildLock(true);
                     }
                 }
             }
 
             if (self::$Categories) {
-                self::JoinUserData(self::$Categories);
+                self::joinUserData(self::$Categories);
             } else {
                 return null;
             }
@@ -101,78 +91,78 @@ class ArticleCategoryModel extends Gdn_Model {
 
         if ($ID !== false) {
             if (!is_numeric($ID) && $ID) {
-                $Code = $ID;
-                foreach (self::$Categories as $Category) {
-                    if (strcasecmp($Category['UrlCode'], $Code) === 0) {
-                        $ID = $Category['ArticleCategoryID'];
+                $code = $ID;
+                foreach (self::$Categories as $category) {
+                    if (strcasecmp($category['UrlCode'], $code) === 0) {
+                        $ID = $category['ArticleCategoryID'];
                         break;
                     }
                 }
             }
 
             if (isset(self::$Categories[$ID])) {
-                $Result = self::$Categories[$ID];
+                $result = self::$Categories[$ID];
 
-                return $Result;
+                return $result;
             } else {
                 return null;
             }
         } else {
-            $Result = self::$Categories;
+            $result = self::$Categories;
 
-            return $Result;
+            return $result;
         }
     }
 
     /**
      * Update &$Categories in memory by applying modifiers for the currently logged-in user.
      *
-     * @param array &$Categories
+     * @param array &$categories
      */
-    public static function JoinUserData(&$Categories) {
-        $IDs = array_keys($Categories);
+    public static function joinUserData(&$categories) {
+        $IDs = array_keys($categories);
 
         // Add permissions.
-        $Session = Gdn::Session();
-        foreach ($IDs as $CID) {
-            $Category = $Categories[$CID];
+        $session = Gdn::session();
+        foreach ($IDs as $cID) {
+            $category = $categories[$cID];
 
-            $Categories[$CID]['PermsArticlesView'] = $Session->CheckPermission('Articles.Articles.View', true,
-                'ArticleCategory', $Category['PermissionArticleCategoryID']);
-            $Categories[$CID]['PermsArticlesAdd'] = $Session->CheckPermission('Articles.Articles.Add', true,
-                'ArticleCategory', $Category['PermissionArticleCategoryID']);
-            $Categories[$CID]['PermsArticlesEdit'] = $Session->CheckPermission('Articles.Articles.Edit', true,
-                'ArticleCategory', $Category['PermissionArticleCategoryID']);
-            $Categories[$CID]['PermsCommentsAdd'] = $Session->CheckPermission('Articles.Comments.Add', true,
-                'ArticleCategory', $Category['PermissionArticleCategoryID']);
+            $categories[$cID]['PermsArticlesView'] = $session->checkPermission('Articles.Articles.View', true,
+                'ArticleCategory', $category['PermissionArticleCategoryID']);
+            $categories[$cID]['PermsArticlesAdd'] = $session->checkPermission('Articles.Articles.Add', true,
+                'ArticleCategory', $category['PermissionArticleCategoryID']);
+            $categories[$cID]['PermsArticlesEdit'] = $session->checkPermission('Articles.Articles.Edit', true,
+                'ArticleCategory', $category['PermissionArticleCategoryID']);
+            $categories[$cID]['PermsCommentsAdd'] = $session->checkPermission('Articles.Comments.Add', true,
+                'ArticleCategory', $category['PermissionArticleCategoryID']);
         }
     }
 
-    public static function JoinCategories(&$Data, $Column = 'ArticleCategoryID', $Options = array()) {
-        $Join = val('Join', $Options,
+    public static function joinCategories(&$data, $column = 'ArticleCategoryID', $options = array()) {
+        $join = val('Join', $options,
             array('Name' => 'ArticleCategoryName', 'UrlCode' => 'ArticleCategoryUrlCode', 'PermissionArticleCategoryID'));
 
-        if ($Data instanceof Gdn_DataSet) {
-            $Data2 = $Data->result();
+        if ($data instanceof Gdn_DataSet) {
+            $data2 = $data->result();
         } else {
-            $Data2 =& $Data;
+            $data2 =& $data;
         }
 
-        foreach ($Data2 as &$Row) {
-            $ID = val($Column, $Row);
-            $Category = self::Categories($ID);
-            foreach ($Join as $N => $V) {
-                if (is_numeric($N)) {
-                    $N = $V;
+        foreach ($data2 as &$row) {
+            $ID = val($column, $row);
+            $category = self::categories($ID);
+            foreach ($join as $n => $v) {
+                if (is_numeric($n)) {
+                    $n = $v;
                 }
 
-                if ($Category) {
-                    $Value = $Category[$N];
+                if ($category) {
+                    $value = $category[$n];
                 } else {
-                    $Value = null;
+                    $value = null;
                 }
 
-                setValue($V, $Row, $Value);
+                setValue($v, $row, $value);
             }
         }
     }
@@ -185,33 +175,33 @@ class ArticleCategoryModel extends Gdn_Model {
      *
      * @return boolean whether we may rebuild
      */
-    protected static function RebuildLock($Release = false) {
-        static $IsMaster = null;
-        if ($Release) {
-            Gdn::Cache()->Remove(self::MASTER_VOTE_KEY);
+    protected static function rebuildLock($release = false) {
+        static $isMaster = null;
+        if ($release) {
+            Gdn::cache()->remove(self::MASTER_VOTE_KEY);
 
             return;
         }
 
-        if (is_null($IsMaster)) {
+        if (is_null($isMaster)) {
             // Vote for master
-            $InstanceKey = getmypid();
-            $MasterKey = Gdn::Cache()->Add(self::MASTER_VOTE_KEY, $InstanceKey, array(
+            $instanceKey = getmypid();
+            $masterKey = Gdn::cache()->add(self::MASTER_VOTE_KEY, $instanceKey, array(
                 Gdn_Cache::FEATURE_EXPIRY => self::CACHE_GRACE
             ));
 
-            $IsMaster = ($InstanceKey == $MasterKey);
+            $isMaster = ($instanceKey == $masterKey);
         }
 
-        return (bool)$IsMaster;
+        return (bool)$isMaster;
     }
 
     /**
      * Build and augment the ArticleCategory cache
      */
-    protected static function BuildCache() {
+    protected static function buildCache() {
         $expiry = self::CACHE_TTL + self::CACHE_GRACE;
-        Gdn::Cache()->Store(self::CACHE_KEY, array(
+        Gdn::cache()->store(self::CACHE_KEY, array(
             'expiry' => time() + $expiry,
             'categories' => self::$Categories
         ), array(
@@ -220,197 +210,197 @@ class ArticleCategoryModel extends Gdn_Model {
         ));
     }
 
-    public static function ClearCache() {
-        Gdn::Cache()->Remove(self::CACHE_KEY);
+    public static function clearCache() {
+        Gdn::cache()->remove(self::CACHE_KEY);
     }
 
     /**
      * Grab and update the category cache
      *
      * @param int $ID
-     * @param array $Data
+     * @param array $data
      */
-    public static function SetCache($ID = false, $Data = false) {
-        $Categories = Gdn::Cache()->Get(self::CACHE_KEY);
+    public static function setCache($ID = false, $data = false) {
+        $categories = Gdn::cache()->get(self::CACHE_KEY);
         self::$Categories = null;
 
-        if (!$Categories) {
+        if (!$categories) {
             return;
         }
 
         // Extract actual category list, remove key if malformed
-        if (!$ID || !is_array($Categories) || !array_key_exists('categories', $Categories)) {
-            Gdn::Cache()->Remove(self::CACHE_KEY);
+        if (!$ID || !is_array($categories) || !array_key_exists('categories', $categories)) {
+            Gdn::cache()->remove(self::CACHE_KEY);
             return;
         }
-        $Categories = $Categories['categories'];
+        $categories = $categories['categories'];
 
         // Check for category in list, otherwise remove key if not found
-        if (!array_key_exists($ID, $Categories)) {
-            Gdn::Cache()->Remove(self::CACHE_KEY);
+        if (!array_key_exists($ID, $categories)) {
+            Gdn::cache()->remove(self::CACHE_KEY);
             return;
         }
 
-        $Category = $Categories[$ID];
-        $Category = array_merge($Category, $Data);
-        $Categories[$ID] = $Category;
+        $category = $categories[$ID];
+        $category = array_merge($category, $data);
+        $categories[$ID] = $category;
 
         // Update memcache entry
-        self::$Categories = $Categories;
-        unset($Categories);
-        self::BuildCache();
+        self::$Categories = $categories;
+        unset($categories);
+        self::buildCache();
 
-        self::JoinUserData(self::$Categories);
+        self::joinUserData(self::$Categories);
     }
 
     /**
      * Count recalculation. Called by DBAModel->Counts().
      *
-     * @param string $Column
+     * @param string $column
      * @return array
      */
-    public function Counts($Column) {
-        $Result = array('Complete' => true);
+    public function counts($column) {
+        $result = array('Complete' => true);
 
-        switch ($Column) {
+        switch ($column) {
             case 'CountArticles':
-                $this->Database->Query(DBAModel::GetCountSQL('count', 'ArticleCategory', 'Article'));
+                $this->Database->query(DBAModel::getCountSQL('count', 'ArticleCategory', 'Article'));
                 break;
             case 'CountArticleComments':
-                $this->Database->Query(DBAModel::GetCountSQL('sum', 'ArticleCategory', 'Article', $Column,
+                $this->Database->query(DBAModel::getCountSQL('sum', 'ArticleCategory', 'Article', $column,
                     'CountArticleComments'));
                 break;
             case 'LastArticleID':
-                $this->Database->Query(DBAModel::GetCountSQL('max', 'ArticleCategory', 'Article'));
+                $this->Database->query(DBAModel::getCountSQL('max', 'ArticleCategory', 'Article'));
                 break;
             case 'LastArticleCommentID':
-                $Data = $this->SQL
-                    ->Select('a.ArticleCategoryID')
-                    ->Select('ac.ArticleCommentID', 'max', 'LastArticleCommentID')
-                    ->Select('a.ArticleID', 'max', 'LastArticleID')
-                    ->Select('ac.DateInserted', 'max', 'DateLastArticleComment')
-                    ->Select('a.DateInserted', 'max', 'DateLastArticle')
-                    ->From('ArticleComment ac')
-                    ->Join('Article a', 'a.ArticleID = ac.ArticleID')
-                    ->GroupBy('a.ArticleCategoryID')
-                    ->Get()->ResultArray();
+                $data = $this->SQL
+                    ->select('a.ArticleCategoryID')
+                    ->select('ac.ArticleCommentID', 'max', 'LastArticleCommentID')
+                    ->select('a.ArticleID', 'max', 'LastArticleID')
+                    ->select('ac.DateInserted', 'max', 'DateLastArticleComment')
+                    ->select('a.DateInserted', 'max', 'DateLastArticle')
+                    ->from('ArticleComment ac')
+                    ->join('Article a', 'a.ArticleID = ac.ArticleID')
+                    ->groupBy('a.ArticleCategoryID')
+                    ->get()->resultArray();
 
                 // Now we have to grab the articles associated with these comments.
-                $ArticleCommentIDs = ConsolidateArrayValuesByKey($Data, 'LastArticleCommentID');
+                $articleCommentIDs = consolidateArrayValuesByKey($data, 'LastArticleCommentID');
 
                 // Grab the articles for the comments.
                 $this->SQL
-                    ->Select('ac.ArticleCommentID, ac.ArticleID')
-                    ->From('ArticleComment ac')
-                    ->WhereIn('ac.ArticleCommentID', $ArticleCommentIDs);
+                    ->select('ac.ArticleCommentID, ac.ArticleID')
+                    ->from('ArticleComment ac')
+                    ->whereIn('ac.ArticleCommentID', $articleCommentIDs);
 
-                $Articles = $this->SQL->Get()->ResultArray();
-                $Articles = Gdn_DataSet::Index($Articles, array('ArticleCommentID'));
+                $articles = $this->SQL->get()->resultArray();
+                $articles = Gdn_DataSet::index($articles, array('ArticleCommentID'));
 
-                foreach ($Data as $Row) {
-                    $ArticleCategoryID = (int)$Row['ArticleCategoryID'];
-                    $Category = $this->GetByID($ArticleCategoryID);
-                    $ArticleCommentID = $Row['LastArticleCommentID'];
-                    $ArticleID = GetValueR("$ArticleCommentID.ArticleID", $Articles, null);
+                foreach ($data as $row) {
+                    $articleCategoryID = (int)$row['ArticleCategoryID'];
+                    $category = $this->getByID($articleCategoryID);
+                    $articleCommentID = $row['LastArticleCommentID'];
+                    $articleID = getValueR("$articleCommentID.ArticleID", $articles, null);
 
-                    $DateLastArticleComment = Gdn_Format::ToTimestamp($Row['DateLastArticleComment']);
-                    $DateLastArticle = Gdn_Format::ToTimestamp($Row['DateLastArticle']);
+                    $dateLastArticleComment = Gdn_Format::toTimestamp($row['DateLastArticleComment']);
+                    $dateLastArticle = Gdn_Format::toTimestamp($row['DateLastArticle']);
 
-                    $Set = array('LastArticleCommentID' => $ArticleCommentID);
+                    $set = array('LastArticleCommentID' => $articleCommentID);
 
-                    if ($ArticleID) {
-                        $LastArticleID = val('LastArticleID', $Category);
+                    if ($articleID) {
+                        $lastArticleID = val('LastArticleID', $category);
 
-                        if ($DateLastArticleComment >= $DateLastArticle) {
+                        if ($dateLastArticleComment >= $dateLastArticle) {
                             // The most recent article is from this comment.
-                            $Set['LastArticleID'] = $ArticleID;
+                            $set['LastArticleID'] = $articleID;
                         } else {
                             // The most recent discussion has no comments.
-                            $Set['LastArticleCommentID'] = null;
+                            $set['LastArticleCommentID'] = null;
                         }
                     } else {
                         // Something went wrong.
-                        $Set['LastArticleCommentID'] = null;
-                        $Set['LastArticleID'] = null;
+                        $set['LastArticleCommentID'] = null;
+                        $set['LastArticleID'] = null;
                     }
 
-                    $this->SetField($ArticleCategoryID, $Set);
+                    $this->setField($articleCategoryID, $set);
                 }
 
                 break;
             case 'LastDateInserted':
-                $Categories = $this->SQL
-                    ->Select('ca.ArticleCategoryID')
-                    ->Select('a.DateInserted', '', 'DateLastArticle')
-                    ->Select('ac.DateInserted', '', 'DateLastArticleComment')
-                    ->From('ArticleCategory ca')
-                    ->Join('Article a', 'a.ArticleID = ca.LastArticleID')
-                    ->Join('ArticleComment ac', 'ac.ArticleCommentID = ca.LastArticleCommentID')
-                    ->Get()->ResultArray();
+                $categories = $this->SQL
+                    ->select('ca.ArticleCategoryID')
+                    ->select('a.DateInserted', '', 'DateLastArticle')
+                    ->select('ac.DateInserted', '', 'DateLastArticleComment')
+                    ->from('ArticleCategory ca')
+                    ->join('Article a', 'a.ArticleID = ca.LastArticleID')
+                    ->join('ArticleComment ac', 'ac.ArticleCommentID = ca.LastArticleCommentID')
+                    ->get()->resultArray();
 
-                foreach ($Categories as $Category) {
-                    $DateLastArticle = val('DateLastArticle', $Category);
-                    $DateLastArticleComment = val('DateLastArticleComment', $Category);
+                foreach ($categories as $category) {
+                    $dateLastArticle = val('DateLastArticle', $category);
+                    $dateLastArticleComment = val('DateLastArticleComment', $category);
 
-                    $MaxDate = $DateLastArticleComment;
-                    if (is_null($DateLastArticleComment) || $DateLastArticle > $MaxDate) {
-                        $MaxDate = $DateLastArticle;
+                    $maxDate = $dateLastArticleComment;
+                    if (is_null($dateLastArticleComment) || $dateLastArticle > $maxDate) {
+                        $maxDate = $dateLastArticle;
                     }
 
-                    if (is_null($MaxDate)) {
+                    if (is_null($maxDate)) {
                         continue;
                     }
 
-                    $ArticleCategoryID = (int)$Category['ArticleCategoryID'];
-                    $this->SetField($ArticleCategoryID, 'LastDateInserted', $MaxDate);
+                    $articleCategoryID = (int)$category['ArticleCategoryID'];
+                    $this->setField($articleCategoryID, 'LastDateInserted', $maxDate);
                 }
 
                 break;
         }
 
-        self::ClearCache();
+        self::clearCache();
 
-        return $Result;
+        return $result;
     }
 
     /**
      * Gets multiple ArticleCategories based on given criteria (respecting user permission).
      *
-     * @param array $Wheres SQL conditions.
+     * @param array $wheres SQL conditions.
      *
      * @return Gdn_DataSet SQL result.
      */
-    public function Get($Wheres = null, $PermFilter = 'Articles.Articles.View') {
+    public function get($wheres = null, $permFilter = 'Articles.Articles.View') {
         // Set up selection query.
-        $this->SQL->Select('ac.*')->From('ArticleCategory ac');
+        $this->SQL->select('ac.*')->from('ArticleCategory ac');
 
         // Handle SQL conditions for wheres.
-        $this->EventArguments['Wheres'] = &$Wheres;
-        $this->FireEvent('BeforeGet');
+        $this->EventArguments['Wheres'] = &$wheres;
+        $this->fireEvent('BeforeGet');
 
-        if (is_array($Wheres)) {
-            $this->SQL->Where($Wheres);
+        if (is_array($wheres)) {
+            $this->SQL->where($wheres);
         }
 
         // Exclude root category
-        $this->SQL->Where('ArticleCategoryID <>', '-1');
+        $this->SQL->where('ArticleCategoryID <>', '-1');
 
         // Respect user permission
-        $this->SQL->BeginWhereGroup()
-            ->Permission($PermFilter, 'ac', 'PermissionArticleCategoryID', 'ArticleCategory')
-            ->EndWhereGroup();
+        $this->SQL->beginWhereGroup()
+            ->permission($permFilter, 'ac', 'PermissionArticleCategoryID', 'ArticleCategory')
+            ->endWhereGroup();
 
         // Set order of data.
-        $this->SQL->OrderBy('ac.Name', 'asc');
+        $this->SQL->orderBy('ac.Name', 'asc');
 
         // Fetch data.
-        $Categories = $this->SQL->Get();
+        $categories = $this->SQL->get();
 
         // Prepare and fire event.
-        $this->EventArguments['Data'] = $Categories;
-        $this->FireEvent('AfterGet');
+        $this->EventArguments['Data'] = $categories;
+        $this->fireEvent('AfterGet');
 
-        return $Categories;
+        return $categories;
     }
 
     /**
@@ -418,94 +408,94 @@ class ArticleCategoryModel extends Gdn_Model {
      *
      * @return void
      * @throws Exception on invalid category for deletion.
-     * @param object $Category
-     * @param int $ReplacementArticleCategoryID Unique ID of category all discussion are being move to.
+     * @param object $category
+     * @param int $replacementArticleCategoryID Unique ID of category all discussion are being move to.
      */
-    public function Delete($Category, $ReplacementArticleCategoryID) {
+    public function delete($category, $replacementArticleCategoryID) {
         // Don't do anything if the required category object & properties are not defined.
-        if (!is_object($Category)
-            || !property_exists($Category, 'ArticleCategoryID')
-            || !property_exists($Category, 'Name')
-            || $Category->ArticleCategoryID <= 0
+        if (!is_object($category)
+            || !property_exists($category, 'ArticleCategoryID')
+            || !property_exists($category, 'Name')
+            || $category->ArticleCategoryID <= 0
         ) {
             throw new Exception(T('Invalid category for deletion.'));
         } else {
             // If there is a replacement category...
-            if ($ReplacementArticleCategoryID > 0) {
+            if ($replacementArticleCategoryID > 0) {
                 // Update articles.
                 $this->SQL
-                    ->Update('Article')
-                    ->Set('ArticleCategoryID', $ReplacementArticleCategoryID)
-                    ->Where('ArticleCategoryID', $Category->ArticleCategoryID)
-                    ->Put();
+                    ->update('Article')
+                    ->set('ArticleCategoryID', $replacementArticleCategoryID)
+                    ->where('ArticleCategoryID', $category->ArticleCategoryID)
+                    ->put();
 
                 // Update the article count.
-                $Count = $this->SQL
-                    ->Select('ArticleID', 'count', 'ArticleCount')
-                    ->From('Article')
-                    ->Where('ArticleCategoryID', $ReplacementArticleCategoryID)
-                    ->Get()
-                    ->FirstRow()
+                $count = $this->SQL
+                    ->select('ArticleID', 'count', 'ArticleCount')
+                    ->from('Article')
+                    ->where('ArticleCategoryID', $replacementArticleCategoryID)
+                    ->get()
+                    ->firstRow()
                     ->ArticleCount;
 
-                if (!is_numeric($Count)) {
-                    $Count = 0;
+                if (!is_numeric($count)) {
+                    $count = 0;
                 }
 
                 $this->SQL
-                    ->Update('ArticleCategory')->Set('CountArticles', $Count)
-                    ->Where('ArticleCategoryID', $ReplacementArticleCategoryID)
-                    ->Put();
+                    ->update('ArticleCategory')->set('CountArticles', $count)
+                    ->where('ArticleCategoryID', $replacementArticleCategoryID)
+                    ->put();
             } else {
                 // Delete comments in this category.
                 $this->SQL
-                    ->From('ArticleComment ac')
-                    ->Join('Article a', 'ac.ArticleID = a.ArticleID')
-                    ->Where('a.ArticleID', $Category->ArticleCategoryID)
-                    ->Delete();
+                    ->from('ArticleComment ac')
+                    ->join('Article a', 'ac.ArticleID = a.ArticleID')
+                    ->where('a.ArticleID', $category->ArticleCategoryID)
+                    ->delete();
 
                 // Delete articles in this category.
-                $this->SQL->Delete('Article', array('ArticleCategoryID' => $Category->ArticleCategoryID));
+                $this->SQL->delete('Article', array('ArticleCategoryID' => $category->ArticleCategoryID));
             }
 
             // Finally, delete the category.
-            $this->SQL->Delete('ArticleCategory', array('ArticleCategoryID' => $Category->ArticleCategoryID));
+            $this->SQL->delete('ArticleCategory', array('ArticleCategoryID' => $category->ArticleCategoryID));
         }
     }
 
     /**
      * Saves the category.
      *
-     * @param array $FormPostValues The values being posted back from the form.
+     * @param array $formPostValues The values being posted back from the form.
      * @return int ID of the saved category.
      */
-    public function Save($FormPostValues) {
+    public function save($formPostValues) {
         // Define the primary key in this model's table.
         $this->defineSchema();
 
         // Get data from form
-        $ArticleCategoryID = arrayValue('ArticleCategoryID', $FormPostValues);
-        $NewName = arrayValue('Name', $FormPostValues, '');
-        $UrlCode = arrayValue('UrlCode', $FormPostValues, '');
-        $CustomPermissions = (bool)val('CustomPermissions', $FormPostValues);
+        $articleCategoryID = arrayValue('ArticleCategoryID', $formPostValues);
+        $newName = arrayValue('Name', $formPostValues, '');
+        $urlCode = arrayValue('UrlCode', $formPostValues, '');
+        $customPermissions = (bool)val('CustomPermissions', $formPostValues);
 
         // Is this a new category?
-        $Insert = $ArticleCategoryID > 0 ? false : true;
-        if ($Insert) {
-            $this->AddInsertFields($FormPostValues);
+        $insert = $articleCategoryID > 0 ? false : true;
+        if ($insert) {
+            $this->addInsertFields($formPostValues);
         }
 
-        $this->AddUpdateFields($FormPostValues);
+        $this->addUpdateFields($formPostValues);
         $this->Validation->applyRule('UrlCode', 'Required');
         $this->Validation->applyRule('UrlCode', 'UrlStringRelaxed');
 
         // Make sure that the UrlCode is unique among categories.
         $this->SQL->select('ArticleCategoryID')
             ->from('ArticleCategory')
-            ->where('UrlCode', $UrlCode);
+            ->where('UrlCode', $urlCode);
 
-        if ($ArticleCategoryID) {
-            $this->SQL->where('ArticleCategoryID <>', $ArticleCategoryID);
+        if ($articleCategoryID) {
+            $this->SQL->where('ArticleCategoryID <>', $articleCategoryID);
         }
 
         if ($this->SQL->get()->numRows()) {
@@ -514,154 +504,154 @@ class ArticleCategoryModel extends Gdn_Model {
         }
 
         //	Prep and fire event.
-        $this->EventArguments['FormPostValues'] = &$FormPostValues;
-        $this->EventArguments['ArticleCategoryID'] = $ArticleCategoryID;
+        $this->EventArguments['FormPostValues'] = &$formPostValues;
+        $this->EventArguments['ArticleCategoryID'] = $articleCategoryID;
         $this->fireEvent('BeforeSaveArticleCategory');
 
         // Validate the form posted values
-        if ($this->validate($FormPostValues, $Insert)) {
-            $Fields = $this->Validation->SchemaValidationFields();
-            $Fields = RemoveKeyFromArray($Fields, 'ArticleCategoryID');
+        if ($this->validate($formPostValues, $insert)) {
+            $fields = $this->Validation->schemaValidationFields();
+            $fields = removeKeyFromArray($fields, 'ArticleCategoryID');
 
-            if ($Insert === false) {
-                $OldCategory = $this->getID($ArticleCategoryID, DATASET_TYPE_ARRAY);
+            if ($insert === false) {
+                $oldCategory = $this->getID($articleCategoryID, DATASET_TYPE_ARRAY);
 
-                $this->update($Fields, array('ArticleCategoryID' => $ArticleCategoryID));
+                $this->update($fields, array('ArticleCategoryID' => $articleCategoryID));
 
-                $this->SetCache($ArticleCategoryID, $Fields);
+                $this->setCache($articleCategoryID, $fields);
             } else {
-                $ArticleCategoryID = $this->insert($Fields);
+                $articleCategoryID = $this->insert($fields);
 
-                if ($ArticleCategoryID) {
-                    if ($CustomPermissions) {
-                        $this->SQL->put('ArticleCategory', array('PermissionArticleCategoryID' => $ArticleCategoryID),
-                            array('ArticleCategoryID' => $ArticleCategoryID));
+                if ($articleCategoryID) {
+                    if ($customPermissions) {
+                        $this->SQL->put('ArticleCategory', array('PermissionArticleCategoryID' => $articleCategoryID),
+                            array('ArticleCategoryID' => $articleCategoryID));
                     }
                 }
             }
 
             // Save the permissions
-            if ($ArticleCategoryID) {
+            if ($articleCategoryID) {
                 // Check to see if this category uses custom permissions.
-                if ($CustomPermissions) {
-                    $PermissionModel = Gdn::permissionModel();
-                    $Permissions = $PermissionModel->PivotPermissions(val('Permission', $FormPostValues, array()),
-                        array('JunctionID' => $ArticleCategoryID));
-                    $PermissionModel->SaveAll($Permissions,
-                        array('JunctionID' => $ArticleCategoryID, 'JunctionTable' => 'ArticleCategory'));
+                if ($customPermissions) {
+                    $permissionModel = Gdn::permissionModel();
+                    $permissions = $permissionModel->pivotPermissions(val('Permission', $formPostValues, array()),
+                        array('JunctionID' => $articleCategoryID));
+                    $permissionModel->saveAll($permissions,
+                        array('JunctionID' => $articleCategoryID, 'JunctionTable' => 'ArticleCategory'));
 
-                    if (!$Insert) {
+                    if (!$insert) {
                         // Update this category's permission.
-                        $this->SQL->put('ArticleCategory', array('PermissionArticleCategoryID' => $ArticleCategoryID),
-                            array('ArticleCategoryID' => $ArticleCategoryID));
+                        $this->SQL->put('ArticleCategory', array('PermissionArticleCategoryID' => $articleCategoryID),
+                            array('ArticleCategoryID' => $articleCategoryID));
                     }
-                } elseif (!$Insert) {
+                } elseif (!$insert) {
                     // Delete my custom permissions.
                     $this->SQL->delete(
                         'Permission',
-                        array('JunctionTable' => 'ArticleCategory', 'JunctionColumn' => 'PermissionArticleCategoryID', 'JunctionID' => $ArticleCategoryID)
+                        array('JunctionTable' => 'ArticleCategory', 'JunctionColumn' => 'PermissionArticleCategoryID', 'JunctionID' => $articleCategoryID)
                     );
 
                     // Update this category's permission.
                     $this->SQL->put('ArticleCategory', array('PermissionArticleCategoryID' => -1),
-                        array('ArticleCategoryID' => $ArticleCategoryID));
+                        array('ArticleCategoryID' => $articleCategoryID));
                 }
 
-                self::ClearCache();
+                self::clearCache();
             }
 
             // Force the user permissions to refresh.
-            Gdn::UserModel()->ClearPermissions();
+            Gdn::userModel()->clearPermissions();
         } else {
-            $ArticleCategoryID = false;
+            $articleCategoryID = false;
         }
 
-        return $ArticleCategoryID;
+        return $articleCategoryID;
     }
 
     /**
      * Update a row in the database.
      *
-     * @param int $RowID
-     * @param array|string $Property
-     * @param mixed $Value
+     * @param int $rowID
+     * @param array|string $property
+     * @param mixed $value
      */
-    public function SetField($RowID, $Property, $Value = false) {
-        parent::SetField($RowID, $Property, $Value);
+    public function setField($rowID, $property, $value = false) {
+        parent::setField($rowID, $property, $value);
 
         // Set the cache.
-        self::SetCache($RowID, $Property);
+        self::setCache($rowID, $property);
     }
 
     /**
      * Update fields of rows in the database.
      *
-     * @param array $Fields
-     * @param array $Where
-     * @param array $Limit
+     * @param array $fields
+     * @param array $where
+     * @param array $limit
      * @return Gdn_Dataset
      */
-    public function Update($Fields, $Where = false, $Limit = false) {
-        parent::Update($Fields, $Where, $Limit);
+    public function update($fields, $where = false, $limit = false) {
+        parent::update($fields, $where, $limit);
 
         // Clear the cache.
-        self::ClearCache();
+        self::clearCache();
     }
 
     /**
      * Get article category by ID.
      *
-     * @param int $ArticleCategoryID
+     * @param int $articleCategoryID
      * @return bool|object
      */
-    public function GetByID($ArticleCategoryID) {
+    public function getByID($articleCategoryID) {
         // Set up the query.
-        $this->SQL->Select('ac.*')
-            ->From('ArticleCategory ac')
-            ->Where('ac.ArticleCategoryID', $ArticleCategoryID);
+        $this->SQL->select('ac.*')
+            ->from('ArticleCategory ac')
+            ->where('ac.ArticleCategoryID', $articleCategoryID);
 
         // Fetch data.
-        $Category = $this->SQL->Get()->FirstRow();
+        $category = $this->SQL->get()->firstRow();
 
-        return $Category;
+        return $category;
     }
 
     /**
      * Get article category by URL code.
      *
-     * @param string $ArticleCategoryID
+     * @param string $categoryUrlCode
      * @return bool|object
      */
-    public function GetByUrlCode($CategoryUrlCode) {
+    public function getByUrlCode($categoryUrlCode) {
         // Set up the query.
-        $this->SQL->Select('ac.*')
-            ->From('ArticleCategory ac')
-            ->Where('ac.UrlCode', $CategoryUrlCode);
+        $this->SQL->select('ac.*')
+            ->from('ArticleCategory ac')
+            ->where('ac.UrlCode', $categoryUrlCode);
 
         // Fetch data.
-        $Category = $this->SQL->Get()->FirstRow();
+        $category = $this->SQL->get()->firstRow();
 
-        return $Category;
+        return $category;
     }
 
     /**
      * Determines and sets the most recent post fields
      * for a specific article category ID.
      *
-     * @param int $ArticleCategoryID
+     * @param int $articleCategoryID
      */
-    public function SetRecentPost($ArticleCategoryID) {
-        $Row = $this->SQL
-            ->GetWhere('Article', array('ArticleCategoryID' => $ArticleCategoryID), 'DateLastArticleComment', 'desc', 1)
-            ->FirstRow(DATASET_TYPE_ARRAY);
+    public function setRecentPost($articleCategoryID) {
+        $row = $this->SQL
+            ->getWhere('Article', array('ArticleCategoryID' => $articleCategoryID), 'DateLastArticleComment', 'desc', 1)
+            ->firstRow(DATASET_TYPE_ARRAY);
 
-        $Fields = array('LastArticleCommentID' => null, 'LastArticleID' => null);
+        $fields = array('LastArticleCommentID' => null, 'LastArticleID' => null);
 
-        if ($Row) {
-            $Fields['LastArticleCommentID'] = $Row['LastArticleCommentID'];
-            $Fields['LastArticleID'] = $Row['ArticleID'];
+        if ($row) {
+            $fields['LastArticleCommentID'] = $row['LastArticleCommentID'];
+            $fields['LastArticleID'] = $row['ArticleID'];
         }
 
-        $this->SetField($ArticleCategoryID, $Fields);
+        $this->setField($articleCategoryID, $fields);
     }
 }

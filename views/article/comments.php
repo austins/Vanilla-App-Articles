@@ -1,27 +1,27 @@
 <?php defined('APPLICATION') or exit();
 
 $Controller = Gdn::Controller();
-$Session = Gdn::Session();
+$session = Gdn::session();
 ?>
 <section id="comments">
     <?php
-    $Comments = $this->ArticleComments->Result();
+    $Comments = $this->ArticleComments->result();
     $Article = $this->Article;
     $CurrentOffset = 0;
-    $canGuestsComment = C('Articles.Comments.AllowGuests', false);
+    $canGuestsComment = c('Articles.Comments.AllowGuests', false);
 
-    if (($this->ArticleComments->NumRows() > 0) || (!$Session->isValid() && !$canGuestsComment)) {
+    if (($this->ArticleComments->numRows() > 0) || (!$session->isValid() && !$canGuestsComment)) {
         echo '<h2 class="CommentHeading">' . T('Comments') . '</h2>';
     }
 
-    if ($this->ArticleComments->NumRows() > 0):
+    if ($this->ArticleComments->numRows() > 0):
         ?>
         <div class="DataBox DataBox-Comments">
             <?php
             // Pager
             $this->Pager->Wrapper = '<span %1$s>%2$s</span>';
             echo '<span class="BeforeCommentHeading">';
-            $this->FireEvent('BeforeCommentHeading');
+            $this->fireEvent('BeforeCommentHeading');
             echo $this->Pager->ToString('less');
             echo '</span>';
             ?>
@@ -33,10 +33,10 @@ $Session = Gdn::Session();
 
                     $User = false;
                     if (is_numeric($Comment->InsertUserID))
-                        $User = Gdn::UserModel()->GetID($Comment->InsertUserID);
+                        $User = Gdn::userModel()->getID($Comment->InsertUserID);
 
                     // Get user meta for articles app.
-                    $UserMeta = Gdn::UserModel()->GetMeta($User->UserID, 'Articles.%', 'Articles.');
+                    $UserMeta = Gdn::userModel()->GetMeta($User->UserID, 'Articles.%', 'Articles.');
                     $AuthorDisplayName = false;
                     if (isset($UserMeta['AuthorDisplayName'])) {
                         $AuthorDisplayName = $UserMeta['AuthorDisplayName'];
@@ -62,7 +62,7 @@ $Session = Gdn::Session();
                                         if (($AuthorDisplayName != '') && ($AuthorDisplayName != $User->Name))
                                             echo ' (' . $AuthorDisplayName . ')';
 
-                                        $this->FireEvent('AuthorPhoto');
+                                        $this->fireEvent('AuthorPhoto');
                                     } else {
                                         echo Wrap($Comment->GuestName, 'span', array('class' => 'Username GuestName'));
                                     }
@@ -75,20 +75,20 @@ $Session = Gdn::Session();
                                     echo ' ' . WrapIf(htmlspecialchars(val('Location', $User)), 'span',
                                             array('class' => 'MItem AuthorLocation'));
 
-                                    $this->FireEvent('AuthorInfo');
+                                    $this->fireEvent('AuthorInfo');
                                     ?>
                                 </span>
                                 </div>
 
                                 <div class="Meta CommentMeta CommentInfo">
-                                <span class="MItem DateCreated"><?php echo Anchor(Gdn_Format::Date($Comment->DateInserted,
-                                            'html'), ArticleCommentUrl($Comment->ArticleCommentID), 'Permalink',
+                                <span class="MItem DateCreated"><?php echo Anchor(Gdn_Format::date($Comment->DateInserted,
+                                            'html'), articleCommentUrl($Comment->ArticleCommentID), 'Permalink',
                                         array('name' => 'Item_' . ($CurrentOffset), 'rel' => 'nofollow')); ?></span>
                                     <?php
                                     echo DateUpdated($Comment, array('<span class="MItem">', '</span>'));
 
                                     // Include IP Address if we have permission
-                                    if ($Session->CheckPermission('Garden.Moderation.Manage'))
+                                    if ($session->checkPermission('Garden.Moderation.Manage'))
                                         echo Wrap(IPAnchor($Comment->InsertIPAddress), 'span',
                                             array('class' => 'MItem IPAddress'));
                                     ?>
@@ -105,13 +105,13 @@ $Session = Gdn::Session();
                                         $Controller->EventArguments['Object'] = &$Comment;
                                         $Controller->EventArguments['Type'] = 'ArticleComment';
 
-                                        $Controller->FireEvent('BeforeCommentBody');
+                                        $Controller->fireEvent('BeforeCommentBody');
                                         echo $Comment->FormatBody;
-                                        $Controller->FireEvent('AfterCommentFormat');
+                                        $Controller->fireEvent('AfterCommentFormat');
                                         ?>
                                     </div>
                                     <?php
-                                    $this->FireEvent('AfterCommentBody');
+                                    $this->fireEvent('AfterCommentBody');
                                     WriteArticleReactions($Comment);
                                     ?>
                                 </div>
@@ -124,7 +124,7 @@ $Session = Gdn::Session();
             </ul>
             <?php
             // Pager
-            $this->FireEvent('AfterComments');
+            $this->fireEvent('AfterComments');
             if ($this->Pager->LastPage()) {
                 $LastCommentID = $this->AddDefinition('LastCommentID');
                 if (!$LastCommentID || $this->ArticleCommentModel->LastArticleCommentID > $LastCommentID)

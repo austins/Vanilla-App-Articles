@@ -1,12 +1,12 @@
 <?php defined('APPLICATION') or exit();
 
-if (!function_exists('ShowArticleOptions'))
-    include($this->FetchViewLocation('helper_functions', 'article', 'articles'));
+if (!function_exists('showArticleOptions'))
+    include($this->fetchViewLocation('helper_functions', 'article', 'articles'));
 
 $Article = $this->Article;
 
-$ArticleUrl = ArticleUrl($Article);
-$Author = Gdn::UserModel()->GetID($Article->InsertUserID);
+$ArticleUrl = articleUrl($Article);
+$Author = Gdn::userModel()->getID($Article->InsertUserID);
 
 $Category = $this->ArticleCategory;
 
@@ -16,35 +16,35 @@ else
     $CommentCountText = Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
 ?>
 <article id="Article_<?php echo $Article->ArticleID; ?>" class="Article">
-    <?php ShowArticleOptions($Article); ?>
+    <?php showArticleOptions($Article); ?>
 
     <header>
         <h1 class="ArticleTitle"><?php echo $Article->Name; ?></h1>
 
         <div class="Meta Meta-Article">
             <?php
-            Gdn::Controller()->FireEvent('BeforeArticleMeta');
+            Gdn::Controller()->fireEvent('BeforeArticleMeta');
 
-            echo ArticleTag($Article, 'Closed', 'Closed');
+            echo articleTag($Article, 'Closed', 'Closed');
 
-            Gdn::Controller()->FireEvent('AfterArticleLabels');
+            Gdn::Controller()->fireEvent('AfterArticleLabels');
             ?>
             <span
                 class="MItem ArticleCategory"><?php echo Anchor($Category->Name,
-                    ArticleCategoryUrl($Category)); ?></span>
+                    articleCategoryUrl($Category)); ?></span>
                     <span
-                        class="MItem ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
+                        class="MItem ArticleDate"><?php echo Gdn_Format::date($Article->DateInserted,
                             '%e %B %Y - %l:%M %p'); ?></span>
-            <span class="MItem ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
+            <span class="MItem ArticleAuthor"><?php echo articleAuthorAnchor($Author); ?></span>
             <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText,
                     $ArticleUrl . '#comments'); ?></span>
         </div>
     </header>
 
-    <div class="ArticleBody"><?php echo FormatArticleBody($Article->Body, $Article->Format); ?></div>
+    <div class="ArticleBody"><?php echo formatArticleBody($Article->Body, $Article->Format); ?></div>
 </article>
 
-<?php $this->FireEvent('AfterArticle'); ?>
+<?php $this->fireEvent('AfterArticle'); ?>
 
 <?php
 $authorMeta = UserModel::getMeta($Author->UserID, 'Articles.%', 'Articles.');
@@ -75,25 +75,25 @@ if (c('Articles.Articles.ShowAuthorInfo', false) && (count($authorMeta) > 0) && 
 <?php
 endif;
 
-if (C('Articles.Articles.ShowSimilarArticles')) {
-    $SimilarArticles = $this->Data('SimilarArticles');
+if (c('Articles.Articles.ShowSimilarArticles')) {
+    $SimilarArticles = $this->data('SimilarArticles');
 
-    if ($SimilarArticles->NumRows() > 0) {
+    if ($SimilarArticles->numRows() > 0) {
         echo '<div id="SimilarArticles">
             <h2 class="H">' . T('You may be interested in...') . '</h2>';
 
         echo '<ul class="DataList">';
         foreach ($SimilarArticles as $SimilarArticle) {
-            $SimilarArticleCategory = $this->ArticleCategoryModel->GetByID($SimilarArticle->ArticleCategoryID);
-            $SimilarArticleAuthor = Gdn::UserModel()->GetID($SimilarArticle->InsertUserID);
+            $SimilarArticleCategory = $this->ArticleCategoryModel->getByID($SimilarArticle->ArticleCategoryID);
+            $SimilarArticleAuthor = Gdn::userModel()->getID($SimilarArticle->InsertUserID);
 
             echo '<li class="SimilarArticle">
-                ' . Anchor($SimilarArticle->Name, ArticleUrl($SimilarArticle)) . '
+                ' . Anchor($SimilarArticle->Name, articleUrl($SimilarArticle)) . '
 
                 <div class="Meta Meta-Article">
-                    <span class="MItem ArticleCategory">' . Anchor($SimilarArticleCategory->Name, ArticleCategoryUrl($SimilarArticleCategory->UrlCode)) . '</span>
-                    <span class="MItem ArticleDate">' . Gdn_Format::Date($SimilarArticle->DateInserted, '%e %B %Y - %l:%M %p') . '</span>
-                    <span class="MItem ArticleAuthor">' . ArticleAuthorAnchor($SimilarArticleAuthor) . '</span>
+                    <span class="MItem ArticleCategory">' . Anchor($SimilarArticleCategory->Name, articleCategoryUrl($SimilarArticleCategory->UrlCode)) . '</span>
+                    <span class="MItem ArticleDate">' . Gdn_Format::date($SimilarArticle->DateInserted, '%e %B %Y - %l:%M %p') . '</span>
+                    <span class="MItem ArticleAuthor">' . articleAuthorAnchor($SimilarArticleAuthor) . '</span>
                 </div>
             </li>';
         }
@@ -103,5 +103,5 @@ if (C('Articles.Articles.ShowSimilarArticles')) {
     }
 }
 
-include $this->FetchViewLocation('comments', 'article', 'Articles');
+include $this->fetchViewLocation('comments', 'article', 'Articles');
 ?>

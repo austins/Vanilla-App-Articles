@@ -9,7 +9,7 @@ $RequestMethod = strtolower($Controller->RequestMethod);
     echo Anchor(T('New Article'), '/compose/article',
         'Button Action Big Primary BigButton NewArticle');
 
-    Gdn::Controller()->FireEvent('AfterNewArticleButton');
+    Gdn::Controller()->fireEvent('AfterNewArticleButton');
     ?>
 </div>
 

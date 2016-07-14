@@ -1,10 +1,10 @@
 <?php defined('APPLICATION') or exit();
 
-if (!function_exists('ShowArticleOptions'))
-    include($this->FetchViewLocation('helper_functions', 'article', 'articles'));
+if (!function_exists('showArticleOptions'))
+    include($this->fetchViewLocation('helper_functions', 'article', 'articles'));
 
-$Articles = $this->Data('Articles')->Result();
-$ArticleCount = $this->Data('Articles')->NumRows();
+$Articles = $this->data('Articles')->result();
+$ArticleCount = $this->data('Articles')->numRows();
 
 echo Wrap(T('Article Posts'), 'h1', array('class' => 'H'));
 
@@ -13,9 +13,9 @@ if (count($Articles) == 0)
 else {
     // Set up pager.
     $PagerOptions = array('Wrapper' => '<span class="PagerNub">&#160;</span><div %1$s>%2$s</div>',
-        'RecordCount' => $this->Data('CountArticles'), 'CurrentRecords' => $this->Data('Articles')->NumRows());
-    if ($this->Data('_PagerUrl'))
-        $PagerOptions['Url'] = $this->Data('_PagerUrl');
+        'RecordCount' => $this->data('CountArticles'), 'CurrentRecords' => $this->data('Articles')->numRows());
+    if ($this->data('_PagerUrl'))
+        $PagerOptions['Url'] = $this->data('_PagerUrl');
 
     echo '<div class="PageControls Top">';
     PagerModule::Write($PagerOptions);
@@ -23,21 +23,21 @@ else {
 
     echo '<ul class="DataList Articles">';
     foreach ($Articles as $Article):
-        $ArticleUrl = ArticleUrl($Article);
-        $Author = Gdn::UserModel()->GetID($Article->InsertUserID);
+        $ArticleUrl = articleUrl($Article);
+        $Author = Gdn::userModel()->getID($Article->InsertUserID);
 
-        $Category = $this->ArticleCategoryModel->GetByID($Article->ArticleCategoryID);
+        $Category = $this->ArticleCategoryModel->getByID($Article->ArticleCategoryID);
 
         $CommentCountText = ($Article->CountArticleComments == 0) ? '0 Comments'
             : Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
 
         $CssClass = 'Item ItemArticle';
 
-        if ($Article->InsertUserID == Gdn::Session()->UserID)
+        if ($Article->InsertUserID == Gdn::session()->UserID)
             $CssClass .= ' Mine';
         ?>
         <li id="Article_<?php echo $Article->ArticleID; ?>" class="<?php echo $CssClass; ?>">
-            <?php ShowArticleOptions($Article); ?>
+            <?php showArticleOptions($Article); ?>
 
             <div class="ItemContent Article">
                 <div class="Title"><?php echo Anchor($Article->Name, $ArticleUrl); ?></div>
@@ -60,11 +60,11 @@ else {
                     ?>
                     <span
                         class="MItem MCount ArticleCategory"><?php echo Anchor($Category->Name,
-                            ArticleCategoryUrl($Category)); ?></span>
+                            articleCategoryUrl($Category)); ?></span>
                     <span
-                        class="MItem MCount ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted,
+                        class="MItem MCount ArticleDate"><?php echo Gdn_Format::date($Article->DateInserted,
                             '%e %B %Y - %l:%M %p'); ?></span>
-                    <span class="MItem MCount ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
+                    <span class="MItem MCount ArticleAuthor"><?php echo articleAuthorAnchor($Author); ?></span>
                     <span
                         class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText,
                             $ArticleUrl . '#comments'); ?></span>

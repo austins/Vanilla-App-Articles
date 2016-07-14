@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-if (!function_exists('ArticleUrl')) {
+if (!function_exists('articleUrl')) {
     /**
      * Get the URL of an article.
      *
@@ -25,35 +25,35 @@ if (!function_exists('ArticleUrl')) {
      * @param bool $WithDomain
      * @return string
      */
-    function ArticleUrl($Article, $Page = '', $WithDomain = true) {
+    function articleUrl($Article, $Page = '', $WithDomain = true) {
         // If $Article type is an array, then cast it to an object.
         if (is_array($Article))
             $Article = (object)$Article;
 
         // Set up the initial URL string.
-        $Result = '/article/' . Gdn_Format::Date($Article->DateInserted, '%Y') . '/' . $Article->UrlCode;
+        $Result = '/article/' . Gdn_Format::date($Article->DateInserted, '%Y') . '/' . $Article->UrlCode;
 
         // Add in the page number if necessary.
-        if ($Page && ($Page > 1 || Gdn::Session()->UserID))
+        if ($Page && ($Page > 1 || Gdn::session()->UserID))
             $Result .= '/p' . $Page;
 
-        return Url($Result, $WithDomain);
+        return url($Result, $WithDomain);
     }
 }
 
-if (!function_exists('ArticleCommentUrl')) {
+if (!function_exists('articleCommentUrl')) {
     /**
      * Get the URL for an article comment.
      *
      * @param int $ArticleCommentID
      * @return string
      */
-    function ArticleCommentUrl($ArticleCommentID) {
-        return Url("/article/comment/$ArticleCommentID/#Comment_$ArticleCommentID", true);
+    function articleCommentUrl($ArticleCommentID) {
+        return url("/article/comment/$ArticleCommentID/#Comment_$ArticleCommentID", true);
     }
 }
 
-if (!function_exists('FormatArticleBody')) {
+if (!function_exists('formatArticleBody')) {
     /**
      * Formats the body string of an article.
      *
@@ -61,7 +61,7 @@ if (!function_exists('FormatArticleBody')) {
      * @param string $Format
      * @return string
      */
-    function FormatArticleBody($ArticleBody, $Format = 'Html') {
+    function formatArticleBody($ArticleBody, $Format = 'Html') {
         if (strcasecmp($Format, 'Html') == 0) {
             // Format links and links to videos.
             $ArticleBody = Gdn_Format::Links($ArticleBody);
@@ -85,7 +85,7 @@ if (!function_exists('FormatArticleBody')) {
     }
 }
 
-if (!function_exists('ArticleCategoryUrl')) {
+if (!function_exists('articleCategoryUrl')) {
     /**
      * Get the URL of an article category.
      *
@@ -94,7 +94,7 @@ if (!function_exists('ArticleCategoryUrl')) {
      * @param bool $WithDomain
      * @return string
      */
-    function ArticleCategoryUrl($Category, $Page = '', $WithDomain = true) {
+    function articleCategoryUrl($Category, $Page = '', $WithDomain = true) {
         // If $Category type is an array, then cast it to an object.
         if (is_array($Category))
             $Category = (object)$Category;
@@ -107,21 +107,21 @@ if (!function_exists('ArticleCategoryUrl')) {
         $Result = '/articles/category/' . $UrlCode;
 
         // Add in the page number if necessary.
-        if ($Page && ($Page > 1 || Gdn::Session()->UserID))
+        if ($Page && ($Page > 1 || Gdn::session()->UserID))
             $Result .= '/p' . $Page;
 
-        return Url($Result, $WithDomain);
+        return url($Result, $WithDomain);
     }
 }
 
-if (!function_exists('ArticleAuthorAnchor')) {
+if (!function_exists('articleAuthorAnchor')) {
     /**
      * Get the URL for the author of an article.
      */
-    function ArticleAuthorAnchor($User, $CssClass = null, $Options = null) {
+    function articleAuthorAnchor($User, $CssClass = null, $Options = null) {
         static $NameUnique = NULL;
         if ($NameUnique === NULL)
-            $NameUnique = C('Garden.Registration.NameUnique');
+            $NameUnique = c('Garden.Registration.NameUnique');
 
         if (is_array($CssClass)) {
             $Options = $CssClass;
@@ -146,6 +146,6 @@ if (!function_exists('ArticleAuthorAnchor')) {
         );
 
         $UserUrl = 'profile/articles/' . $UserID . '/' . $Name;
-        return '<a href="'.htmlspecialchars(Url($UserUrl)).'"'.Attribute($Attributes).'>'.$Text.'</a>';
+        return '<a href="'.htmlspecialchars(url($UserUrl)).'"'.Attribute($Attributes).'>'.$Text.'</a>';
     }
 }

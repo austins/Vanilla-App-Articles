@@ -1,15 +1,15 @@
 <?php defined('APPLICATION') or exit(); ?>
-<h1 class="H HomepageTitle"><?php echo $this->Data('Title'); ?></h1>
+<h1 class="H HomepageTitle"><?php echo $this->data('Title'); ?></h1>
 <ul class="DataList ArticleCategoryList">
     <?php
-    $Categories = $this->Data('ArticleCategories');
+    $Categories = $this->data('ArticleCategories');
 
     foreach ($Categories as $Category) :
         ?>
         <li id="ArticleCategory_<?php echo $Category->ArticleCategoryID; ?>"
             class="Item Item-ArticleCategory-<?php echo $Category->UrlCode; ?>">
             <div class="ItemContent ArticleCategory">
-                <div class="TitleWrap"><?php echo Anchor($Category->Name, ArticleCategoryUrl($Category)); ?></div>
+                <div class="TitleWrap"><?php echo Anchor($Category->Name, articleCategoryUrl($Category)); ?></div>
                 <div class="ArticleCategoryDescription"><?php echo $Category->Description; ?></div>
                 <div class="Meta">
                     <span class="MItem ArticleCount"><?php echo Plural(number_format($Category->CountArticles),

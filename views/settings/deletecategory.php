@@ -1,17 +1,17 @@
 <?php defined('APPLICATION') or exit();
 
-$Category = $this->Data('Category');
-$OtherCategories = $this->Data('OtherCategories');
+$Category = $this->data('Category');
+$OtherCategories = $this->data('OtherCategories');
 
 echo $this->Form->Open();
 echo $this->Form->Errors();
 
 if (is_object($OtherCategories)) {
     ?>
-    <h1><?php echo $this->Title(); ?></h1>
+    <h1><?php echo $this->title(); ?></h1>
     <ul>
     <?php
-    if ($OtherCategories->NumRows() == 0) {
+    if ($OtherCategories->numRows() == 0) {
         ?>
         <li><p class="Warning"><?php echo T('Are you sure you want to delete this category?'); ?></p></li>
     <?php

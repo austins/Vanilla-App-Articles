@@ -1,7 +1,7 @@
 <?php defined('APPLICATION') or exit();
 
-$Session = Gdn::Session();
-$GuestCommenting = (C('Articles.Comments.AllowGuests', false) && !$Session->IsValid());
+$session = Gdn::session();
+$GuestCommenting = (c('Articles.Comments.AllowGuests', false) && !$session->isValid());
 $Editing = isset($this->Comment);
 
 $this->EventArguments['FormCssClass'] = 'MessageForm CommentForm FormTitleWrapper';
@@ -9,23 +9,23 @@ $this->EventArguments['FormCssClass'] = 'MessageForm CommentForm FormTitleWrappe
 if ($GuestCommenting)
     $this->EventArguments['FormCssClass'] .= ' Guest';
 
-$this->FireEvent('BeforeCommentForm');
+$this->fireEvent('BeforeCommentForm');
 ?>
 <div id="CommentBox" class="<?php echo $this->EventArguments['FormCssClass']; ?>">
     <h2 class="H"><?php echo T($Editing ? 'Edit Comment' : 'Leave a Comment'); ?></h2>
 
     <div class="CommentFormWrap">
-        <?php if (Gdn::Session()->IsValid()): ?>
+        <?php if (Gdn::session()->isValid()): ?>
             <div class="Form-HeaderWrap">
                 <div class="Form-Header">
             <span class="Author">
                <?php
-               if (C('Articles.Comment.UserPhotoFirst', true)) {
-                   echo UserPhoto($Session->User);
-                   echo UserAnchor($Session->User, 'Username');
+               if (c('Articles.Comment.UserPhotoFirst', true)) {
+                   echo UserPhoto($session->User);
+                   echo UserAnchor($session->User, 'Username');
                } else {
-                   echo UserAnchor($Session->User, 'Username');
-                   echo UserPhoto($Session->User);
+                   echo UserAnchor($session->User, 'Username');
+                   echo UserPhoto($session->User);
                }
                ?>
             </span>
@@ -48,7 +48,7 @@ $this->FireEvent('BeforeCommentForm');
                         echo $this->Form->TextBox('GuestEmail');
                     }
 
-                    $this->FireEvent('BeforeBodyField');
+                    $this->fireEvent('BeforeBodyField');
 
                     if ($GuestCommenting) {
                         echo '<br />';
@@ -58,11 +58,11 @@ $this->FireEvent('BeforeCommentForm');
                     echo $this->Form->BodyBox('Body', array('Table' => 'ArticleComment', 'tabindex' => 1));
 
                     echo '<div class="CommentOptions List Inline">';
-                    $this->FireEvent('AfterBodyField');
+                    $this->fireEvent('AfterBodyField');
                     echo '</div>';
 
                     echo "<div class=\"Buttons\">\n";
-                    $this->FireEvent('BeforeFormButtons');
+                    $this->fireEvent('BeforeFormButtons');
                     $CancelText = T('Home');
                     $CancelClass = 'Back';
                     if ($Editing) {
@@ -77,17 +77,17 @@ $this->FireEvent('BeforeCommentForm');
                     $ButtonOptions = array('class' => 'Button Primary CommentButton');
                     $ButtonOptions['tabindex'] = 2;
 
-                    if ((!$Editing && $Session->IsValid()) || (!$Editing && $GuestCommenting)) {
+                    if ((!$Editing && $session->isValid()) || (!$Editing && $GuestCommenting)) {
                         echo ' ' . Anchor(T('Preview'), '#', 'Button PreviewButton') . "\n";
                         echo ' ' . Anchor(T('Edit'), '#', 'Button WriteButton Hidden') . "\n";
                     }
 
-                    if ($Session->IsValid()) {
+                    if ($session->isValid()) {
                         echo $this->Form->Button($Editing ? 'Save Comment' : 'Post Comment', $ButtonOptions);
                     } else if($GuestCommenting) {
                         echo ' ' . $this->Form->Button($Editing ? 'Save Comment' : 'Comment As Guest', $ButtonOptions);
                     } else {
-                        $AllowSigninPopup = C('Garden.SignIn.Popup');
+                        $AllowSigninPopup = c('Garden.SignIn.Popup');
                         $Attributes = array('tabindex' => '-1');
                         if (!$AllowSigninPopup)
                             $Attributes['target'] = '_parent';
@@ -100,7 +100,7 @@ $this->FireEvent('BeforeCommentForm');
                         echo Anchor(T('Sign In'), $AuthenticationUrl, $CssClass, $Attributes);
                     }
 
-                    $this->FireEvent('AfterFormButtons');
+                    $this->fireEvent('AfterFormButtons');
                     echo "</div>\n";
                     echo $this->Form->Close();
                     ?>

@@ -1,8 +1,8 @@
 <?php defined('APPLICATION') or exit();
 
-$Categories = $this->Data('Categories')->Result();
+$Categories = $this->data('Categories')->result();
 ?>
-<h1><?php echo $this->Title(); ?></h1>
+<h1><?php echo $this->title(); ?></h1>
 
 <div class="Info">
     <?php echo T('Article categories are used to help organize articles.',

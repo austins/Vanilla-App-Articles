@@ -1,23 +1,23 @@
 <?php defined('APPLICATION') or exit();
 
-if (!function_exists('ShowArticleOptions')) {
-    function ShowArticleOptions($Article) {
+if (!function_exists('showArticleOptions')) {
+    function showArticleOptions($Article) {
         // If $Article type is an array, then cast it to an object.
         if (is_array($Article))
             $Article = (object)$Article;
 
         $Sender = Gdn::Controller();
-        $Session = Gdn::Session();
+        $session = Gdn::session();
         $Options = array();
 
         // Can the user edit?
-        if ($Session->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
+        if ($session->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
             $Options['EditArticle'] = array(
                 'Label' => T('Edit'),
                 'Url' => '/compose/editarticle/' . $Article->ArticleID);
 
         // Can the user close?
-        if ($Session->CheckPermission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
+        if ($session->checkPermission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
             $NewClosed = (int)!$Article->Closed;
             $Options['CloseArticle'] = array(
                 'Label' => T($Article->Closed ? 'Reopen' : 'Close'),
@@ -26,9 +26,9 @@ if (!function_exists('ShowArticleOptions')) {
         }
 
         // Can the user delete?
-        if ($Session->CheckPermission('Articles.Articles.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
+        if ($session->checkPermission('Articles.Articles.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
             $ArticleCategoryModel = new ArticleCategoryModel();
-            $Category = $ArticleCategoryModel->GetByID(val('ArticleCategoryID', $Article));
+            $Category = $ArticleCategoryModel->getByID(val('ArticleCategoryID', $Article));
 
             $Options['DeleteArticle'] = array(
                 'Label' => T('Delete'),
@@ -36,7 +36,7 @@ if (!function_exists('ShowArticleOptions')) {
                 'Class' => 'DeleteArticle Popup');
 
             if (strtolower($Sender->ControllerName) === "articlecontroller")
-                $Options['DeleteArticle']['Url'] .= '?&target=' . urlencode(ArticleCategoryUrl($Category));
+                $Options['DeleteArticle']['Url'] .= '?&target=' . urlencode(articleCategoryUrl($Category));
         }
 
         // Render the article options menu.
@@ -57,7 +57,7 @@ if (!function_exists('ShowArticleOptions')) {
 }
 
 if (!function_exists('ArticleTag')) {
-    function ArticleTag($Article, $Column, $Code, $CssClass = false) {
+    function articleTag($Article, $Column, $Code, $CssClass = false) {
         if (is_array($Article))
             $Article = (object)$Article;
 
@@ -75,12 +75,12 @@ if (!function_exists('ArticleTag')) {
 
 if (!function_exists('ShowCommentForm')) {
     function ShowCommentForm() {
-        $Session = Gdn::Session();
+        $session = Gdn::session();
         $Controller = Gdn::Controller();
         $Article = $Controller->Article;
-        $UserCanClose = $Session->CheckPermission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
-        $UserCanComment = $Session->CheckPermission('Articles.Comments.Add', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
-        $canGuestsComment = C('Articles.Comments.AllowGuests', false);
+        $UserCanClose = $session->checkPermission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
+        $UserCanComment = $session->checkPermission('Articles.Comments.Add', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
+        $canGuestsComment = c('Articles.Comments.AllowGuests', false);
 
         // Closed notification
         if ((bool)$Article->Closed) {
@@ -89,17 +89,17 @@ if (!function_exists('ShowCommentForm')) {
                 <div class="Note Closed"><?php echo T('This article has been closed.'); ?></div>
             </div>
         <?php
-        } else if (!$Session->isValid() && !$canGuestsComment) {
+        } else if (!$session->isValid() && !$canGuestsComment) {
                 ?>
                 <div class="Foot Closed">
                     <div class="Note Closed SignInOrRegister"><?php
-                        $Popup = (C('Garden.SignIn.Popup')) ? ' class="Popup"' : '';
+                        $Popup = (c('Garden.SignIn.Popup')) ? ' class="Popup"' : '';
                         echo FormatString(
                             T('Sign In or Register to Comment.',
                                 '<a href="{SignInUrl,html}"{Popup}>Sign In</a> or <a href="{RegisterUrl,html}">Register</a> to comment.'),
                             array(
-                                'SignInUrl' => Url(SignInUrl(Url(''))),
-                                'RegisterUrl' => Url(RegisterUrl(Url(''))),
+                                'SignInUrl' => url(SignInUrl(url(''))),
+                                'RegisterUrl' => url(RegisterUrl(url(''))),
                                 'Popup' => $Popup
                             )
                         ); ?>
@@ -110,7 +110,7 @@ if (!function_exists('ShowCommentForm')) {
 
         if ((($Article->Closed == '1') && $UserCanClose)
                 || (($Article->Closed == '0') && $UserCanComment)
-                || (!$Session->isValid() && $canGuestsComment))
+                || (!$session->isValid() && $canGuestsComment))
             echo $Controller->FetchView('comment', 'compose', 'Articles');
     }
 }
@@ -125,17 +125,17 @@ if (!function_exists('WriteArticleReactions')):
         echo '<div class="Reactions">';
         Gdn_Theme::BulletRow();
 
-        $Session = Gdn::Session();
-        $GuestCommenting = (C('Articles.Comments.AllowGuests', false) && !$Session->IsValid());
-        if (C('Articles.Comments.EnableThreadedComments', true) && !$Comment->ParentArticleCommentID) {
-            if ($Session->IsValid() || $GuestCommenting) {
+        $session = Gdn::session();
+        $GuestCommenting = (c('Articles.Comments.AllowGuests', false) && !$session->isValid());
+        if (c('Articles.Comments.EnableThreadedComments', true) && !$Comment->ParentArticleCommentID) {
+            if ($session->isValid() || $GuestCommenting) {
                 echo Anchor('<span class="ReactSprite ReactReply"></span> Reply',
                     '/compose/comment/' . $Comment->ArticleID . '/' . $Comment->ArticleCommentID,
                     'ReactButton ReplyLink Visible');
             }
         }
         
-        Gdn::Controller()->FireEvent('AfterArticleReactions');
+        Gdn::Controller()->fireEvent('AfterArticleReactions');
         echo '</div>';
     }
 endif;
@@ -148,43 +148,43 @@ if (!function_exists('GetCommentOptions')):
             return $Options;
 
         $Sender = Gdn::Controller();
-        $Session = Gdn::Session();
+        $session = Gdn::session();
 
         $Article = & $Sender->Article;
         $ArticleCategoryID = val('ArticleCategoryID', $Article);
 
         // Determine if we still have time to edit
-        $EditContentTimeout = C('Garden.EditContentTimeout', -1);
+        $EditContentTimeout = c('Garden.EditContentTimeout', -1);
         $CanEdit = $EditContentTimeout == -1 || strtotime($Comment->DateInserted) + $EditContentTimeout > time();
 
         // Don't allow guests to edit.
-        if (!$Session->IsValid())
+        if (!$session->isValid())
             $CanEdit = false;
 
         $TimeLeft = '';
 
-        if ($CanEdit && $EditContentTimeout > 0 && !$Session->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
+        if ($CanEdit && $EditContentTimeout > 0 && !$session->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
             $TimeLeft = strtotime($Comment->DateInserted) + $EditContentTimeout - time();
             $TimeLeft = $TimeLeft > 0 ? ' (' . Gdn_Format::Seconds($TimeLeft) . ')' : '';
         }
 
         // Can the user edit the comment?
-        if (($CanEdit && $Session->UserID == $Comment->InsertUserID) || $Session->CheckPermission('Articles.Comments.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
+        if (($CanEdit && $session->UserID == $Comment->InsertUserID) || $session->checkPermission('Articles.Comments.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
             $Options['EditComment'] = array('Label' => T('Edit') . ' ' . $TimeLeft,
                 'Url' => '/articles/compose/editcomment/' . $Comment->ArticleCommentID, 'EditComment');
 
         // Can the user delete the comment?
-        $SelfDeleting = ($CanEdit && $Session->UserID == $Comment->InsertUserID && C('Articles.Comments.AllowSelfDelete'));
-        if ($SelfDeleting || $Session->CheckPermission('Articles.Comments.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
+        $SelfDeleting = ($CanEdit && $session->UserID == $Comment->InsertUserID && c('Articles.Comments.AllowSelfDelete'));
+        if ($SelfDeleting || $session->checkPermission('Articles.Comments.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
             $Options['DeleteComment'] = array('Label' => T('Delete'),
-                'Url' => '/articles/article/deletecomment/' . $Comment->ArticleCommentID . '/' . $Session->TransientKey()
-                    . '/?Target=' . urlencode('/article/' . Gdn_Format::Date($Article->DateInserted, '%Y') . '/'
+                'Url' => '/articles/article/deletecomment/' . $Comment->ArticleCommentID . '/' . $session->TransientKey()
+                    . '/?Target=' . urlencode('/article/' . Gdn_Format::date($Article->DateInserted, '%Y') . '/'
                         . $Article->UrlCode), 'Class' => 'DeleteComment');
 
         // Allow plugins to add options
         $Sender->EventArguments['CommentOptions'] = & $Options;
         $Sender->EventArguments['Comment'] = $Comment;
-        $Sender->FireEvent('CommentOptions');
+        $Sender->fireEvent('CommentOptions');
 
         return $Options;
     }

@@ -48,14 +48,14 @@ $Construct->PrimaryKey('ArticleCategoryID')
     ->Column('LastArticleCommentID', 'int', null)
     ->Column('Sort', 'int', true)
     ->Column('PermissionArticleCategoryID', 'int', '-1') // Default to root category
-    ->Set($Explicit, $Drop);
+    ->set($Explicit, $Drop);
 
-$SystemUserID = Gdn::UserModel()->GetSystemUserID();
+$SystemUserID = Gdn::userModel()->GetSystemUserID();
 $Now = Gdn_Format::ToDateTime();
 
-if ($SQL->GetWhere('ArticleCategory', array('ArticleCategoryID' => -1))->NumRows() == 0) {
+if ($SQL->getWhere('ArticleCategory', array('ArticleCategoryID' => -1))->numRows() == 0) {
     // Insert root article category for use with permissions.
-    $SQL->Insert('ArticleCategory', array(
+    $SQL->insert('ArticleCategory', array(
         'ArticleCategoryID' => -1,
         'Name' => 'Root',
         'UrlCode' => '',
@@ -67,7 +67,7 @@ if ($SQL->GetWhere('ArticleCategory', array('ArticleCategoryID' => -1))->NumRows
 
 if ($Drop || !$ArticleCategoryExists) {
     // Insert first article category.
-    $SQL->Insert('ArticleCategory', array(
+    $SQL->insert('ArticleCategory', array(
         'Name' => 'General',
         'UrlCode' => 'general',
         'Description' => 'Uncategorized articles.',
@@ -80,8 +80,8 @@ if ($Drop || !$ArticleCategoryExists) {
     ));
 } elseif ($ArticleCategoryExists && !$PermissionArticleCategoryIDExists) {
     // Existing installations need to be set up with per/ArticleCategory permissions.
-    $SQL->Update('ArticleCategory')->Set('PermissionArticleCategoryID', -1, false)->Put();
-    $SQL->Update('Permission')->Set('JunctionColumn', 'PermissionArticleCategoryID')->Where('JunctionColumn', 'ArticleCategoryID')->Put();
+    $SQL->update('ArticleCategory')->set('PermissionArticleCategoryID', -1, false)->put();
+    $SQL->update('Permission')->set('JunctionColumn', 'PermissionArticleCategoryID')->where('JunctionColumn', 'ArticleCategoryID')->put();
 }
 
 // Construct the Article table.
@@ -92,10 +92,10 @@ $ArticleExists = $Construct->TableExists();
 $AttributionUserIDExists = $Construct->ColumnExists('AttributionUserID');
 if ($ArticleExists && $AttributionUserIDExists) {
     $AttributionUserIDNotSameCount = $SQL->Query('SELECT COUNT(CASE WHEN AttributionUserID != InsertUserID'
-        . ' THEN 1 ELSE NULL END) AS NotSameCount FROM ' . $Px . 'Article;')->FirstRow()->NotSameCount;
+        . ' THEN 1 ELSE NULL END) AS NotSameCount FROM ' . $Px . 'Article;')->firstRow()->NotSameCount;
 
     if ($AttributionUserIDNotSameCount > 0) {
-        $SQL->Update('Article a')->Set('a.InsertUserID', 'a.AttributionUserID', false, false)->Put();
+        $SQL->update('Article a')->set('a.InsertUserID', 'a.AttributionUserID', false, false)->put();
     }
 }
 
@@ -119,7 +119,7 @@ $Construct->PrimaryKey('ArticleID')
     ->Column('LastArticleCommentID', 'int', true)
     ->Column('DateLastArticleComment', 'datetime', null, array('index', 'index.CategoryPages'))
     ->Column('LastArticleCommentUserID', 'int', true)
-    ->Set($Explicit, $Drop);
+    ->set($Explicit, $Drop);
 
 // Construct the ArticleComment table.
 $Construct->Table('ArticleComment');
@@ -136,13 +136,13 @@ $Construct->PrimaryKey('ArticleCommentID')
     ->Column('GuestName', 'varchar(50)', true)
     ->Column('GuestEmail', 'varchar(200)', true)
     ->Column('ParentArticleCommentID', 'int', true)
-    ->Set($Explicit, $Drop);
+    ->set($Explicit, $Drop);
 
 // Add extra columns to user table for tracking articles and comments.
 $Construct->Table('User')
     ->Column('CountArticles', 'int', 0)
     ->Column('CountArticleComments', 'int', 0)
-    ->Set(false, false);
+    ->set(false, false);
 
 // Construct the ArticleMedia table.
 $Construct->Table('ArticleMedia');
@@ -158,7 +158,7 @@ $Construct->PrimaryKey('ArticleMediaID')
     ->Column('IsThumbnail', 'tinyint(1)', 0)
     ->Column('DateInserted', 'datetime')
     ->Column('InsertUserID', 'int(11)')
-    ->Set($Explicit, $Drop);
+    ->set($Explicit, $Drop);
 
 /*
  * Create activity types.
@@ -170,7 +170,7 @@ $ActivityModel->DefineType('ArticleComment');
 /*
  * Set up permissions.
  */
-$PermissionModel = Gdn::PermissionModel();
+$PermissionModel = Gdn::permissionModel();
 $PermissionModel->Database = $Database;
 $PermissionModel->SQL = $SQL;
 
@@ -207,7 +207,7 @@ $PermissionModel->Define(array(
 // Set default permissions for roles.
 If (!$PermissionArticleCategoryIDExists) {
     // Guest defaults
-    $PermissionModel->Save(array(
+    $PermissionModel->save(array(
         'Role' => 'Guest',
         'JunctionTable' => 'ArticleCategory',
         'JunctionColumn' => 'PermissionArticleCategoryID',
@@ -216,7 +216,7 @@ If (!$PermissionArticleCategoryIDExists) {
     ), true);
 
     // Unconfirmed defaults
-    $PermissionModel->Save(array(
+    $PermissionModel->save(array(
         'Role' => 'Unconfirmed',
         'JunctionTable' => 'ArticleCategory',
         'JunctionColumn' => 'PermissionArticleCategoryID',
@@ -225,7 +225,7 @@ If (!$PermissionArticleCategoryIDExists) {
     ), true);
 
     // Applicant defaults
-    $PermissionModel->Save(array(
+    $PermissionModel->save(array(
         'Role' => 'Applicant',
         'JunctionTable' => 'ArticleCategory',
         'JunctionColumn' => 'PermissionArticleCategoryID',
@@ -234,7 +234,7 @@ If (!$PermissionArticleCategoryIDExists) {
     ), true);
 
     // Member defaults
-    $PermissionModel->Save(array(
+    $PermissionModel->save(array(
         'Role' => 'Member',
         'JunctionTable' => 'ArticleCategory',
         'JunctionColumn' => 'PermissionArticleCategoryID',
@@ -244,7 +244,7 @@ If (!$PermissionArticleCategoryIDExists) {
     ), true);
 
     // Moderator defaults
-    $PermissionModel->Save(array(
+    $PermissionModel->save(array(
         'Role' => 'Moderator',
         'JunctionTable' => 'ArticleCategory',
         'JunctionColumn' => 'PermissionArticleCategoryID',
@@ -260,7 +260,7 @@ If (!$PermissionArticleCategoryIDExists) {
     ), true);
 
     // Administrator defaults
-    $PermissionModel->Save(array(
+    $PermissionModel->save(array(
         'Role' => 'Administrator',
         'JunctionTable' => 'ArticleCategory',
         'JunctionColumn' => 'PermissionArticleCategoryID',

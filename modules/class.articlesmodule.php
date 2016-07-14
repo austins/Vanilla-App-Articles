@@ -26,7 +26,7 @@ class ArticlesModule extends Gdn_Module {
 
         $Limit = 5;
         $ArticleWheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED); // Category must have at least one article.
-        $Articles = $ArticleModel->Get(0, $Limit, $ArticleWheres);
+        $Articles = $ArticleModel->get(0, $Limit, $ArticleWheres);
 
         $this->Data = $Articles;
 
@@ -51,12 +51,12 @@ class ArticlesModule extends Gdn_Module {
      */
     public function ToString() {
         $Controller = Gdn::Controller();
-        $Session = Gdn::Session();
+        $session = Gdn::session();
 
         $Controller->EventArguments['ArticlesModule'] = &$this;
-        $Controller->FireEvent('BeforeArticlesModule');
+        $Controller->fireEvent('BeforeArticlesModule');
 
-        if (!$Session->CheckPermission('Articles.Articles.View', true, 'ArticleCategory', 'any'))
+        if (!$session->checkPermission('Articles.Articles.View', true, 'ArticleCategory', 'any'))
             return '';
 
         return parent::ToString();

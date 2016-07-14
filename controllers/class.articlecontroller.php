@@ -1,29 +1,29 @@
-<?php defined('APPLICATION') or exit();
+<?php
 /**
- * Copyright (C) 2015  Austin S.
+ * Article controller
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @copyright 2015-2016 Austin S.
+ * @license http://www.opensource.org/licenses/gpl-2.0.php GNU GPL v2
  */
 
 /**
- * The controller for an article.
+ * Handles displaying an article in most contexts via /article endpoint.
  */
 class ArticleController extends Gdn_Controller {
-    /**
-     * Models to include.
-     */
+    /** @var array Models to include. */
     public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'ArticleCommentModel', 'ArticleMediaModel', 'Form');
+
+    /** @var ArticleModel */
+    public $ArticleModel;
+
+    /** @var ArticleCategoryModel */
+    public $ArticleCategoryModel;
+
+    /** @var ArticleCommentModel */
+    public $ArticleCommentModel;
+
+    /** @var ArticleMediaModel */
+    public $ArticleMediaModel;
 
     public $Article = false;
     protected $ArticleCategory = false;
@@ -34,205 +34,205 @@ class ArticleController extends Gdn_Controller {
      * Extended by all other controllers in this application.
      * Always called by dispatcher before controller's requested method.
      */
-    public function Initialize() {
+    public function initialize() {
         // Set up head.
         $this->Head = new HeadModule($this);
 
         // Add JS files.
-        $this->AddJsFile('jquery.js');
-        $this->AddJsFile('jquery.livequery.js');
-        $this->AddJsFile('jquery.form.js');
-        $this->AddJsFile('jquery.popup.js');
-        $this->AddJsFile('jquery.gardenhandleajaxform.js');
-        $this->AddJsFile('jquery.autogrow.js');
-        $this->AddJsFile('global.js');
-        $this->AddJsFile('articles.js');
+        $this->addJsFile('jquery.js');
+        $this->addJsFile('jquery.livequery.js');
+        $this->addJsFile('jquery.form.js');
+        $this->addJsFile('jquery.popup.js');
+        $this->addJsFile('jquery.gardenhandleajaxform.js');
+        $this->addJsFile('jquery.autogrow.js');
+        $this->addJsFile('global.js');
+        $this->addJsFile('articles.js');
 
         // Add CSS files.
-        $this->AddCssFile('style.css');
-        $this->AddCssFile('articles.css');
+        $this->addCssFile('style.css');
+        $this->addCssFile('articles.css');
 
         // Add CSS file for mobile theme if active.
-        if (Gdn::ThemeManager()->CurrentTheme() === 'mobile') {
-            $this->AddCssFile('articles.mobile.css');
+        if (Gdn::themeManager()->currentTheme() === 'mobile') {
+            $this->addCssFile('articles.mobile.css');
         }
 
         // Add modules.
-        $this->AddModule('GuestModule');
-        $this->AddModule('SignedInModule');
-        $this->AddModule('ArticlesDashboardModule');
-        $this->AddModule('ArticleCategoriesModule');
-        $this->AddModule('RecentActivityModule');
+        $this->addModule('GuestModule');
+        $this->addModule('SignedInModule');
+        $this->addModule('ArticlesDashboardModule');
+        $this->addModule('ArticleCategoriesModule');
+        $this->addModule('RecentActivityModule');
 
-        parent::Initialize();
+        parent::initialize();
     }
 
     /**
      * Main method of an article.
      *
-     * @param int $ArticleYear in YYYY format
-     * @param string $ArticleUrlCode is a unique code
-     * @param bool|object $Page is a page entity
+     * @param int $articleYear in YYYY format
+     * @param string $articleUrlCode is a unique code
+     * @param bool|object $page is a page entity
      * @throws NotFoundException if article not found
      */
-    public function Index($ArticleYear, $ArticleUrlCode, $Page = false) {
+    public function index($articleYear, $articleUrlCode, $page = false) {
         // Get the article.
-        $this->Article = $this->ArticleModel->GetByUrlCode($ArticleUrlCode);
+        $this->Article = $this->ArticleModel->getByUrlCode($articleUrlCode);
 
         if (!$this->Article)
-            throw NotFoundException('Article');
+            throw notFoundException('Article');
 
         // Set required permission.
         // If not published...
         if ($this->Article->Status != ArticleModel::STATUS_PUBLISHED) {
             // If author, only require View permission.
-            if ($this->Article->InsertUserID == Gdn::Session()->UserID) {
-                $this->Permission('Articles.Articles.View', true, 'ArticleCategory', $this->Article->PermissionArticleCategoryID);
+            if ($this->Article->InsertUserID == Gdn::session()->UserID) {
+                $this->permission('Articles.Articles.View', true, 'ArticleCategory', $this->Article->PermissionArticleCategoryID);
             } else {
-                $this->Permission('Articles.Articles.Edit', true, 'ArticleCategory', $this->Article->PermissionArticleCategoryID);
+                $this->permission('Articles.Articles.Edit', true, 'ArticleCategory', $this->Article->PermissionArticleCategoryID);
             }
         } else {
-            $this->Permission('Articles.Articles.View', true, 'ArticleCategory', $this->Article->PermissionArticleCategoryID);
+            $this->permission('Articles.Articles.View', true, 'ArticleCategory', $this->Article->PermissionArticleCategoryID);
         }
 
         // Get the category.
-        $this->ArticleCategory = $this->ArticleCategoryModel->GetByID($this->Article->ArticleCategoryID);
-        $this->SetData('ArticleCategory', $this->ArticleCategory);
-        $this->SetData('Breadcrumbs', array(
-            array('Name' => $this->ArticleCategory->Name, 'Url' => ArticleCategoryUrl($this->ArticleCategory))
+        $this->ArticleCategory = $this->ArticleCategoryModel->getByID($this->Article->ArticleCategoryID);
+        $this->setData('ArticleCategory', $this->ArticleCategory);
+        $this->setData('Breadcrumbs', array(
+            array('Name' => $this->ArticleCategory->Name, 'Url' => articleCategoryUrl($this->ArticleCategory))
         ));
 
         // Prepare comment arguments.
         // Define the query offset and limit.
-        $Limit = C('Articles.Comments.PerPage', 30);
-        list($Offset, $Limit) = OffsetLimit($Page, $Limit);
+        $limit = c('Articles.Comments.PerPage', 30);
+        list($offset, $limit) = offsetLimit($page, $limit);
 
-        $PageNumber = PageNumber($Offset, $Limit);
-        $this->SetData('Page', $PageNumber);
+        $pageNumber = pageNumber($offset, $limit);
+        $this->setData('Page', $pageNumber);
 
         // Build a pager
-        $PagerFactory = new Gdn_PagerFactory();
+        $pagerFactory = new Gdn_PagerFactory();
         $this->EventArguments['PagerType'] = 'Pager';
-        $this->FireEvent('BeforeBuildPager');
-        $this->Pager = $PagerFactory->GetPager($this->EventArguments['PagerType'], $this);
+        $this->fireEvent('BeforeBuildPager');
+        $this->Pager = $pagerFactory->getPager($this->EventArguments['PagerType'], $this);
         $this->Pager->ClientID = 'Pager';
 
-        $this->Pager->Configure(
-            $Offset,
-            $Limit,
+        $this->Pager->configure(
+            $offset,
+            $limit,
             $this->Article->CountArticleComments,
             array('ArticleUrl')
         );
         $this->Pager->Record = $this->Article;
-        PagerModule::Current($this->Pager);
-        $this->FireEvent('AfterBuildPager');
+        PagerModule::current($this->Pager);
+        $this->fireEvent('AfterBuildPager');
 
         // Set canonical URL.
-        $this->CanonicalUrl(ArticleUrl($this->Article, PageNumber($Offset, $Limit, 0, false)));
+        $this->canonicalUrl(articleUrl($this->Article, pageNumber($offset, $limit, 0, false)));
 
         // Get the comments.
-        $this->ArticleComments = $this->ArticleCommentModel->GetByArticleID($this->Article->ArticleID, $Offset, $Limit);
+        $this->ArticleComments = $this->ArticleCommentModel->getByArticleID($this->Article->ArticleID, $offset, $limit);
 
         // Validate slugs.
-        $DateInsertedYear = Gdn_Format::Date($this->Article->DateInserted, '%Y');
-        if (((count($this->RequestArgs) < 2) && (!$ArticleYear || !$ArticleUrlCode)) || !is_numeric($ArticleYear)
-            || ($ArticleUrlCode == '') || !$this->Article
-            || ($ArticleYear != $DateInsertedYear)
+        $dateInsertedYear = Gdn_Format::date($this->Article->DateInserted, '%Y');
+        if (((count($this->RequestArgs) < 2) && (!$articleYear || !$articleUrlCode)) || !is_numeric($articleYear)
+            || ($articleUrlCode == '') || !$this->Article
+            || ($articleYear != $dateInsertedYear)
         )
-            throw NotFoundException('Article');
+            throw notFoundException('Article');
 
         // Set the title.
-        $this->Title($this->Article->Name);
+        $this->title($this->Article->Name);
 
         // Add the open graph tags
-        $this->AddMetaTags();
+        $this->addMetaTags();
 
         // Set up comment form.
-        $this->Form->SetModel($this->ArticleCommentModel);
-        $this->Form->Action = Url('/compose/comment/' . $this->Article->ArticleID);
-        $this->Form->AddHidden('ArticleID', $this->Article->ArticleID);
+        $this->Form->setModel($this->ArticleCommentModel);
+        $this->Form->Action = url('/compose/comment/' . $this->Article->ArticleID);
+        $this->Form->addHidden('ArticleID', $this->Article->ArticleID);
 
         // Load data for similar articles
-        if (C('Articles.Articles.ShowSimilarArticles')) {
-            $SimilarArticles = $this->ArticleModel->GetSimilarArticles($this->Article->ArticleID,
+        if (c('Articles.Articles.ShowSimilarArticles')) {
+            $similarArticles = $this->ArticleModel->getSimilarArticles($this->Article->ArticleID,
                 $this->Article->ArticleCategoryID);
 
-            $this->SetData('SimilarArticles', $SimilarArticles);
+            $this->setData('SimilarArticles', $similarArticles);
         }
 
         $this->View = 'index';
 
-        $this->Render();
+        $this->render();
     }
 
     /**
      * Adds meta tags to a controller method.
      */
-    protected function AddMetaTags() {
-        $HeadModule =& $this->Head;
-        $Article = $this->Article;
+    protected function addMetaTags() {
+        $headModule =& $this->Head;
+        $article = $this->Article;
 
-        $HeadModule->AddTag('meta', array('property' => 'og:type', 'content' => 'article'));
+        $headModule->addTag('meta', array('property' => 'og:type', 'content' => 'article'));
 
-        if ($Article->Excerpt != '') {
-            $Description = Gdn_Format::PlainText($Article->Excerpt, $Article->Format);
+        if ($article->Excerpt != '') {
+            $Description = Gdn_Format::plainText($article->Excerpt, $article->Format);
         } else {
-            $Description = SliceParagraph(Gdn_Format::PlainText($Article->Body, $Article->Format), C('Articles.Excerpt.MaxLength'));
+            $Description = sliceParagraph(Gdn_Format::plainText($article->Body, $article->Format), c('Articles.Excerpt.MaxLength'));
         }
-        $this->Description($Description);
+        $this->description($Description);
 
-        $HeadModule->AddTag('meta', array('property' => 'article:published_time',
-            'content' => date(DATE_ISO8601, strtotime($Article->DateInserted))));
-        if ($Article->DateUpdated) {
-            $HeadModule->AddTag('meta', array('property' => 'article:modified_time',
-                'content' => date(DATE_ISO8601, strtotime($Article->DateUpdated))));
+        $headModule->addTag('meta', array('property' => 'article:published_time',
+            'content' => date(DATE_ISO8601, strtotime($article->DateInserted))));
+        if ($article->DateUpdated) {
+            $headModule->addTag('meta', array('property' => 'article:modified_time',
+                'content' => date(DATE_ISO8601, strtotime($article->DateUpdated))));
         }
 
-        $Author = Gdn::UserModel()->GetID($Article->InsertUserID);
-        $HeadModule->AddTag('meta',
-            array('property' => 'article:author', 'content' => Url(UserUrl($Author), true)));
-        $HeadModule->AddTag('meta', array('property' => 'article:section', 'content' => $this->ArticleCategory->Name));
+        $author = Gdn::userModel()->getID($article->InsertUserID);
+        $headModule->addTag('meta',
+            array('property' => 'article:author', 'content' => url(userUrl($author), true)));
+        $headModule->addTag('meta', array('property' => 'article:section', 'content' => $this->ArticleCategory->Name));
 
         // Image meta info
-        $Image = $this->ArticleMediaModel->GetThumbnailByArticleID($Article->ArticleID);
-        if(!$Image) {
-          $Image = $this->ArticleMediaModel->GetByArticleID($Article->ArticleID)->FirstRow();
+        $image = $this->ArticleMediaModel->getThumbnailByArticleID($article->ArticleID);
+        if(!$image) {
+          $image = $this->ArticleMediaModel->getByArticleID($article->ArticleID)->firstRow();
         }
-        if ($Image) {
-            $HeadModule->AddTag('meta', array('property' => 'og:image', 'content' => Url('/uploads' . $Image->Path, true)));
-            $HeadModule->AddTag('meta', array('property' => 'og:image:width', 'content' => $Image->ImageWidth));
-            $HeadModule->AddTag('meta', array('property' => 'og:image:height', 'content' => $Image->ImageHeight));
+        if ($image) {
+            $headModule->addTag('meta', array('property' => 'og:image', 'content' => url('/uploads' . $image->Path, true)));
+            $headModule->addTag('meta', array('property' => 'og:image:width', 'content' => $image->ImageWidth));
+            $headModule->addTag('meta', array('property' => 'og:image:height', 'content' => $image->ImageHeight));
         }
         
         // Twitter card
-        $HeadModule->AddTag('meta', array('name' => 'twitter:card', 'content' => 'summary'));
+        $headModule->addTag('meta', array('name' => 'twitter:card', 'content' => 'summary'));
 
-        $TwitterUsername = trim(C('Articles.TwitterUsername', ''));
-        if ($TwitterUsername != '')
-            $HeadModule->AddTag('meta', array('name' => 'twitter:site', 'content' => '@' . $TwitterUsername));
+        $twitterUsername = trim(c('Articles.TwitterUsername', ''));
+        if ($twitterUsername != '')
+            $headModule->addTag('meta', array('name' => 'twitter:site', 'content' => '@' . $twitterUsername));
 
-        $HeadModule->AddTag('meta', array('name' => 'twitter:title', 'content' => $Article->Name));
-        $HeadModule->AddTag('meta', array('name' => 'twitter:description', 'content' => $Description));
+        $headModule->addTag('meta', array('name' => 'twitter:title', 'content' => $article->Name));
+        $headModule->addTag('meta', array('name' => 'twitter:description', 'content' => $Description));
 
-        if ($Image) {
-            $HeadModule->AddTag('meta', array('name' => 'twitter:image', 'content' => Url('/uploads' . $Image->Path, true)));
+        if ($image) {
+            $headModule->addTag('meta', array('name' => 'twitter:image', 'content' => url('/uploads' . $image->Path, true)));
         }
     }
 
     /**
      * Sends options to a view via JSON.
      *
-     * @param mixed $Article is an article entity
+     * @param mixed $article is an article entity
      */
-    private function SendOptions($Article) {
-        require_once($this->FetchViewLocation('helper_functions', 'Article', 'Articles'));
+    private function sendOptions($article) {
+        require_once($this->fetchViewLocation('helper_functions', 'Article', 'Articles'));
 
         ob_start();
-        ShowArticleOptions($Article);
-        $Options = ob_get_clean();
+        showArticleOptions($article);
+        $options = ob_get_clean();
 
-        $this->JsonTarget("#Article_{$Article->ArticleID} .OptionsMenu,.Section-Article .Article .OptionsMenu",
-            $Options, 'ReplaceWith');
+        $this->jsonTarget("#Article_{$article->ArticleID} .OptionsMenu,.Section-Article .Article .OptionsMenu",
+            $options, 'ReplaceWith');
     }
 
     /**
@@ -242,87 +242,87 @@ class ArticleController extends Gdn_Controller {
      * closed, this re-opens it. Closed article may not have new
      * comments added to them.
      *
-     * @param int $ArticleID Unique article ID.
-     * @param bool $Close Whether or not to close the article.
-     * @param string $From Where the method is requested from.
+     * @param int $articleID Unique article ID.
+     * @param bool $close Whether or not to close the article.
+     * @param string $from Where the method is requested from.
      */
-    public function Close($ArticleID, $Close = true, $From = 'list') {
+    public function close($articleID, $close = true, $from = 'list') {
         // Make sure we are posting back.
-        if (!$this->Request->IsPostBack()) {
-            throw PermissionException('Javascript');
+        if (!$this->Request->isPostBack()) {
+            throw permissionException('Javascript');
         }
 
-        $Article = $this->ArticleModel->GetByID($ArticleID);
-        if (!$Article) {
-            throw NotFoundException('Article');
+        $article = $this->ArticleModel->getByID($articleID);
+        if (!$article) {
+            throw notFoundException('Article');
         }
 
-        $this->Permission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
+        $this->permission('Articles.Articles.Close', true, 'ArticleCategory', $article->PermissionArticleCategoryID);
 
         // Close the article.
-        $this->ArticleModel->SetField($ArticleID, 'Closed', $Close);
-        $Article->Closed = $Close;
+        $this->ArticleModel->setField($articleID, 'Closed', $close);
+        $article->Closed = $close;
 
         // Redirect to the front page
         if ($this->_DeliveryType === DELIVERY_TYPE_ALL) {
-            $Target = GetIncomingValue('Target', 'articles');
-            SafeRedirect($Target);
+            $target = getIncomingValue('Target', 'articles');
+            safeRedirect($target);
         }
 
-        $this->SendOptions($Article);
+        $this->sendOptions($article);
 
-        if ($Close) {
-            require_once($this->FetchViewLocation('helper_functions', 'Article', 'Articles'));
-            $this->JsonTarget(".Section-ArticleList #Article_$ArticleID .Meta-Article",
-                ArticleTag($Article, 'Closed', 'Closed'), 'Prepend');
-            $this->JsonTarget(".Section-ArticleList #Article_$ArticleID", 'Closed', 'AddClass');
+        if ($close) {
+            require_once($this->fetchViewLocation('helper_functions', 'Article', 'Articles'));
+            $this->jsonTarget(".Section-ArticleList #Article_$articleID .Meta-Article",
+                articleTag($article, 'Closed', 'Closed'), 'Prepend');
+            $this->jsonTarget(".Section-ArticleList #Article_$articleID", 'Closed', 'AddClass');
         } else {
-            $this->JsonTarget(".Section-ArticleList #Article_$ArticleID .Tag-Closed", null, 'Remove');
-            $this->JsonTarget(".Section-ArticleList #Article_$ArticleID", 'Closed', 'RemoveClass');
+            $this->jsonTarget(".Section-ArticleList #Article_$articleID .Tag-Closed", null, 'Remove');
+            $this->jsonTarget(".Section-ArticleList #Article_$articleID", 'Closed', 'RemoveClass');
         }
 
-        $this->JsonTarget("#Article_$ArticleID", null, 'Highlight');
-        $this->JsonTarget(".Article #Item_0", null, 'Highlight');
+        $this->jsonTarget("#Article_$articleID", null, 'Highlight');
+        $this->jsonTarget(".Article #Item_0", null, 'Highlight');
 
-        $this->Render('Blank', 'Utility', 'Dashboard');
+        $this->render('Blank', 'Utility', 'Dashboard');
     }
 
     /**
      * Allows user to delete article.
      *
-     * @param int $ArticleID
-     * @param string $Target
+     * @param int $articleID
+     * @param string $target
      * @throws NotFoundException if article not found
      */
-    public function Delete($ArticleID, $Target = '') {
-        $Article = $this->ArticleModel->GetByID($ArticleID);
-        if (!$Article) {
-            throw NotFoundException('Article');
+    public function delete($articleID, $target = '') {
+        $article = $this->ArticleModel->getByID($articleID);
+        if (!$article) {
+            throw notFoundException('Article');
         }
 
-        $this->Permission('Articles.Articles.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
+        $this->permission('Articles.Articles.Delete', true, 'ArticleCategory', $article->PermissionArticleCategoryID);
 
-        if ($this->Form->AuthenticatedPostBack()) {
-            if (!$this->ArticleModel->Delete($ArticleID))
-                $this->Form->AddError('Failed to delete article.');
+        if ($this->Form->authenticatedPostBack()) {
+            if (!$this->ArticleModel->delete($articleID))
+                $this->Form->addError('Failed to delete article.');
 
-            if ($this->Form->ErrorCount() == 0) {
+            if ($this->Form->errorCount() == 0) {
                 // Remove the "new article" activity for this article.
-                $this->ArticleModel->DeleteActivity($ArticleID);
+                $this->ArticleModel->deleteActivity($articleID);
 
                 // Redirect.
                 if ($this->_DeliveryType === DELIVERY_TYPE_ALL)
-                    SafeRedirect($Target);
+                    safeRedirect($target);
 
-                if ($Target)
-                    $this->RedirectUrl = Url($Target);
+                if ($target)
+                    $this->RedirectUrl = url($target);
 
-                $this->JsonTarget(".Section-ArticleList #Article_{$ArticleID}", null, 'SlideUp');
+                $this->jsonTarget(".Section-ArticleList #Article_{$articleID}", null, 'SlideUp');
             }
         }
 
-        $this->SetData('Title', T('Delete Article'));
-        $this->Render();
+        $this->setData('Title', T('Delete Article'));
+        $this->render();
     }
 
     /**
@@ -331,88 +331,88 @@ class ArticleController extends Gdn_Controller {
      * If the comment is the only one in the article, the article will
      * be deleted as well. This is a "hard" delete - it is removed from the database.
      *
-     * @param int $ArticleCommentID Unique comment ID.
-     * @param string $TransientKey Single-use hash to prove intent.
+     * @param int $articleCommentID Unique comment ID.
+     * @param string $transientKey Single-use hash to prove intent.
      */
-    public function DeleteComment($ArticleCommentID = '', $TransientKey = '') {
-        $Session = Gdn::Session();
-        $DefaultTarget = '/articles/';
-        $ValidArticleCommentID = is_numeric($ArticleCommentID) && $ArticleCommentID > 0;
-        $ValidUser = ($Session->UserID > 0) && $Session->ValidateTransientKey($TransientKey);
+    public function deleteComment($articleCommentID = '', $transientKey = '') {
+        $session = Gdn::session();
+        $defaultTarget = '/articles/';
+        $validArticleCommentID = is_numeric($articleCommentID) && $articleCommentID > 0;
+        $validUser = ($session->UserID > 0) && $session->validateTransientKey($transientKey);
 
-        if ($ValidArticleCommentID && $ValidUser) {
+        if ($validArticleCommentID && $validUser) {
             // Get comment and article data.
-            $Comment = $this->ArticleCommentModel->GetByID($ArticleCommentID);
-            $ArticleID = val('ArticleID', $Comment);
-            $Article = $this->ArticleModel->GetByID($ArticleID);
+            $comment = $this->ArticleCommentModel->getByID($articleCommentID);
+            $articleID = val('ArticleID', $comment);
+            $article = $this->ArticleModel->getByID($articleID);
 
-            if ($Comment && $Article) {
-                $DefaultTarget = ArticleUrl($Article);
+            if ($comment && $article) {
+                $defaultTarget = articleUrl($article);
 
                 // Make sure comment is this user's or they have Delete permission
-                if ($Comment->InsertUserID != $Session->UserID || !C('Articles.Comments.AllowSelfDelete'))
-                    $this->Permission('Articles.Comments.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
+                if ($comment->InsertUserID != $session->UserID || !C('Articles.Comments.AllowSelfDelete'))
+                    $this->permission('Articles.Comments.Delete', true, 'ArticleCategory', $article->PermissionArticleCategoryID);
 
                 // Make sure that content can (still) be edited
-                $EditContentTimeout = C('Garden.EditContentTimeout', -1);
-                $CanEdit = $EditContentTimeout == -1 || strtotime($Comment->DateInserted) + $EditContentTimeout > time();
-                if (!$CanEdit)
-                    $this->Permission('Articles.Comments.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
+                $editContentTimeout = c('Garden.EditContentTimeout', -1);
+                $canEdit = $editContentTimeout == -1 || strtotime($comment->DateInserted) + $editContentTimeout > time();
+                if (!$canEdit)
+                    $this->permission('Articles.Comments.Delete', true, 'ArticleCategory', $article->PermissionArticleCategoryID);
 
                 // Delete the comment
-                if (!$this->ArticleCommentModel->Delete($ArticleCommentID)) {
-                    $this->Form->AddError('Failed to delete comment');
+                if (!$this->ArticleCommentModel->delete($articleCommentID)) {
+                    $this->Form->addError('Failed to delete comment');
                 } else {
                     // Comment was successfully deleted.
 
                     // Remove the "new article comment" activity for this article comment.
-                    $this->ArticleCommentModel->DeleteActivity($ArticleCommentID);
+                    $this->ArticleCommentModel->deleteActivity($articleCommentID);
                 }
             } else {
-                $this->Form->AddError('Invalid comment');
+                $this->Form->addError('Invalid comment');
             }
         } else {
-            $this->Form->AddError('ErrPermission');
+            $this->Form->addError('ErrPermission');
         }
 
         // Redirect
         if ($this->_DeliveryType == DELIVERY_TYPE_ALL) {
-            $Target = GetIncomingValue('Target', $DefaultTarget);
-            SafeRedirect($Target);
+            $Target = getIncomingValue('Target', $defaultTarget);
+            safeRedirect($Target);
         }
 
-        if ($this->Form->ErrorCount() > 0) {
-            $this->SetJson('ErrorMessage', $this->Form->Errors());
+        if ($this->Form->errorCount() > 0) {
+            $this->setJson('ErrorMessage', $this->Form->Errors());
         } else {
-            $this->JsonTarget("#Comment_$ArticleCommentID", '', 'SlideUp');
+            $this->jsonTarget("#Comment_$articleCommentID", '', 'SlideUp');
         }
 
-        $this->Render();
+        $this->render();
     }
 
 
     /**
      * Display article page starting with a particular comment.
      *
-     * @param int $ArticleCommentID Unique comment ID
+     * @param int $articleCommentID Unique comment ID
      */
-    public function Comment($ArticleCommentID) {
+    public function comment($articleCommentID) {
         // Get the ArticleID
-        $Comment = $this->ArticleCommentModel->GetByID($ArticleCommentID);
-        if (!$Comment)
-            throw NotFoundException('Article comment');
+        $comment = $this->ArticleCommentModel->getByID($articleCommentID);
+        if (!$comment)
+            throw notFoundException('Article comment');
 
         // Figure out how many comments are before this one
-        $Offset = $this->ArticleCommentModel->GetOffset($Comment);
-        $Limit = Gdn::Config('Articles.Comments.PerPage', 30);
+        $offset = $this->ArticleCommentModel->getOffset($comment);
+        $limit = Gdn::config('Articles.Comments.PerPage', 30);
 
-        $PageNumber = PageNumber($Offset, $Limit, true);
-        $this->SetData('Page', $PageNumber);
+        $pageNumber = pageNumber($offset, $limit, true);
+        $this->setData('Page', $pageNumber);
 
         $this->View = 'index';
 
-        $Article = $this->ArticleModel->GetByID($Comment->ArticleID);
+        $article = $this->ArticleModel->getByID($comment->ArticleID);
 
-        $this->Index(Gdn_Format::Date($Article->DateInserted, '%Y'), $Article->UrlCode, $PageNumber);
+        $this->index(Gdn_Format::date($article->DateInserted, '%Y'), $article->UrlCode, $pageNumber);
     }
 }

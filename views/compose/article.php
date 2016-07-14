@@ -1,24 +1,24 @@
 <?php defined('APPLICATION') or exit();
 
 // Declare variables.
-$Categories = $this->Data('Categories');
+$Categories = $this->data('Categories');
 
 // Open the form.
 echo $this->Form->Open(array('id' => 'Form_ComposeArticle'));
 echo $this->Form->Errors();
 ?>
     <div>
-        <h1 class="H"><?php echo $this->Data('Title'); ?></h1>
+        <h1 class="H"><?php echo $this->data('Title'); ?></h1>
 
         <?php
-        if ($Categories->NumRows() > 0) {
+        if ($Categories->numRows() > 0) {
             echo '<div class="P">';
             echo $this->Form->Label('Category', 'ArticleCategoryID'), ' ';
             echo $this->Form->DropDown('ArticleCategoryID', $Categories, array(
                 'IncludeNull' => true,
                 'ValueField' => 'ArticleCategoryID',
                 'TextField' => 'Name',
-                'Value' => val('ArticleCategoryID', $this->Data('Category'))
+                'Value' => val('ArticleCategoryID', $this->data('Category'))
             ));
             echo '</div>';
         }
@@ -57,11 +57,11 @@ echo $this->Form->Errors();
 
             <div id="UploadedImages">
                 <?php
-                if ($this->Data('Article')) {
-                    $UploadedImages = $this->Data('UploadedImages');
+                if ($this->data('Article')) {
+                    $UploadedImages = $this->data('UploadedImages');
 
-                    if ($UploadedImages->NumRows() > 0) {
-                        $UploadedImagesResult = $UploadedImages->Result();
+                    if ($UploadedImages->numRows() > 0) {
+                        $UploadedImagesResult = $UploadedImages->result();
 
                         foreach ($UploadedImages as $UploadedImage) {
                             $ImagePath = Gdn_UploadImage::url($UploadedImage->Path);
@@ -69,7 +69,7 @@ echo $this->Form->Errors();
                             echo '<div id="ArticleMedia_' . $UploadedImage->ArticleMediaID . '" class="UploadedImageWrap">' .
                                 '<div class="UploadedImage"><img src="' . $ImagePath . '" alt="" /></div>' .
                                 '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' . $ImagePath . '">Insert into Post</a>' .
-                                '<br /><a class="UploadedImageDelete" href="' . Url('/articles/compose/deleteimage/'
+                                '<br /><a class="UploadedImageDelete" href="' . url('/articles/compose/deleteimage/'
                                     . $UploadedImage->ArticleMediaID) . '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>';
                         }
                     }
@@ -80,15 +80,15 @@ echo $this->Form->Errors();
 
         <div class="P">
             <?php
-            echo $this->Form->Label('Upload a Thumbnail (Max dimensions: ' . C('Articles.Articles.ThumbnailWidth', 280)
-                . 'x' . C('Articles.Articles.ThumbnailHeight', 200) . ')', 'UploadThumbnail');
+            echo $this->Form->Label('Upload a Thumbnail (Max dimensions: ' . c('Articles.Articles.ThumbnailWidth', 280)
+                . 'x' . c('Articles.Articles.ThumbnailHeight', 200) . ')', 'UploadThumbnail');
             echo $this->Form->ImageUpload('UploadThumbnail');
             ?>
 
             <div id="UploadedThumbnail">
                 <?php
-                if ($this->Data('Article')) {
-                    $UploadedThumbnail = $this->Data('UploadedThumbnail');
+                if ($this->data('Article')) {
+                    $UploadedThumbnail = $this->data('UploadedThumbnail');
 
                     if ($UploadedThumbnail) {
                         $ImagePath = Gdn_UploadImage::url($UploadedThumbnail->Path);
@@ -96,7 +96,7 @@ echo $this->Form->Errors();
                         echo '<div id="ArticleMedia_' . $UploadedThumbnail->ArticleMediaID . '" class="UploadedImageWrap">' .
                             '<div class="UploadedImage"><img src="' . $ImagePath . '" alt="" /></div>' .
                             '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' . $ImagePath . '">Insert into Post</a>' .
-                            '<br /><a class="UploadedImageDelete" href="' . Url('/articles/compose/deleteimage/'
+                            '<br /><a class="UploadedImageDelete" href="' . url('/articles/compose/deleteimage/'
                                 . $UploadedThumbnail->ArticleMediaID) . '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>';
                     }
                 }
@@ -111,7 +111,7 @@ echo $this->Form->Errors();
             ?>
         </div>
 
-        <?php if (Gdn::Session()->CheckPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')): ?>
+        <?php if (Gdn::session()->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')): ?>
             <div class="P">
                 <?php
                 echo $this->Form->Label('Author', 'AuthorUserName');
@@ -124,7 +124,7 @@ echo $this->Form->Errors();
         <div class="P">
             <?php
             echo $this->Form->Label('Status', 'Status');
-            echo $this->Form->RadioList('Status', $this->Data('StatusOptions'),
+            echo $this->Form->RadioList('Status', $this->data('StatusOptions'),
                 array('Default' => ArticleModel::STATUS_DRAFT));
             ?>
         </div>
@@ -132,7 +132,7 @@ echo $this->Form->Errors();
 
     <div class="Buttons">
         <?php
-        $this->FireEvent('BeforeFormButtons');
+        $this->fireEvent('BeforeFormButtons');
 
         echo $this->Form->Button((property_exists($this, 'Article')) ? 'Save' : 'Post Article',
             array('class' => 'Button Primary ArticleButton'));
@@ -141,7 +141,7 @@ echo $this->Form->Errors();
 
         echo Anchor(T('Cancel'), '/compose/posts', 'Button ComposeCancel');
 
-        $this->FireEvent('AfterFormButtons');
+        $this->fireEvent('AfterFormButtons');
         ?>
     </div>
 <?php

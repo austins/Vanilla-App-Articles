@@ -40,13 +40,13 @@ class ComposeFilterModule extends Gdn_Module {
      */
     public function ToString() {
         $Controller = Gdn::Controller();
-        $Session = Gdn::Session();
+        $session = Gdn::session();
 
         $Controller->EventArguments['ComposeFilterModule'] = &$this;
-        $Controller->FireEvent('BeforeComposeFilterModule');
+        $Controller->fireEvent('BeforeComposeFilterModule');
 
         $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
-        if (!$Session->CheckPermission($PermissionsAllowed, false, 'ArticleCategory', 'any'))
+        if (!$session->checkPermission($PermissionsAllowed, false, 'ArticleCategory', 'any'))
             return '';
 
         return parent::ToString();

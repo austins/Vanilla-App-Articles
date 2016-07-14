@@ -1,10 +1,10 @@
 <?php defined('APPLICATION') or exit();
 
-if (!function_exists('ShowArticleOptions')) {
-    include($this->FetchViewLocation('helper_functions', 'article', 'articles'));
+if (!function_exists('showArticleOptions')) {
+    include($this->fetchViewLocation('helper_functions', 'article', 'articles'));
 }
 
-$Articles = $this->Data('Articles');
+$Articles = $this->data('Articles');
 
 $Category = isset($this->ArticleCategory->ArticleCategoryID) ? $this->ArticleCategory : false;
 
@@ -20,16 +20,16 @@ if (count($Articles) == 0) {
     }
 } else {
     foreach ($Articles as $Article):
-        $ArticleUrl = ArticleUrl($Article);
-        $Author = Gdn::UserModel()->GetID($Article->InsertUserID);
+        $ArticleUrl = articleUrl($Article);
+        $Author = Gdn::userModel()->getID($Article->InsertUserID);
 
         $CommentCountText = ($Article->CountArticleComments == 0) ? 'Comments' :
             Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
 
-        $Thumbnail = $this->ArticleMediaModel->GetThumbnailByArticleID($Article->ArticleID);
+        $Thumbnail = $this->ArticleMediaModel->getThumbnailByArticleID($Article->ArticleID);
         ?>
         <article id="Article_<?php echo $Article->ArticleID; ?>" class="Article ClearFix">
-            <?php ShowArticleOptions($Article); ?>
+            <?php showArticleOptions($Article); ?>
 
             <?php
             if (is_object($Thumbnail) && ($Article->Excerpt != "")) {
@@ -46,18 +46,18 @@ if (count($Articles) == 0) {
 
                     <div class="Meta Meta-Article">
                         <?php
-                        Gdn::Controller()->FireEvent('BeforeArticleMeta');
+                        Gdn::Controller()->fireEvent('BeforeArticleMeta');
 
-                        echo ArticleTag($Article, 'Closed', 'Closed');
+                        echo articleTag($Article, 'Closed', 'Closed');
 
-                        Gdn::Controller()->FireEvent('AfterArticleLabels');
+                        Gdn::Controller()->fireEvent('AfterArticleLabels');
                         ?>
                         <span
                             class="MItem ArticleCategory"><?php echo Anchor($Article->ArticleCategoryName,
-                                ArticleCategoryUrl($Article->ArticleCategoryUrlCode));
+                                articleCategoryUrl($Article->ArticleCategoryUrlCode));
                             ?></span>
-                        <span class="MItem ArticleDate"><?php echo Gdn_Format::Date($Article->DateInserted, '%e %B %Y - %l:%M %p'); ?></span>
-                        <span class="MItem ArticleAuthor"><?php echo ArticleAuthorAnchor($Author); ?></span>
+                        <span class="MItem ArticleDate"><?php echo Gdn_Format::date($Article->DateInserted, '%e %B %Y - %l:%M %p'); ?></span>
+                        <span class="MItem ArticleAuthor"><?php echo articleAuthorAnchor($Author); ?></span>
                         <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText, $ArticleUrl . '#comments'); ?></span>
                     </div>
                 </header>
@@ -65,7 +65,7 @@ if (count($Articles) == 0) {
                 <div class="ArticleBody">
                     <?php
                     $ArticleBody = ($Article->Excerpt != "") ? $Article->Excerpt : $Article->Body;
-                    echo FormatArticleBody($ArticleBody, $Article->Format);
+                    echo formatArticleBody($ArticleBody, $Article->Format);
                     ?>
                 </div>
             </div>
@@ -76,12 +76,12 @@ if (count($Articles) == 0) {
     // Set up pager.
     $PagerOptions = array(
         'Wrapper' => '<span class="PagerNub">&#160;</span><div %1$s>%2$s</div>',
-        'RecordCount' => $this->Data('CountArticles'),
+        'RecordCount' => $this->data('CountArticles'),
         'CurrentRecords' => count($Articles)
     );
 
-    if ($this->Data('_PagerUrl')) {
-        $PagerOptions['Url'] = $this->Data('_PagerUrl');
+    if ($this->data('_PagerUrl')) {
+        $PagerOptions['Url'] = $this->data('_PagerUrl');
     }
 
     echo '<div class="PageControls Bottom">';

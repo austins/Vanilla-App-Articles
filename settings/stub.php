@@ -25,17 +25,17 @@
  */
 
 // Only do this once, ever.
-if (Gdn::Config('Articles.Version') !== false)
+if (Gdn::config('Articles.Version') !== false)
     return;
 
 // Prep content meta data.
-$SystemUserID = Gdn::UserModel()->GetSystemUserID();
+$SystemUserID = Gdn::userModel()->GetSystemUserID();
 $Now = Gdn_Format::ToDateTime();
 
 // Insert first article.
 $ArticleModel = new ArticleModel();
 
-if ($ArticleModel->GetCount() == 0) {
+if ($ArticleModel->getCount() == 0) {
     $FirstArticleName = 'My First Article!';
     $FirstArticleBody = "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
         . " Duis luctus turpis nec lacus convallis consectetur. Maecenas ligula"

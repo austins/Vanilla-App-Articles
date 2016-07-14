@@ -1,29 +1,25 @@
-<?php defined('APPLICATION') or exit();
+<?php
 /**
- * Copyright (C) 2015  Austin S.
+ * Articles controller
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @copyright 2015-2016 Austin S.
+ * @license http://www.opensource.org/licenses/gpl-2.0.php GNU GPL v2
  */
 
 /**
- * Master application controller for Articles.
+ * Handles displaying an article in most contexts via /articles endpoint.
  */
 class ArticlesController extends Gdn_Controller {
     /**
      * Models to include.
      */
     public $Uses = array('ArticleModel', 'ArticleCategoryModel', 'ArticleMediaModel');
+
+    /** @var ArticleModel */
+    public $ArticleModel;
+
+    /** @var ArticleCategoryModel */
+    public $ArticleCategoryModel;
 
     protected $ArticleCategory = false;
 
@@ -32,156 +28,156 @@ class ArticlesController extends Gdn_Controller {
      * Extended by all other controllers in this application.
      * Always called by dispatcher before controller's requested method.
      */
-    public function Initialize() {
+    public function initialize() {
         // Set up head.
         $this->Head = new HeadModule($this);
 
         // Add JS files.
-        $this->AddJsFile('jquery.js');
-        $this->AddJsFile('jquery-ui-1.8.17.custom.min.js');
-        $this->AddJsFile('jquery.livequery.js');
-        $this->AddJsFile('jquery.form.js');
-        $this->AddJsFile('jquery.popup.js');
-        $this->AddJsFile('jquery.gardenhandleajaxform.js');
-        $this->AddJsFile('global.js');
-        $this->AddJsFile('articles.js');
+        $this->addJsFile('jquery.js');
+        $this->addJsFile('jquery-ui-1.8.17.custom.min.js');
+        $this->addJsFile('jquery.livequery.js');
+        $this->addJsFile('jquery.form.js');
+        $this->addJsFile('jquery.popup.js');
+        $this->addJsFile('jquery.gardenhandleajaxform.js');
+        $this->addJsFile('global.js');
+        $this->addJsFile('articles.js');
 
         // Add CSS files.
-        $this->AddCssFile('style.css');
-        $this->AddCssFile('articles.css');
+        $this->addCssFile('style.css');
+        $this->addCssFile('articles.css');
 
         // Add CSS file for mobile theme if active.
-        if (Gdn::ThemeManager()->CurrentTheme() === 'mobile') {
-            $this->AddCssFile('articles.mobile.css');
+        if (Gdn::themeManager()->currentTheme() === 'mobile') {
+            $this->addCssFile('articles.mobile.css');
         }
 
         // Add modules.
-        $this->AddModule('GuestModule');
-        $this->AddModule('SignedInModule');
-        $this->AddModule('ArticlesDashboardModule');
-        $this->AddModule('ArticleCategoriesModule');
-        $this->AddModule('DiscussionsModule');
-        $this->AddModule('RecentActivityModule');
+        $this->addModule('GuestModule');
+        $this->addModule('SignedInModule');
+        $this->addModule('ArticlesDashboardModule');
+        $this->addModule('ArticleCategoriesModule');
+        $this->addModule('DiscussionsModule');
+        $this->addModule('RecentActivityModule');
 
-        parent::Initialize();
+        parent::initialize();
     }
 
     /**
      * Main listing of articles.
      *
-     * @param bool|object $Page entity
+     * @param bool|object $page entity
      * @throws NotFoundException if article not found
      */
-    public function Index($Page = false) {
-        if (Gdn::Router()->GetDestination('DefaultController') !== 'articles')
-            $this->Title(T('Articles'));
+    public function index($page = false) {
+        if (Gdn::router()->getDestination('DefaultController') !== 'articles')
+            $this->title(T('Articles'));
 
         // TODO: Set title appropriately if not first page of index.
 
         // Set required permission.
-        $this->Permission('Articles.Articles.View', true, 'ArticleCategory', 'any');
+        $this->permission('Articles.Articles.View', true, 'ArticleCategory', 'any');
 
         // Get total article count.
-        $CountArticles = $this->ArticleModel->GetCount();
-        $this->SetData('CountArticles', $CountArticles);
+        $countArticles = $this->ArticleModel->getCount();
+        $this->setData('CountArticles', $countArticles);
 
         // Determine offset from $Page.
-        list($Offset, $Limit) = OffsetLimit($Page, C('Articles.Articles.PerPage', 12));
-        $Page = PageNumber($Offset, $Limit);
-        $this->CanonicalUrl(Url(ConcatSep('/', 'articles', PageNumber($Offset, $Limit, true, false)), true));
+        list($offset, $limit) = offsetLimit($page, c('Articles.Articles.PerPage', 12));
+        $page = pageNumber($offset, $limit);
+        $this->canonicalUrl(url(concatSep('/', 'articles', pageNumber($offset, $limit, true, false)), true));
 
         // Have a way to limit the number of pages on large databases
         // because requesting a super-high page can kill the db.
-        $MaxPages = C('Articles.Articles.MaxPages', false);
-        if ($MaxPages && $Page > $MaxPages) {
-            throw NotFoundException();
+        $maxPages = c('Articles.Articles.MaxPages', false);
+        if ($maxPages && $page > $maxPages) {
+            throw notFoundException();
         }
 
         // Build a pager
-        $PagerFactory = new Gdn_PagerFactory();
+        $pagerFactory = new Gdn_PagerFactory();
         $this->EventArguments['PagerType'] = 'Pager';
-        $this->FireEvent('BeforeBuildPager');
-        $this->Pager = $PagerFactory->GetPager($this->EventArguments['PagerType'], $this);
+        $this->fireEvent('BeforeBuildPager');
+        $this->Pager = $pagerFactory->getPager($this->EventArguments['PagerType'], $this);
         $this->Pager->ClientID = 'Pager';
-        $this->Pager->Configure($Offset, $Limit, $CountArticles, 'articles/%1$s');
-        if (!$this->Data('_PagerUrl'))
-            $this->SetData('_PagerUrl', 'articles/{Page}');
-        $this->SetData('_Page', $Page);
-        $this->SetData('_Limit', $Limit);
-        $this->FireEvent('AfterBuildPager');
+        $this->Pager->configure($offset, $limit, $countArticles, 'articles/%1$s');
+        if (!$this->data('_PagerUrl'))
+            $this->setData('_PagerUrl', 'articles/{Page}');
+        $this->setData('_Page', $page);
+        $this->setData('_Limit', $limit);
+        $this->fireEvent('AfterBuildPager');
 
         // Get published articles.
-        $Wheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED);
-        $this->SetData('Articles', $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result());
+        $wheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED);
+        $this->setData('Articles', $this->ArticleModel->get($offset, $limit, $wheres)->result());
 
-        Gdn_Theme::Section('ArticleList');
+        Gdn_Theme::section('ArticleList');
         $this->View = 'index';
-        $this->Render();
+        $this->render();
     }
 
     /**
      * Category filtered view of index.
      *
-     * @param string $UrlCode
+     * @param string $urlCode
      * @throws NotFoundException if article category not found
      */
-    public function Category($UrlCode = '', $Page = false) {
+    public function category($urlCode = '', $page = false) {
         // Set required permission.
-        $this->Permission('Articles.Articles.View', true, 'ArticleCategory', 'any');
+        $this->permission('Articles.Articles.View', true, 'ArticleCategory', 'any');
 
-        list($Offset, $Limit) = OffsetLimit($Page, C('Articles.Articles.PerPage', 12));
-        $Page = PageNumber($Offset, $Limit);
+        list($offset, $limit) = offsetLimit($page, c('Articles.Articles.PerPage', 12));
+        $page = pageNumber($offset, $limit);
         
         // Get the category.
-        if ($UrlCode != '')
-            $this->ArticleCategory = $this->ArticleCategoryModel->GetByUrlCode($UrlCode);
+        if ($urlCode != '')
+            $this->ArticleCategory = $this->ArticleCategoryModel->getByUrlCode($urlCode);
 
         if (!$this->ArticleCategory)
-            throw NotFoundException('Article category');
+            throw notFoundException('Article category');
 
-        $this->SetData('ArticleCategory', $this->ArticleCategory);
+        $this->setData('ArticleCategory', $this->ArticleCategory);
 
         // Set the title.
-        $this->Title($this->ArticleCategory->Name);
+        $this->title($this->ArticleCategory->Name);
 
         // Get published articles.
-        $Wheres = array(
+        $wheres = array(
             'Status' => ArticleModel::STATUS_PUBLISHED,
             'ArticleCategoryID' => $this->ArticleCategory->ArticleCategoryID
         );
-        $this->SetData('Articles', $this->ArticleModel->Get($Offset, $Limit, $Wheres)->Result());
+        $this->setData('Articles', $this->ArticleModel->get($offset, $limit, $wheres)->result());
         // Get total article count.
-        $CountArticles = $this->ArticleModel->GetCount($Wheres);
-        $this->SetData('CountArticles', $CountArticles);
+        $countArticles = $this->ArticleModel->getCount($wheres);
+        $this->setData('CountArticles', $countArticles);
         // Build a pager
-        $PagerFactory = new Gdn_PagerFactory();
+        $pagerFactory = new Gdn_PagerFactory();
         $this->EventArguments['PagerType'] = 'Pager';
-        $this->FireEvent('BeforeBuildPager');
-        $this->Pager = $PagerFactory->GetPager($this->EventArguments['PagerType'], $this);
+        $this->fireEvent('BeforeBuildPager');
+        $this->Pager = $pagerFactory->getPager($this->EventArguments['PagerType'], $this);
         $this->Pager->ClientID = 'Pager';
-        $this->Pager->Configure($Offset, $Limit, $CountArticles, 'articles/category/'.$UrlCode.'/%1$s');
-        if (!$this->Data('_PagerUrl')) {
-          $this->SetData('_PagerUrl', 'articles/category/'.$UrlCode.'/{Page}');
+        $this->Pager->configure($offset, $limit, $countArticles, 'articles/category/'.$urlCode.'/%1$s');
+        if (!$this->data('_PagerUrl')) {
+          $this->setData('_PagerUrl', 'articles/category/'.$urlCode.'/{Page}');
         }
-        $this->SetData('_Page', $Page);
-        $this->SetData('_Limit', $Limit);
-        $this->FireEvent('AfterBuildPager');
+        $this->setData('_Page', $page);
+        $this->setData('_Limit', $limit);
+        $this->fireEvent('AfterBuildPager');
 
-        Gdn_Theme::Section('CategoryArticleList');
+        Gdn_Theme::section('CategoryArticleList');
         $this->View = 'index';
-        $this->Render();
+        $this->render();
     }
 
-    public function Categories() {
-        $this->Permission('Articles.Articles.View', true, 'ArticleCategory', 'any'); // Set required permission.
+    public function categories() {
+        $this->permission('Articles.Articles.View', true, 'ArticleCategory', 'any'); // Set required permission.
 
-        $this->Title(T('Article Categories'));
+        $this->title(T('Article Categories'));
 
         // Get the categories.
-        $Wheres = array('ac.CountArticles >' => '0'); // Category must have at least one article.
-        $Categories = $this->ArticleCategoryModel->Get($Wheres);
-        $this->SetData('ArticleCategories', $Categories, true);
+        $wheres = array('ac.CountArticles >' => '0'); // Category must have at least one article.
+        $categories = $this->ArticleCategoryModel->get($wheres);
+        $this->setData('ArticleCategories', $categories, true);
 
-        $this->Render();
+        $this->render();
     }
 }

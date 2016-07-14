@@ -25,7 +25,7 @@ class ArticleCategoriesModule extends Gdn_Module {
         $ArticleCategoryModel = new ArticleCategoryModel();
 
         $CategoriesWheres = array('ac.CountArticles >' => '0'); // Category must have at least one article.
-        $Categories = $ArticleCategoryModel->Get($CategoriesWheres);
+        $Categories = $ArticleCategoryModel->get($CategoriesWheres);
 
         $this->Data = $Categories;
 
@@ -48,12 +48,12 @@ class ArticleCategoriesModule extends Gdn_Module {
      */
     public function ToString() {
         $Controller = Gdn::Controller();
-        $Session = Gdn::Session();
+        $session = Gdn::session();
 
         $Controller->EventArguments['ArticleCategoriesModule'] = &$this;
-        $Controller->FireEvent('BeforeArticleCategoriesModule');
+        $Controller->fireEvent('BeforeArticleCategoriesModule');
 
-        if (!$Session->CheckPermission('Articles.Articles.View', true, 'ArticleCategory', 'any'))
+        if (!$session->checkPermission('Articles.Articles.View', true, 'ArticleCategory', 'any'))
             return '';
 
         return parent::ToString();
