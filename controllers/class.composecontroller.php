@@ -104,27 +104,6 @@ class ComposeController extends Gdn_Controller {
     }
 
     /**
-     * Retrieves status options for an article.
-     *
-     * @param bool|object $article entity
-     * @return array
-     */
-    private function getArticleStatusOptions($article = false) {
-        $statusOptions = array(
-            ArticleModel::STATUS_DRAFT => t('Draft'),
-            ArticleModel::STATUS_PENDING => t('Pending Review'),
-        );
-
-        if (Gdn::session()->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')
-            || ($article && ($article->Status == ArticleModel::STATUS_PUBLISHED))
-        ) {
-            $statusOptions[ArticleModel::STATUS_PUBLISHED] = t('Published');
-        }
-
-        return $statusOptions;
-    }
-
-    /**
      * Listing of articles.
      *
      * @param bool|object $page entity
@@ -308,8 +287,10 @@ class ComposeController extends Gdn_Controller {
 
                 $category = ArticleCategoryModel::categories($formValues['ArticleCategoryID']);
                 $permissionArticleCategoryID = val('PermissionArticleCategoryID', $category, 'any');
-                if (!$session->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', $permissionArticleCategoryID)
-                        && ($formValues['AuthorUserName'] == "")) {
+                if (!$session->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory',
+                        $permissionArticleCategoryID)
+                    && ($formValues['AuthorUserName'] == "")
+                ) {
                     // Set author to current user if current user does not have Edit permission.
                     $author = $session->User;
                 } else {
@@ -379,7 +360,8 @@ class ComposeController extends Gdn_Controller {
                             // Set thumbnail ID.
                             $uploadedThumbnail = $this->ArticleMediaModel->getThumbnailByArticleID($article->ArticleID);
                             if (is_object($uploadedThumbnail) && ($uploadedThumbnail->ArticleMediaID > 0)) {
-                                $this->ArticleModel->setField($articleID, 'ThumbnailID', $uploadedThumbnail->ArticleMediaID);
+                                $this->ArticleModel->setField($articleID, 'ThumbnailID',
+                                    $uploadedThumbnail->ArticleMediaID);
                             }
                         } else {
                             // If not editing.
@@ -487,7 +469,9 @@ class ComposeController extends Gdn_Controller {
                 $permissionArticleCategoryID = $article->PermissionArticleCategoryID;
             }
         }
-        if (!$session->checkPermission('Articles.Articles.Add', true, 'ArticleCategory', $permissionArticleCategoryID)) {
+        if (!$session->checkPermission('Articles.Articles.Add', true, 'ArticleCategory',
+            $permissionArticleCategoryID)
+        ) {
             throw permissionException('Articles.Articles.Add');
         }
 
@@ -605,7 +589,9 @@ class ComposeController extends Gdn_Controller {
                 $permissionArticleCategoryID = $article->PermissionArticleCategoryID;
             }
         }
-        if (!$session->checkPermission('Articles.Articles.Add', true, 'ArticleCategory', $permissionArticleCategoryID)) {
+        if (!$session->checkPermission('Articles.Articles.Add', true, 'ArticleCategory',
+            $permissionArticleCategoryID)
+        ) {
             throw permissionException('Articles.Articles.Add');
         }
 
@@ -647,18 +633,22 @@ class ComposeController extends Gdn_Controller {
             if (c('Articles.Comments.AllowGuests', false)) { // If guest commenting is enabled
                 $guestCommenting = true;
             } else { // Require permission to add comment
-                $this->permission('Articles.Comments.Add', true, 'ArticleCategory', $article->PermissionArticleCategoryID);
+                $this->permission('Articles.Comments.Add', true, 'ArticleCategory',
+                    $article->PermissionArticleCategoryID);
             }
         }
 
         // Determine whether we are editing.
-        $articleCommentID = isset($this->Comment) && property_exists($this->Comment, 'ArticleCommentID') ? $this->Comment->ArticleCommentID : false;
+        $articleCommentID = isset($this->Comment) && property_exists($this->Comment,
+            'ArticleCommentID') ? $this->Comment->ArticleCommentID : false;
         $this->EventArguments['ArticleCommentID'] = &$articleCommentID;
         $editing = ($articleCommentID > 0);
 
         // If closed, cancel and go to article.
         if ($article && $article->Closed == 1 && !$editing
-                && !$session->checkPermission('Articles.Articles.Close', true, 'ArticleCategory', $article->PermissionArticleCategoryID)) {
+            && !$session->checkPermission('Articles.Articles.Close', true, 'ArticleCategory',
+                $article->PermissionArticleCategoryID)
+        ) {
             redirect(articleUrl($article));
         }
 
@@ -671,24 +661,28 @@ class ComposeController extends Gdn_Controller {
             if ($article && $editing) {
                 // Permission to edit
                 if ($this->Comment->InsertUserID != $session->UserID) {
-                    $this->permission('Articles.Comments.Edit', true, 'ArticleCategory', $article->PermissionArticleCategoryID);
+                    $this->permission('Articles.Comments.Edit', true, 'ArticleCategory',
+                        $article->PermissionArticleCategoryID);
                 }
 
                 // Make sure that content can (still) be edited.
                 $editContentTimeout = c('Garden.EditContentTimeout', -1);
                 $canEdit = $editContentTimeout == -1 || strtotime($this->Comment->DateInserted) + $editContentTimeout > time();
                 if (!$canEdit) {
-                    $this->permission('Articles.Comments.Edit', true, 'ArticleCategory', $article->PermissionArticleCategoryID);
+                    $this->permission('Articles.Comments.Edit', true, 'ArticleCategory',
+                        $article->PermissionArticleCategoryID);
                 }
 
                 // Make sure only moderators can edit closed things
                 if ($article->Closed) {
-                    $this->permission('Articles.Comments.Edit', true, 'ArticleCategory', $article->PermissionArticleCategoryID);
+                    $this->permission('Articles.Comments.Edit', true, 'ArticleCategory',
+                        $article->PermissionArticleCategoryID);
                 }
             } else {
                 if ($article) {
                     // Permission to add
-                    $this->permission('Articles.Comments.Add', true, 'ArticleCategory', $article->PermissionArticleCategoryID);
+                    $this->permission('Articles.Comments.Add', true, 'ArticleCategory',
+                        $article->PermissionArticleCategoryID);
                 }
             }
         }
@@ -823,5 +817,26 @@ class ComposeController extends Gdn_Controller {
         }
 
         $this->comment($this->Comment->ArticleID, $parentArticleCommentID);
+    }
+
+    /**
+     * Retrieves status options for an article.
+     *
+     * @param bool|object $article entity
+     * @return array
+     */
+    private function getArticleStatusOptions($article = false) {
+        $statusOptions = array(
+            ArticleModel::STATUS_DRAFT => t('Draft'),
+            ArticleModel::STATUS_PENDING => t('Pending Review'),
+        );
+
+        if (Gdn::session()->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')
+            || ($article && ($article->Status == ArticleModel::STATUS_PUBLISHED))
+        ) {
+            $statusOptions[ArticleModel::STATUS_PUBLISHED] = t('Published');
+        }
+
+        return $statusOptions;
     }
 }

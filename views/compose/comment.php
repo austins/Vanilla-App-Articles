@@ -41,10 +41,10 @@ $this->fireEvent('BeforeCommentForm');
 
                     // Guest fields.
                     if ($GuestCommenting) {
-                        echo $this->Form->Label('Your Name', 'GuestName');
+                        echo $this->Form->label('Your Name', 'GuestName');
                         echo $this->Form->TextBox('GuestName');
                         echo '<br />';
-                        echo $this->Form->Label('Your Email', 'GuestEmail');
+                        echo $this->Form->label('Your Email', 'GuestEmail');
                         echo $this->Form->TextBox('GuestEmail');
                     }
 
@@ -52,7 +52,7 @@ $this->fireEvent('BeforeCommentForm');
 
                     if ($GuestCommenting) {
                         echo '<br />';
-                        echo $this->Form->Label('Message', 'Body');
+                        echo $this->Form->label('Message', 'Body');
                     }
 
                     echo $this->Form->BodyBox('Body', array('Table' => 'ArticleComment', 'tabindex' => 1));
@@ -71,15 +71,15 @@ $this->fireEvent('BeforeCommentForm');
                     }
 
                     echo '<span class="' . $CancelClass . '">';
-                    echo Anchor($CancelText, '/');
+                    echo anchor($CancelText, '/');
                     echo '</span>';
 
                     $ButtonOptions = array('class' => 'Button Primary CommentButton');
                     $ButtonOptions['tabindex'] = 2;
 
                     if ((!$Editing && $session->isValid()) || (!$Editing && $GuestCommenting)) {
-                        echo ' ' . Anchor(t('Preview'), '#', 'Button PreviewButton') . "\n";
-                        echo ' ' . Anchor(t('Edit'), '#', 'Button WriteButton Hidden') . "\n";
+                        echo ' ' . anchor(t('Preview'), '#', 'Button PreviewButton') . "\n";
+                        echo ' ' . anchor(t('Edit'), '#', 'Button WriteButton Hidden') . "\n";
                     }
 
                     if ($session->isValid()) {
@@ -92,12 +92,12 @@ $this->fireEvent('BeforeCommentForm');
                         if (!$AllowSigninPopup)
                             $Attributes['target'] = '_parent';
 
-                        $AuthenticationUrl = SignInUrl(Gdn::Controller()->SelfUrl);
+                        $AuthenticationUrl = SignInUrl(Gdn::controller()->SelfUrl);
                         $CssClass = 'Button Primary Stash';
                         if ($AllowSigninPopup)
                             $CssClass .= ' SignInPopup';
 
-                        echo Anchor(t('Sign In'), $AuthenticationUrl, $CssClass, $Attributes);
+                        echo anchor(t('Sign In'), $AuthenticationUrl, $CssClass, $Attributes);
                     }
 
                     $this->fireEvent('AfterFormButtons');

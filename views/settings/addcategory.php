@@ -8,23 +8,23 @@ echo $this->Form->Errors();
     <ul>
         <li>
             <?php
-            echo $this->Form->Label('Category Name', 'Name');
+            echo $this->Form->label('Category Name', 'Name');
             echo $this->Form->TextBox('Name');
             ?>
         </li>
         <li id="UrlCode">
             <?php
-            echo Wrap(t('Category URL:'), 'strong');
+            echo wrap(t('Category URL:'), 'strong');
             echo ' ' . Gdn::Request()->Url('/articles/category/', true);
-            echo Wrap(htmlspecialchars($this->Form->getValue('UrlCode')));
+            echo wrap(htmlspecialchars($this->Form->getValue('UrlCode')));
             echo $this->Form->TextBox('UrlCode');
-            echo Anchor(t('edit'), '#', 'Edit');
-            echo Anchor(t('OK'), '#', 'Save SmallButton');
+            echo anchor(t('edit'), '#', 'Edit');
+            echo anchor(t('OK'), '#', 'Save SmallButton');
             ?>
         </li>
         <li>
             <?php
-            echo $this->Form->Label('Description', 'Description');
+            echo $this->Form->label('Description', 'Description');
             echo $this->Form->TextBox('Description', array('MultiLine' => true));
             ?>
         </li>

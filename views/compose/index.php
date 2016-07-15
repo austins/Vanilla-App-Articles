@@ -16,10 +16,10 @@
                     $Author = Gdn::userModel()->getID($Article->InsertUserID);
 
                     echo '<li class="Item RecentlyPublishedArticle">';
-                    echo Wrap(Anchor($Article->Name, articleUrl($Article)), 'div');
+                    echo wrap(anchor($Article->Name, articleUrl($Article)), 'div');
 
                     echo '<div class="Meta Meta-Article">';
-                    echo '<span class="MItem ArticleCategory">' . Anchor($Article->ArticleCategoryName,
+                    echo '<span class="MItem ArticleCategory">' . anchor($Article->ArticleCategoryName,
                             articleCategoryUrl($Article->ArticleCategoryUrlCode)) . '</span>';
                     echo '<span class="MItem ArticleDate">' . Gdn_Format::date($Article->DateInserted,
                             '%e %B %Y - %l:%M %p') . '</span>';
@@ -55,14 +55,14 @@
                         <?php $this->fireEvent('BeforeItemContent'); ?>
                         <div class="ItemContent">
                             <div class="Message"><?php
-                                echo SliceString(Gdn_Format::Text(Gdn_Format::To($Comment->Body, $Comment->Format),
+                                echo SliceString(Gdn_Format::Text(Gdn_Format::to($Comment->Body, $Comment->Format),
                                     false), 250);
                                 ?></div>
                             <div class="Meta">
                     <span class="MItem"><?php echo t('Comment in', 'in') . ' '; ?>
-                        <b><?php echo Anchor(Gdn_Format::Text($Comment->ArticleName), $Permalink); ?></b></span>
+                        <b><?php echo anchor(Gdn_Format::Text($Comment->ArticleName), $Permalink); ?></b></span>
                                 <span class="MItem"><?php printf(t('Comment by %s'), $UserName); ?></span>
-                                <span class="MItem"><?php echo Anchor(Gdn_Format::date($Comment->DateInserted),
+                                <span class="MItem"><?php echo anchor(Gdn_Format::date($Comment->DateInserted),
                                         $Permalink); ?></span>
                             </div>
                         </div>
@@ -89,7 +89,7 @@
                         $Author = Gdn::userModel()->getID($Article->InsertUserID);
 
                         echo '<li class="Item PendingArticle">';
-                        echo Wrap(Anchor($Article->Name, articleUrl($Article)), 'div',
+                        echo wrap(anchor($Article->Name, articleUrl($Article)), 'div',
                             array('class' => 'ArticleTitle'));
 
                         echo '<div class="ArticleMeta">';

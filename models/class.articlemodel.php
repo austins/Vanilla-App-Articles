@@ -29,7 +29,9 @@ class ArticleModel extends Gdn_Model {
         $addPermission = 'Articles.Articles.Add';
 
         // If no UserID passed, check current session permission.
-        if (!$userID && Gdn::session()->checkPermission($addPermission, true, 'ArticleCategory', $permissionArticleCategoryID)) {
+        if (!$userID && Gdn::session()
+                ->checkPermission($addPermission, true, 'ArticleCategory', $permissionArticleCategoryID)
+        ) {
             return true;
         }
 
@@ -73,7 +75,9 @@ class ArticleModel extends Gdn_Model {
         }
 
         // Users with category edit permission can edit.
-        if (Gdn::session()->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', $permissionArticleCategoryID)) {
+        if (Gdn::session()
+            ->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', $permissionArticleCategoryID)
+        ) {
             return true;
         }
 
@@ -147,7 +151,8 @@ class ArticleModel extends Gdn_Model {
                 $this->Database->query(DBAModel::getCountSQL('max', 'Article', 'ArticleComment', $column));
                 break;
             case 'DateLastArticleComment':
-                $this->Database->query(DBAModel::getCountSQL('max', 'Article', 'ArticleComment', $column, 'DateInserted'));
+                $this->Database->query(DBAModel::getCountSQL('max', 'Article', 'ArticleComment', $column,
+                    'DateInserted'));
                 $this->SQL
                     ->update('Article')
                     ->set('DateLastArticleComment', 'DateInserted', false, false)
@@ -178,10 +183,11 @@ class ArticleModel extends Gdn_Model {
                 $result['Complete'] = $to >= $max;
 
                 $percent = round($to * 100 / $max);
-                if ($percent > 100 || $result['Complete'])
+                if ($percent > 100 || $result['Complete']) {
                     $result['Percent'] = '100%';
-                else
+                } else {
                     $result['Percent'] = $percent . '%';
+                }
 
                 $from = $to + 1;
                 $to = $from + DBAModel::$ChunkSize - 1;
@@ -222,11 +228,12 @@ class ArticleModel extends Gdn_Model {
         $limit = $limit ? $limit : Gdn::config('Articles.Articles.PerPage', 12);
         $offset = is_numeric($offset) ? (($offset < 0) ? 0 : $offset) : false;
 
-        if (($offset !== false) && ($limit !== false))
+        if (($offset !== false) && ($limit !== false)) {
             $this->SQL->limit($limit, $offset);
+        }
 
         // Handle SQL conditions for wheres.
-        $this->EventArguments['Wheres'] = & $wheres;
+        $this->EventArguments['Wheres'] = &$wheres;
         $this->fireEvent('BeforeGet');
 
         // Handle ArticleCategoryID in Wheres clause
@@ -240,8 +247,9 @@ class ArticleModel extends Gdn_Model {
             $articleCategoryID = $wheres['a.ArticleCategoryID'];
         }
 
-        if (is_array($wheres))
+        if (is_array($wheres)) {
             $this->SQL->where($wheres);
+        }
 
         // Set order of data.
         $this->SQL->orderBy($orderByField, $orderByDirection);
@@ -276,6 +284,120 @@ class ArticleModel extends Gdn_Model {
         $this->fireEvent('AfterGet');
 
         return $articles;
+    }
+
+    /**
+     * Takes a set of form data ($Form->_PostValues), validates them, and
+     * inserts or updates them to the database.
+     *
+     * @param array $formPostValues An associative array of $Field => $Value pairs that represent data posted
+     * from the form in the $_POST or $_GET collection.
+     * @param array $settings If a custom model needs special settings in order to perform a save, they
+     * would be passed in using this variable as an associative array.
+     * @return unknown
+     */
+    public function save($formPostValues, $settings = false) {
+        // Define the primary key in this model's table.
+        $this->defineSchema();
+
+        // See if a primary key value was posted and decide how to save
+        $primaryKeyVal = val($this->PrimaryKey, $formPostValues, false);
+        $insert = $primaryKeyVal === false ? true : false;
+        if ($insert) {
+            $this->addInsertFields($formPostValues);
+        } else {
+            $this->addUpdateFields($formPostValues);
+        }
+
+        // Validate the form posted values
+        if ($this->validate($formPostValues, $insert) === true) {
+            $fields = $this->Validation->validationFields();
+
+            // Add the activity.
+            if (c('Articles.Articles.AddActivity', true)) {
+                $this->addActivity($fields, $insert);
+            }
+
+            $fields = removeKeyFromArray($fields, $this->PrimaryKey); // Don't try to insert or update the primary key
+            if ($insert === false) {
+                // Updating.
+                $this->update($fields, array($this->PrimaryKey => $primaryKeyVal));
+            } else {
+                // Inserting.
+                $primaryKeyVal = $this->insert($fields);
+            }
+
+            // Update article count for affected category and user.
+            $article = $this->getByID($primaryKeyVal);
+            $articleCategoryID = val('ArticleCategoryID', $article, false);
+
+            $this->updateArticleCount($articleCategoryID, $article);
+            $this->updateUserArticleCount(val('InsertUserID', $article, false));
+        } else {
+            $primaryKeyVal = false;
+        }
+
+        return $primaryKeyVal;
+    }
+
+    /**
+     * Delete an article and its comments, then update counts accordingly.
+     *
+     * @param string $where
+     * @param bool $limit
+     * @param bool $resetData
+     * @return bool|Gdn_DataSet|string
+     */
+    public function delete($where = '', $limit = false, $resetData = false) {
+        if (is_numeric($where)) {
+            $where = array($this->PrimaryKey => $where);
+        }
+
+        $articleID = val($this->PrimaryKey, $where, false);
+
+        $articleToDelete = $this->getByID($articleID);
+
+        if ($resetData) {
+            $result = $this->SQL->delete($this->Name, $where, $limit);
+        } else {
+            $result = $this->SQL->noReset()->delete($this->Name, $where, $limit);
+        }
+
+        if ($articleToDelete && $result) {
+            // Delete comments for this article.
+            $this->SQL
+                ->from('ArticleComment ac')
+                ->join('Article a', 'ac.ArticleID = a.ArticleID')
+                ->where('a.ArticleID', $articleID)
+                ->delete();
+
+            // Get the newest article in the table to set the LastDateInserted and LastArticleID accordingly.
+            $lastArticle = $this->SQL
+                ->select('a.*')
+                ->from('Article a')
+                ->orderBy('a.ArticleID', 'desc')
+                ->limit(1)->get()->firstRow(DATASET_TYPE_OBJECT);
+
+            // Update article count for affected category and user.
+            $this->updateArticleCount($articleToDelete->ArticleCategoryID, $lastArticle);
+            $this->updateUserArticleCount(val('InsertUserID', $articleToDelete, false));
+
+            // See if LastDateInserted should be the latest comment.
+            $lastComment = $this->SQL
+                ->select('ac.*')
+                ->from('ArticleComment ac')
+                ->orderBy('ac.ArticleCommentID', 'desc')
+                ->limit(1)->get()->firstRow(DATASET_TYPE_OBJECT);
+
+            if ($lastComment && (strtotime($lastComment->DateInserted) > strtotime($lastArticle->DateInserted))) {
+                $articleCategoryModel = new ArticleCategoryModel();
+
+                $articleCategoryModel->update(array('LastDateInserted' => $lastComment->DateInserted),
+                    array('ArticleCategoryID' => $lastArticle->ArticleCategoryID), false);
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -336,8 +458,9 @@ class ArticleModel extends Gdn_Model {
      * @return bool|object
      */
     public function getByUser($userID, $offset = 0, $limit = false, $wheres = null) {
-        if (!$wheres)
+        if (!$wheres) {
             $wheres = array();
+        }
 
         $wheres['InsertUserID'] = $userID;
 
@@ -345,117 +468,6 @@ class ArticleModel extends Gdn_Model {
         $this->LastArticleCount = $articles->numRows();
 
         return $articles;
-    }
-
-    /**
-     * Takes a set of form data ($Form->_PostValues), validates them, and
-     * inserts or updates them to the database.
-     *
-     * @param array $formPostValues An associative array of $Field => $Value pairs that represent data posted
-     * from the form in the $_POST or $_GET collection.
-     * @param array $settings If a custom model needs special settings in order to perform a save, they
-     * would be passed in using this variable as an associative array.
-     * @return unknown
-     */
-    public function save($formPostValues, $settings = false) {
-        // Define the primary key in this model's table.
-        $this->defineSchema();
-
-        // See if a primary key value was posted and decide how to save
-        $primaryKeyVal = val($this->PrimaryKey, $formPostValues, false);
-        $insert = $primaryKeyVal === false ? true : false;
-        if ($insert) {
-            $this->addInsertFields($formPostValues);
-        } else {
-            $this->addUpdateFields($formPostValues);
-        }
-
-        // Validate the form posted values
-        if ($this->validate($formPostValues, $insert) === true) {
-            $fields = $this->Validation->validationFields();
-
-            // Add the activity.
-            if (c('Articles.Articles.AddActivity', true))
-                $this->addActivity($fields, $insert);
-
-            $fields = removeKeyFromArray($fields, $this->PrimaryKey); // Don't try to insert or update the primary key
-            if ($insert === false) {
-                // Updating.
-                $this->update($fields, array($this->PrimaryKey => $primaryKeyVal));
-            } else {
-                // Inserting.
-                $primaryKeyVal = $this->insert($fields);
-            }
-
-            // Update article count for affected category and user.
-            $article = $this->getByID($primaryKeyVal);
-            $articleCategoryID = val('ArticleCategoryID', $article, false);
-
-            $this->updateArticleCount($articleCategoryID, $article);
-            $this->updateUserArticleCount(val('InsertUserID', $article, false));
-        } else {
-            $primaryKeyVal = false;
-        }
-
-        return $primaryKeyVal;
-    }
-
-    /**
-     * Delete an article and its comments, then update counts accordingly.
-     *
-     * @param string $where
-     * @param bool $limit
-     * @param bool $resetData
-     * @return bool|Gdn_DataSet|string
-     */
-    public function delete($where = '', $limit = false, $resetData = false) {
-        if (is_numeric($where))
-            $where = array($this->PrimaryKey => $where);
-
-        $articleID = val($this->PrimaryKey, $where, false);
-
-        $articleToDelete = $this->getByID($articleID);
-
-        if ($resetData)
-            $result = $this->SQL->delete($this->Name, $where, $limit);
-        else
-            $result = $this->SQL->noReset()->delete($this->Name, $where, $limit);
-
-        if ($articleToDelete && $result) {
-            // Delete comments for this article.
-            $this->SQL
-                ->from('ArticleComment ac')
-                ->join('Article a', 'ac.ArticleID = a.ArticleID')
-                ->where('a.ArticleID', $articleID)
-                ->delete();
-
-            // Get the newest article in the table to set the LastDateInserted and LastArticleID accordingly.
-            $lastArticle = $this->SQL
-                ->select('a.*')
-                ->from('Article a')
-                ->orderBy('a.ArticleID', 'desc')
-                ->limit(1)->get()->firstRow(DATASET_TYPE_OBJECT);
-
-            // Update article count for affected category and user.
-            $this->updateArticleCount($articleToDelete->ArticleCategoryID, $lastArticle);
-            $this->updateUserArticleCount(val('InsertUserID', $articleToDelete, false));
-
-            // See if LastDateInserted should be the latest comment.
-            $lastComment = $this->SQL
-                ->select('ac.*')
-                ->from('ArticleComment ac')
-                ->orderBy('ac.ArticleCommentID', 'desc')
-                ->limit(1)->get()->firstRow(DATASET_TYPE_OBJECT);
-
-            if ($lastComment && (strtotime($lastComment->DateInserted) > strtotime($lastArticle->DateInserted))) {
-                $articleCategoryModel = new ArticleCategoryModel();
-
-                $articleCategoryModel->update(array('LastDateInserted' => $lastComment->DateInserted),
-                    array('ArticleCategoryID' => $lastArticle->ArticleCategoryID), false);
-            }
-        }
-
-        return $result;
     }
 
     /**
@@ -468,8 +480,9 @@ class ArticleModel extends Gdn_Model {
     public function updateArticleCount($articleCategoryID, $article = false) {
         $articleID = val('ArticleID', $article, false);
 
-        if (!is_numeric($articleCategoryID) && !is_numeric($articleID))
+        if (!is_numeric($articleCategoryID) && !is_numeric($articleID)) {
             return false;
+        }
 
         $categoryData = $this->SQL
             ->select('a.ArticleID', 'count', 'CountArticles')
@@ -479,8 +492,9 @@ class ArticleModel extends Gdn_Model {
             ->where('a.ArticleCategoryID', $articleCategoryID)
             ->get()->firstRow();
 
-        if (!$categoryData)
+        if (!$categoryData) {
             return false;
+        }
 
         $countArticles = (int)val('CountArticles', $categoryData, 0);
 
@@ -506,8 +520,9 @@ class ArticleModel extends Gdn_Model {
      * @return bool
      */
     public function updateUserArticleCount($userID) {
-        if (!is_numeric($userID))
+        if (!is_numeric($userID)) {
             return false;
+        }
 
         $countArticles = $this->SQL
             ->select('a.ArticleID', 'count', 'CountArticles')
@@ -516,58 +531,6 @@ class ArticleModel extends Gdn_Model {
             ->get()->value('CountArticles', 0);
 
         Gdn::userModel()->setField($userID, 'CountArticles', $countArticles);
-    }
-
-    /**
-     * Creates an activity post for an article.
-     *
-     * @param array $fields
-     * @param bool $insert
-     */
-    private function addActivity($fields, $insert) {
-        // Current user must be logged in for an activity to be posted.
-        if (!Gdn::session()->isValid())
-            return;
-
-        // Determine whether to add a new activity.
-        if ($insert && ($fields['Status'] === self::STATUS_PUBLISHED)) {
-            // The article is new and will be published.
-            $insertActivity = true;
-        } else {
-            // The article already exists.
-            $currentArticle = Gdn::SQL()->select('a.Status, a.DateInserted')->from('Article a')
-                ->where('a.ArticleID', $fields['ArticleID'])->get()->firstRow();
-
-            // Set $InsertActivity to true if the article wasn't published and is being changed to published status.
-            $insertActivity = ($currentArticle->Status !== self::STATUS_PUBLISHED)
-                && ($fields['Status'] === self::STATUS_PUBLISHED);
-
-            // Pass the DateInserted to be used for the route of the activity.
-            $fields['DateInserted'] = $currentArticle->DateInserted;
-        }
-
-        if ($insertActivity) {
-            //if ($Fields['Excerpt'] != '') {
-            //    $ActivityStory = Gdn_Format::To($Fields['Excerpt'], $Fields['Format']);
-            //} else {
-            //    $ActivityStory = sliceParagraph(Gdn_Format::plainText($Fields['Body'], $Fields['Format']),
-            //        c('Articles.Excerpt.MaxLength', 160));
-            //}
-
-            $activityModel = new ActivityModel();
-            $activity = array(
-                'ActivityType' => 'Article',
-                'ActivityUserID' => $fields['InsertUserID'],
-                'NotifyUserID' => ActivityModel::NOTIFY_PUBLIC,
-                'HeadlineFormat' => '{ActivityUserID,user} posted the "<a href="{Url,html}">{Data.Name}</a>" article.',
-                //'Story' => $ActivityStory,
-                'Route' => '/article/' . Gdn_Format::date($fields['DateInserted'], '%Y') . '/' . $fields['UrlCode'],
-                'RecordType' => 'Article',
-                'RecordID' => $fields['ArticleID'],
-                'Data' => array('Name' => $fields['Name'])
-            );
-            $activityModel->save($activity);
-        }
     }
 
     /**
@@ -581,14 +544,15 @@ class ArticleModel extends Gdn_Model {
         $where = array('RecordType' => 'Article', 'RecordID' => $articleID);
         $activity = $activityModel->getWhere($where, 0, 1)->firstRow();
 
-        if ($activity)
+        if ($activity) {
             $activityModel->delete(val('ActivityID', $activity, false));
+        }
     }
 
-    //
     public function getSimilarArticles($articleID, $articleCategoryID) {
-        if (!is_numeric($articleID) || !is_numeric($articleCategoryID))
+        if (!is_numeric($articleID) || !is_numeric($articleCategoryID)) {
             throw new InvalidArgumentException('The article ID and article category ID must be a numeric value.');
+        }
 
 //        $ArticleCategoryModel = new ArticleCategoryModel();
 //        $Category = $ArticleCategoryModel->getByID($ArticleCategoryID);
@@ -619,5 +583,60 @@ class ArticleModel extends Gdn_Model {
         }
 
         return $articles;
+    }
+
+    //
+
+    /**
+     * Creates an activity post for an article.
+     *
+     * @param array $fields
+     * @param bool $insert
+     */
+    private function addActivity($fields, $insert) {
+        // Current user must be logged in for an activity to be posted.
+        if (!Gdn::session()->isValid()) {
+            return;
+        }
+
+        // Determine whether to add a new activity.
+        if ($insert && ($fields['Status'] === self::STATUS_PUBLISHED)) {
+            // The article is new and will be published.
+            $insertActivity = true;
+        } else {
+            // The article already exists.
+            $currentArticle = Gdn::sql()->select('a.Status, a.DateInserted')->from('Article a')
+                ->where('a.ArticleID', $fields['ArticleID'])->get()->firstRow();
+
+            // Set $InsertActivity to true if the article wasn't published and is being changed to published status.
+            $insertActivity = ($currentArticle->Status !== self::STATUS_PUBLISHED)
+                && ($fields['Status'] === self::STATUS_PUBLISHED);
+
+            // Pass the DateInserted to be used for the route of the activity.
+            $fields['DateInserted'] = $currentArticle->DateInserted;
+        }
+
+        if ($insertActivity) {
+            //if ($Fields['Excerpt'] != '') {
+            //    $ActivityStory = Gdn_Format::to($Fields['Excerpt'], $Fields['Format']);
+            //} else {
+            //    $ActivityStory = sliceParagraph(Gdn_Format::plainText($Fields['Body'], $Fields['Format']),
+            //        c('Articles.Excerpt.MaxLength', 160));
+            //}
+
+            $activityModel = new ActivityModel();
+            $activity = array(
+                'ActivityType' => 'Article',
+                'ActivityUserID' => $fields['InsertUserID'],
+                'NotifyUserID' => ActivityModel::NOTIFY_PUBLIC,
+                'HeadlineFormat' => '{ActivityUserID,user} posted the "<a href="{Url,html}">{Data.Name}</a>" article.',
+                //'Story' => $ActivityStory,
+                'Route' => '/article/' . Gdn_Format::date($fields['DateInserted'], '%Y') . '/' . $fields['UrlCode'],
+                'RecordType' => 'Article',
+                'RecordID' => $fields['ArticleID'],
+                'Data' => array('Name' => $fields['Name'])
+            );
+            $activityModel->save($activity);
+        }
     }
 }

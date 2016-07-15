@@ -9,14 +9,14 @@ $Articles = $this->data('Articles');
 $Category = isset($this->ArticleCategory->ArticleCategoryID) ? $this->ArticleCategory : false;
 
 if ($Category) {
-    echo Wrap($Category->Name, 'h1', array('class' => 'H'));
+    echo wrap($Category->Name, 'h1', array('class' => 'H'));
 }
 
 if (count($Articles) == 0) {
     if ($Category) {
-        echo Wrap(t('No articles have been published in this category yet.'), 'div', array('class' => 'Empty'));
+        echo wrap(t('No articles have been published in this category yet.'), 'div', array('class' => 'Empty'));
     } else {
-        echo Wrap(t('No articles have been published yet.'), 'div', array('class' => 'Empty'));
+        echo wrap(t('No articles have been published yet.'), 'div', array('class' => 'Empty'));
     }
 } else {
     foreach ($Articles as $Article):
@@ -36,29 +36,29 @@ if (count($Articles) == 0) {
                 $ThumbnailPath = '/uploads' . $Thumbnail->Path;
 
                 echo '<div class="ArticleThumbnail">';
-                echo Anchor(Img($ThumbnailPath, array('title' => $Article->Name)), $ArticleUrl);
+                echo anchor(Img($ThumbnailPath, array('title' => $Article->Name)), $ArticleUrl);
                 echo '</div>';
             }
             ?>
             <div class="ArticleInner">
                 <header>
-                    <h2 class="ArticleTitle"><?php echo Anchor($Article->Name, $ArticleUrl); ?></h2>
+                    <h2 class="ArticleTitle"><?php echo anchor($Article->Name, $ArticleUrl); ?></h2>
 
                     <div class="Meta Meta-Article">
                         <?php
-                        Gdn::Controller()->fireEvent('BeforeArticleMeta');
+                        Gdn::controller()->fireEvent('BeforeArticleMeta');
 
                         echo articleTag($Article, 'Closed', 'Closed');
 
-                        Gdn::Controller()->fireEvent('AfterArticleLabels');
+                        Gdn::controller()->fireEvent('AfterArticleLabels');
                         ?>
                         <span
-                            class="MItem ArticleCategory"><?php echo Anchor($Article->ArticleCategoryName,
+                            class="MItem ArticleCategory"><?php echo anchor($Article->ArticleCategoryName,
                                 articleCategoryUrl($Article->ArticleCategoryUrlCode));
                             ?></span>
                         <span class="MItem ArticleDate"><?php echo Gdn_Format::date($Article->DateInserted, '%e %B %Y - %l:%M %p'); ?></span>
                         <span class="MItem ArticleAuthor"><?php echo articleAuthorAnchor($Author); ?></span>
-                        <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText, $ArticleUrl . '#comments'); ?></span>
+                        <span class="MItem MCount ArticleComments"><?php echo anchor($CommentCountText, $ArticleUrl . '#comments'); ?></span>
                     </div>
                 </header>
 

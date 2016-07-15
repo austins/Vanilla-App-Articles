@@ -1,36 +1,26 @@
-<?php defined('APPLICATION') or exit();
+<?php
 /**
- * Copyright (C) 2015  Austin S.
+ * ArticlesModule module
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @copyright 2015-2016 Austin S.
+ * @license http://www.opensource.org/licenses/gpl-2.0.php GNU GPL v2
  */
 
 /**
  * Renders recently published articles
  */
 class ArticlesModule extends Gdn_Module {
-    public function __construct($Sender = '') {
+    public function __construct($sender = '') {
         // Load articles.
-        $ArticleModel = new ArticleModel();
+        $articleModel = new ArticleModel();
 
-        $Limit = 5;
-        $ArticleWheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED); // Category must have at least one article.
-        $Articles = $ArticleModel->get(0, $Limit, $ArticleWheres);
+        $limit = 5;
+        $articleWheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED); // Category must have at least one article.
+        $articles = $articleModel->get(0, $limit, $articleWheres);
 
-        $this->Data = $Articles;
+        $this->Data = $articles;
 
-        parent::__construct($Sender);
+        parent::__construct($sender);
 
         $this->_ApplicationFolder = 'articles';
     }
@@ -40,7 +30,7 @@ class ArticlesModule extends Gdn_Module {
      *
      * @return string
      */
-    public function AssetTarget() {
+    public function assetTarget() {
         return 'Panel';
     }
 
@@ -49,16 +39,16 @@ class ArticlesModule extends Gdn_Module {
      *
      * @return string
      */
-    public function ToString() {
-        $Controller = Gdn::Controller();
+    public function toString() {
+        $controller = Gdn::controller();
         $session = Gdn::session();
 
-        $Controller->EventArguments['ArticlesModule'] = &$this;
-        $Controller->fireEvent('BeforeArticlesModule');
+        $controller->EventArguments['ArticlesModule'] = &$this;
+        $controller->fireEvent('BeforeArticlesModule');
 
         if (!$session->checkPermission('Articles.Articles.View', true, 'ArticleCategory', 'any'))
             return '';
 
-        return parent::ToString();
+        return parent::toString();
     }
 }

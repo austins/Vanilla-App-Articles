@@ -13,7 +13,7 @@ echo $this->Form->Errors();
         <?php
         if ($Categories->numRows() > 0) {
             echo '<div class="P">';
-            echo $this->Form->Label('Category', 'ArticleCategoryID'), ' ';
+            echo $this->Form->label('Category', 'ArticleCategoryID'), ' ';
             echo $this->Form->DropDown('ArticleCategoryID', $Categories, array(
                 'IncludeNull' => true,
                 'ValueField' => 'ArticleCategoryID',
@@ -26,32 +26,32 @@ echo $this->Form->Errors();
 
         <div class="P">
             <?php
-            echo $this->Form->Label('Article Name', 'Name');
-            echo Wrap($this->Form->TextBox('Name', array('maxlength' => 100, 'class' => 'InputBox BigInput')), 'div',
+            echo $this->Form->label('Article Name', 'Name');
+            echo wrap($this->Form->TextBox('Name', array('maxlength' => 100, 'class' => 'InputBox BigInput')), 'div',
                 array('class' => 'TextBoxWrapper'));
             ?>
         </div>
 
         <div id="UrlCode">
             <?php
-            echo Wrap('URL Code', 'strong') . ': ';
-            echo Wrap(htmlspecialchars($this->Form->getValue('UrlCode')));
+            echo wrap('URL Code', 'strong') . ': ';
+            echo wrap(htmlspecialchars($this->Form->getValue('UrlCode')));
             echo $this->Form->TextBox('UrlCode');
-            echo Anchor(t('edit'), '#', 'Edit');
-            echo Anchor(t('OK'), '#', 'Save SmallButton');
+            echo anchor(t('edit'), '#', 'Edit');
+            echo anchor(t('OK'), '#', 'Save SmallButton');
             ?>
         </div>
 
         <div class="P">
             <?php
-            echo $this->Form->Label('Body', 'Body');
+            echo $this->Form->label('Body', 'Body');
             echo $this->Form->BodyBox('Body', array('Table' => 'Article'));
             ?>
         </div>
 
         <div class="P">
             <?php
-            echo $this->Form->Label('Upload an Image', 'UploadImage');
+            echo $this->Form->label('Upload an Image', 'UploadImage');
             echo $this->Form->ImageUpload('UploadImage');
             ?>
 
@@ -80,7 +80,7 @@ echo $this->Form->Errors();
 
         <div class="P">
             <?php
-            echo $this->Form->Label('Upload a Thumbnail (Max dimensions: ' . c('Articles.Articles.ThumbnailWidth', 280)
+            echo $this->Form->label('Upload a Thumbnail (Max dimensions: ' . c('Articles.Articles.ThumbnailWidth', 280)
                 . 'x' . c('Articles.Articles.ThumbnailHeight', 200) . ')', 'UploadThumbnail');
             echo $this->Form->ImageUpload('UploadThumbnail');
             ?>
@@ -106,7 +106,7 @@ echo $this->Form->Errors();
 
         <div class="P">
             <?php
-            echo $this->Form->Label('Excerpt (Optional)', 'Excerpt');
+            echo $this->Form->label('Excerpt (Optional)', 'Excerpt');
             echo $this->Form->TextBox('Excerpt', array('MultiLine' => TRUE));
             ?>
         </div>
@@ -114,8 +114,8 @@ echo $this->Form->Errors();
         <?php if (Gdn::session()->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', 'any')): ?>
             <div class="P">
                 <?php
-                echo $this->Form->Label('Author', 'AuthorUserName');
-                echo Wrap($this->Form->TextBox('AuthorUserName', array('class' => 'InputBox BigInput MultiComplete')),
+                echo $this->Form->label('Author', 'AuthorUserName');
+                echo wrap($this->Form->TextBox('AuthorUserName', array('class' => 'InputBox BigInput MultiComplete')),
                     'div', array('class' => 'TextBoxWrapper'));
                 ?>
             </div>
@@ -123,7 +123,7 @@ echo $this->Form->Errors();
 
         <div class="P">
             <?php
-            echo $this->Form->Label('Status', 'Status');
+            echo $this->Form->label('Status', 'Status');
             echo $this->Form->RadioList('Status', $this->data('StatusOptions'),
                 array('Default' => ArticleModel::STATUS_DRAFT));
             ?>
@@ -139,7 +139,7 @@ echo $this->Form->Errors();
 
         echo $this->Form->Button('Preview', array('class' => 'Button PreviewButton'));
 
-        echo Anchor(t('Cancel'), '/compose/posts', 'Button ComposeCancel');
+        echo anchor(t('Cancel'), '/compose/posts', 'Button ComposeCancel');
 
         $this->fireEvent('AfterFormButtons');
         ?>

@@ -22,7 +22,9 @@ class ArticleCommentModel extends Gdn_Model {
         $addPermission = 'Articles.Comments.Add';
 
         // If no UserID passed, check current session permission.
-        if (!$userID && Gdn::session()->checkPermission($addPermission, true, 'ArticleCategory', $permissionArticleCategoryID)) {
+        if (!$userID && Gdn::session()
+                ->checkPermission($addPermission, true, 'ArticleCategory', $permissionArticleCategoryID)
+        ) {
             return true;
         }
 
@@ -68,19 +70,22 @@ class ArticleCommentModel extends Gdn_Model {
         $limit = $limit ? $limit : Gdn::config('Articles.Comments.PerPage', 30);
         $offset = is_numeric($offset) ? (($offset < 0) ? 0 : $offset) : false;
 
-        if (($offset !== false) && ($limit !== false))
+        if (($offset !== false) && ($limit !== false)) {
             $this->SQL->limit($limit, $offset);
+        }
 
         // Handle SQL conditions for wheres.
-        $this->EventArguments['Wheres'] = & $wheres;
+        $this->EventArguments['Wheres'] = &$wheres;
         $this->fireEvent('BeforeGet');
 
-        if (is_array($wheres))
+        if (is_array($wheres)) {
             $this->SQL->where($wheres);
+        }
 
         // Set order of data.
-        if (($sortOrder !== 'asc') && ($sortOrder !== 'desc'))
+        if (($sortOrder !== 'asc') && ($sortOrder !== 'desc')) {
             $sortOrder = 'asc';
+        }
 
         $this->SQL->orderBy('ac.DateInserted', $sortOrder);
 
@@ -104,67 +109,6 @@ class ArticleCommentModel extends Gdn_Model {
         // Prepare and fire event.
         $this->EventArguments['Data'] = $comments;
         $this->fireEvent('AfterGet');
-
-        return $comments;
-    }
-
-    /**
-     * Get article comment by article ID.
-     *
-     * @param int $articleID
-     * @param int $offset
-     * @param bool $limit
-     * @param null|array $wheres
-     * @return Gdn_DataSet
-     * @throws InvalidArgumentException on invalid article ID.
-     */
-    public function getByArticleID($articleID, $offset = 0, $limit = false, $wheres = null) {
-        if (!is_numeric($articleID))
-            throw new InvalidArgumentException('The article ID must be a numeric value.');
-
-        $wheres = array('ac.ArticleID' => $articleID);
-
-        $comments = $this->get($offset, $limit, $wheres);
-
-        return $comments;
-    }
-
-    /**
-     * Get article comment by ID.
-     *
-     * @param $articleCommentID
-     * @param int $offset
-     * @param bool $limit
-     * @param null|array $wheres
-     * @return bool
-     * @throws InvalidArgumentException on invalid comment ID.
-     */
-    public function getByID($articleCommentID, $offset = 0, $limit = false, $wheres = null) {
-        if (!is_numeric($articleCommentID))
-            throw new InvalidArgumentException('The comment ID must be a numeric value.');
-
-        $wheres = array('ac.ArticleCommentID' => $articleCommentID);
-
-        $comment = $this->get($offset, $limit, $wheres)->firstRow();
-
-        return $comment;
-    }
-
-    /**
-     * Get comments for a user.
-     *
-     * @param int $userID Which user to get comments for.
-     * @param int $limit Max number to get.
-     * @param int $offset Number to skip.
-     * @return object SQL results.
-     */
-    public function getByUser($userID, $offset = 0, $limit = false) {
-        if (!is_numeric($userID))
-            throw new InvalidArgumentException('The user ID must be a numeric value.');
-
-        $wheres = array('ac.InsertUserID' => $userID);
-
-        $comments = $this->get($offset, $limit, $wheres);
 
         return $comments;
     }
@@ -203,10 +147,10 @@ class ArticleCommentModel extends Gdn_Model {
             } else {
                 // Check for spam
                 $spam = SpamModel::isSpam('Comment', $fields);
-                if($spam) {
-                  return SPAM;
+                if ($spam) {
+                    return SPAM;
                 }
-                
+
                 // Inserting.
                 $primaryKeyVal = $this->insert($fields);
 
@@ -222,68 +166,22 @@ class ArticleCommentModel extends Gdn_Model {
 
                 // Add the activity.
                 $articleName = $article->Name;
-                if (c('Articles.Comments.AddActivity', true))
+                if (c('Articles.Comments.AddActivity', true)) {
                     $this->addActivity($fields, $insert, $primaryKeyVal, $articleName);
+                }
 
                 $this->updateCommentCount($article, $comment);
 
                 // Update user comment count if this isn't a guest comment.
-                if (is_numeric($comment->InsertUserID))
+                if (is_numeric($comment->InsertUserID)) {
                     $this->updateUserCommentCount($comment->InsertUserID);
+                }
             }
         } else {
             $primaryKeyVal = false;
         }
 
         return $primaryKeyVal;
-    }
-
-    /**
-     * Creates an activity post for an article comment.
-     *
-     * @param array $fields
-     * @param bool $insert
-     * @param int $articleCommentID
-     * @param string $articleName
-     */
-    private function addActivity($fields, $insert, $articleCommentID, $articleName) {
-        // Current user must be logged in for an activity to be posted.
-        if (!Gdn::session()->isValid())
-            return;
-
-        // Only add a new activity if the comment is new and not a threaded reply.
-        if (!$insert || ($fields['ParentArticleCommentID'] > 0))
-            return;
-
-        $activityModel = new ActivityModel();
-        $activity = array(
-            'ActivityType' => 'ArticleComment',
-            'ActivityUserID' => $fields['InsertUserID'],
-            'NotifyUserID' => ActivityModel::NOTIFY_PUBLIC,
-            'HeadlineFormat' => '{ActivityUserID,user} commented on the "<a href="{Url,html}">{Data.Name}</a>" article.',
-            //'Story' => sliceParagraph(Gdn_Format::plainText($Fields['Body'], $Fields['Format']),
-            //    c('Articles.Excerpt.MaxLength', 160)),
-            'Route' => '/article/comment/' . $articleCommentID . '/#Comment_' . $articleCommentID,
-            'RecordType' => 'ArticleComment',
-            'RecordID' => $articleCommentID,
-            'Data' => array('Name' => $articleName)
-        );
-        $activityModel->save($activity);
-    }
-
-    /**
-     * Remove the "new article comment" activity for an article comment.
-     *
-     * @param int $articleCommentID
-     */
-    public function deleteActivity($articleCommentID) {
-        $activityModel = new ActivityModel();
-
-        $where = array('RecordType' => 'ArticleComment', 'RecordID' => $articleCommentID);
-        $activity = $activityModel->getWhere($where, 0, 1)->firstRow();
-
-        if ($activity)
-            $activityModel->delete(val('ActivityID', $activity, false));
     }
 
     /**
@@ -298,11 +196,12 @@ class ArticleCommentModel extends Gdn_Model {
      * @returns true on successful delete; false if comment ID doesn't exist.
      */
     public function delete($articleCommentID, $options = array()) {
-        $this->EventArguments['ArticleCommentID'] = & $articleCommentID;
+        $this->EventArguments['ArticleCommentID'] = &$articleCommentID;
 
         $comment = $this->getByID($articleCommentID);
-        if (!$comment)
+        if (!$comment) {
             return false;
+        }
 
         $this->fireEvent('DeleteComment');
 
@@ -325,10 +224,91 @@ class ArticleCommentModel extends Gdn_Model {
 
         // Update the comment count for the user if this isn't a guest comment.
         $insertUserID = val('InsertUserID', $comment, false);
-        if (is_numeric($insertUserID))
+        if (is_numeric($insertUserID)) {
             $this->updateUserCommentCount($insertUserID);
+        }
 
         return true;
+    }
+
+    /**
+     * Get article comment by article ID.
+     *
+     * @param int $articleID
+     * @param int $offset
+     * @param bool $limit
+     * @param null|array $wheres
+     * @return Gdn_DataSet
+     * @throws InvalidArgumentException on invalid article ID.
+     */
+    public function getByArticleID($articleID, $offset = 0, $limit = false, $wheres = null) {
+        if (!is_numeric($articleID)) {
+            throw new InvalidArgumentException('The article ID must be a numeric value.');
+        }
+
+        $wheres = array('ac.ArticleID' => $articleID);
+
+        $comments = $this->get($offset, $limit, $wheres);
+
+        return $comments;
+    }
+
+    /**
+     * Get article comment by ID.
+     *
+     * @param $articleCommentID
+     * @param int $offset
+     * @param bool $limit
+     * @param null|array $wheres
+     * @return bool
+     * @throws InvalidArgumentException on invalid comment ID.
+     */
+    public function getByID($articleCommentID, $offset = 0, $limit = false, $wheres = null) {
+        if (!is_numeric($articleCommentID)) {
+            throw new InvalidArgumentException('The comment ID must be a numeric value.');
+        }
+
+        $wheres = array('ac.ArticleCommentID' => $articleCommentID);
+
+        $comment = $this->get($offset, $limit, $wheres)->firstRow();
+
+        return $comment;
+    }
+
+    /**
+     * Get comments for a user.
+     *
+     * @param int $userID Which user to get comments for.
+     * @param int $limit Max number to get.
+     * @param int $offset Number to skip.
+     * @return object SQL results.
+     */
+    public function getByUser($userID, $offset = 0, $limit = false) {
+        if (!is_numeric($userID)) {
+            throw new InvalidArgumentException('The user ID must be a numeric value.');
+        }
+
+        $wheres = array('ac.InsertUserID' => $userID);
+
+        $comments = $this->get($offset, $limit, $wheres);
+
+        return $comments;
+    }
+
+    /**
+     * Remove the "new article comment" activity for an article comment.
+     *
+     * @param int $articleCommentID
+     */
+    public function deleteActivity($articleCommentID) {
+        $activityModel = new ActivityModel();
+
+        $where = array('RecordType' => 'ArticleComment', 'RecordID' => $articleCommentID);
+        $activity = $activityModel->getWhere($where, 0, 1)->firstRow();
+
+        if ($activity) {
+            $activityModel->delete(val('ActivityID', $activity, false));
+        }
     }
 
     /**
@@ -344,8 +324,9 @@ class ArticleCommentModel extends Gdn_Model {
     public function updateCommentCount($article, $comment = false) {
         $articleID = val('ArticleID', $article, false);
 
-        if (!is_numeric($articleID))
+        if (!is_numeric($articleID)) {
             return false;
+        }
 
         $articleData = $this->SQL
             ->select('ac.ArticleCommentID', 'count', 'CountArticleComments')
@@ -353,18 +334,19 @@ class ArticleCommentModel extends Gdn_Model {
             ->where('ac.ArticleID', $articleID)
             ->get()->firstRow();
 
-        if (!$articleData)
+        if (!$articleData) {
             return false;
+        }
 
         $countArticleComments = (int)val('CountArticleComments', $articleData, 0);
 
         $fields = array(
             'CountArticleComments' => $countArticleComments,
             'FirstArticleCommentID' => $this->SQL
-                    ->select('ac.ArticleCommentID')
-                    ->from('ArticleComment ac')
-                    ->orderBy('ac.ArticleCommentID', 'asc')
-                    ->limit(1)->get()->firstRow(DATASET_TYPE_OBJECT)->ArticleCommentID,
+                ->select('ac.ArticleCommentID')
+                ->from('ArticleComment ac')
+                ->orderBy('ac.ArticleCommentID', 'asc')
+                ->limit(1)->get()->firstRow(DATASET_TYPE_OBJECT)->ArticleCommentID,
             'LastArticleCommentID' => val('ArticleCommentID', $comment, null),
             'DateLastArticleComment' => val('DateInserted', $comment, null),
             'LastArticleCommentUserID' => val('InsertUserID', $comment, null)
@@ -384,8 +366,9 @@ class ArticleCommentModel extends Gdn_Model {
      * @return bool
      */
     public function updateUserCommentCount($userID) {
-        if (!is_numeric($userID))
+        if (!is_numeric($userID)) {
             return false;
+        }
 
         $countArticleComments = $this->SQL
             ->select('ac.ArticleCommentID', 'count', 'CountArticleComments')
@@ -394,37 +377,6 @@ class ArticleCommentModel extends Gdn_Model {
             ->get()->value('CountArticleComments', 0);
 
         Gdn::userModel()->setField($userID, 'CountArticleComments', $countArticleComments);
-    }
-
-    /**
-     * Builds Where statements for getOffset method.
-     *
-     * @access protected
-     * @see CommentModel::GetOffset()
-     *
-     * @param array $part Value from $this->_OrderBy.
-     * @param object $comment
-     * @param string $op Comparison operator.
-     * @return array Expression and value.
-     */
-    protected function _whereFromOrderBy($part, $comment, $op = '') {
-        if (!$op || $op == '=') {
-            $op = ($part[1] == 'desc' ? '>' : '<') . $op;
-        } elseif ($op == '==') {
-            $op = '=';
-        }
-        $expr = $part[0] . ' ' . $op;
-        if (preg_match('/c\.(\w*\b)/', $part[0], $matches)) {
-            $field = $matches[1];
-        } else {
-            $field = $part[0];
-        }
-        $value = val($field, $comment);
-        if (!$value) {
-            $value = 0;
-        }
-
-        return array($expr, $value);
     }
 
     /**
@@ -472,5 +424,71 @@ class ArticleCommentModel extends Gdn_Model {
             ->get()
             ->firstRow()
             ->CountArticleComments;
+    }
+
+    /**
+     * Builds Where statements for getOffset method.
+     *
+     * @access protected
+     * @see CommentModel::GetOffset()
+     *
+     * @param array $part Value from $this->_OrderBy.
+     * @param object $comment
+     * @param string $op Comparison operator.
+     * @return array Expression and value.
+     */
+    protected function _whereFromOrderBy($part, $comment, $op = '') {
+        if (!$op || $op == '=') {
+            $op = ($part[1] == 'desc' ? '>' : '<') . $op;
+        } elseif ($op == '==') {
+            $op = '=';
+        }
+        $expr = $part[0] . ' ' . $op;
+        if (preg_match('/c\.(\w*\b)/', $part[0], $matches)) {
+            $field = $matches[1];
+        } else {
+            $field = $part[0];
+        }
+        $value = val($field, $comment);
+        if (!$value) {
+            $value = 0;
+        }
+
+        return array($expr, $value);
+    }
+
+    /**
+     * Creates an activity post for an article comment.
+     *
+     * @param array $fields
+     * @param bool $insert
+     * @param int $articleCommentID
+     * @param string $articleName
+     */
+    private function addActivity($fields, $insert, $articleCommentID, $articleName) {
+        // Current user must be logged in for an activity to be posted.
+        if (!Gdn::session()->isValid()) {
+            return;
+        }
+
+        // Only add a new activity if the comment is new and not a threaded reply.
+        if (!$insert || ($fields['ParentArticleCommentID'] > 0)) {
+            return;
+        }
+
+        $activityModel = new ActivityModel();
+        $activity = array(
+            'ActivityType' => 'ArticleComment',
+            'ActivityUserID' => $fields['InsertUserID'],
+            'NotifyUserID' => ActivityModel::NOTIFY_PUBLIC,
+            'HeadlineFormat' => '{ActivityUserID,user} commented on the "<a href="{Url,html}">{Data.Name}</a>" article.',
+            //'Story' => sliceParagraph(Gdn_Format::plainText($Fields['Body'], $Fields['Format']),
+            //    c('Articles.Excerpt.MaxLength', 160)),
+            'Route' => '/article/comment/' . $articleCommentID . '/#Comment_' . $articleCommentID,
+            'RecordType' => 'ArticleComment',
+            'RecordID' => $articleCommentID,
+            'Data' => array('Name' => $articleName)
+        );
+        $activityModel->save($activity);
     }
 }

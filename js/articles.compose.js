@@ -1,14 +1,14 @@
 jQuery(document).ready(function($) {
     // Article media: image upload events.
-    function CreateCustomElement(ElementType, SetOptions) {
-        var Element = document.createElement(ElementType);
+    function createCustomElement(elementType, setOptions) {
+        var element = document.createElement(elementType);
 
-        for (var prop in SetOptions) {
-            var propval = SetOptions[prop];
-            Element.setAttribute(prop, propval);
+        for (var prop in setOptions) {
+            var propval = setOptions[prop];
+            element.setAttribute(prop, propval);
         }
 
-        return Element;
+        return element;
     }
 
     var currentArticleID = gdn.definition('ArticleID', null);
@@ -28,19 +28,20 @@ jQuery(document).ready(function($) {
                 var imagePath = gdn.definition('WebRoot') + '/uploads' + response.Path;
 
                 // Show new image in form.
-                $('#UploadedImages').append('<div id="ArticleMedia_' + response.ArticleMediaID + '" class="UploadedImageWrap">' +
-                '<div class="UploadedImage"><img src="' + imagePath + '" alt="" /></div>' +
-                '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' + imagePath + '">Insert into Post</a>' +
-                '<br /><a class="UploadedImageDelete" href="' + gdn.url('/articles/compose/deleteimage/'
-                + response.ArticleMediaID) + '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>');
+                $('#UploadedImages')
+                    .append('<div id="ArticleMedia_' + response.ArticleMediaID + '" class="UploadedImageWrap">' +
+                        '<div class="UploadedImage"><img src="' + imagePath + '" alt="" /></div>' +
+                        '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' + imagePath + '">Insert into Post</a>' +
+                        '<br /><a class="UploadedImageDelete" href="' + gdn.url('/articles/compose/deleteimage/'
+                            + response.ArticleMediaID) + '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>');
 
                 // Add new image to hidden form field to be passed to the controller.
-                var UploadedImageIDs = CreateCustomElement('input', {
+                var uploadedImageIDs = createCustomElement('input', {
                     'type': 'hidden',
                     'name': 'UploadedImageIDs[]',
                     'value': response.ArticleMediaID
                 });
-                $('#Form_ComposeArticle').append(UploadedImageIDs);
+                $('#Form_ComposeArticle').append(uploadedImageIDs);
 
                 $('.TinyProgress').remove();
             },
@@ -71,18 +72,20 @@ jQuery(document).ready(function($) {
                 var imagePath = gdn.definition('WebRoot') + '/uploads' + response.Path;
 
                 // Show new image in form.
-                $('#UploadedThumbnail').append('<div id="ArticleMedia_' + response.ArticleMediaID + '" class="UploadedImageWrap">' +
-                '<div class="UploadedImage"><img src="' + imagePath + '" alt="" /></div>' +
-                '<div class="UploadedImageActions"><a class="UploadedImageDelete" href="' + gdn.url('/articles/compose/deleteimage/'
-                + response.ArticleMediaID) + '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>');
+                $('#UploadedThumbnail')
+                    .append('<div id="ArticleMedia_' + response.ArticleMediaID + '" class="UploadedImageWrap">' +
+                        '<div class="UploadedImage"><img src="' + imagePath + '" alt="" /></div>' +
+                        '<div class="UploadedImageActions"><a class="UploadedImageDelete" href="' + gdn.url(
+                            '/articles/compose/deleteimage/'
+                            + response.ArticleMediaID) + '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>');
 
                 // Add new image to hidden form field to be passed to the controller.
-                var UploadedThumbnailID = CreateCustomElement('input', {
+                var uploadedThumbnailID = createCustomElement('input', {
                     'type': 'hidden',
                     'name': 'UploadedThumbnailID',
                     'value': response.ArticleMediaID
                 });
-                $('#Form_ComposeArticle').append(UploadedThumbnailID);
+                $('#Form_ComposeArticle').append(uploadedThumbnailID);
 
                 $('.TinyProgress').remove();
             },
@@ -115,12 +118,13 @@ jQuery(document).ready(function($) {
                 break;
         }
 
-        var FormBodyVal = $('#Form_Body').val();
+        var formBodyVal = $('#Form_Body').val();
 
-        $('#Form_Body').val(FormBodyVal + imageCode);
+        $('#Form_Body').val(formBodyVal + imageCode);
 
-        if ($('#Form_Body').data('wysihtml5'))
-            $('#Form_Body').data('wysihtml5').editor.setValue(FormBodyVal + imageCode); // Wysihtml5 support.
+        if ($('#Form_Body').data('wysihtml5')) {
+            $('#Form_Body').data('wysihtml5').editor.setValue(formBodyVal + imageCode);
+        } // Wysihtml5 support.
 
         return false;
     });
@@ -134,9 +138,9 @@ jQuery(document).ready(function($) {
         afterConfirm: function(json, sender) {
             var isThumbnail = ($(sender).closest('#UploadedThumbnail').length > 0);
             var linkUrl = jQuery(sender).attr('href').split('?')[0]; // Retrieve part of URL without query string.
-            var ArticleMediaID = linkUrl.substring(linkUrl.lastIndexOf('/') + 1);
+            var articleMediaID = linkUrl.substring(linkUrl.lastIndexOf('/') + 1);
 
-            $('#ArticleMedia_' + ArticleMediaID).remove();
+            $('#ArticleMedia_' + articleMediaID).remove();
 
             if (isThumbnail) {
                 $('#UploadedThumbnailID').remove();
@@ -175,8 +179,9 @@ jQuery(document).ready(function($) {
                 $('div.Popup').remove();
 
                 // Assign the article id to the form if it was defined
-                if (json.ArticleID != null)
+                if (json.ArticleID != null) {
                     $(inpArticleID).val(json.ArticleID);
+                }
 
                 // Remove any old errors from the form
                 $(frm).find('div.Errors').remove();

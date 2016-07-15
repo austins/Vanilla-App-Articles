@@ -9,7 +9,7 @@
         <li id="ArticleCategory_<?php echo $Category->ArticleCategoryID; ?>"
             class="Item Item-ArticleCategory-<?php echo $Category->UrlCode; ?>">
             <div class="ItemContent ArticleCategory">
-                <div class="TitleWrap"><?php echo Anchor($Category->Name, articleCategoryUrl($Category)); ?></div>
+                <div class="TitleWrap"><?php echo anchor($Category->Name, articleCategoryUrl($Category)); ?></div>
                 <div class="ArticleCategoryDescription"><?php echo $Category->Description; ?></div>
                 <div class="Meta">
                     <span class="MItem ArticleCount"><?php echo Plural(number_format($Category->CountArticles),

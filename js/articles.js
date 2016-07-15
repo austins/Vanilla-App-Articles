@@ -37,10 +37,11 @@ jQuery(document).ready(function($) {
     });
 
     // Auto size text boxes.
-    if ($.autogrow)
+    if ($.autogrow) {
         $('textarea.TextBox').livequery(function() {
             $(this).autogrow();
         });
+    }
 
     // Threaded comment replies.
     // Hide/reveal the comments when the comment link is clicked
@@ -52,7 +53,8 @@ jQuery(document).ready(function($) {
 
         // Add the ParentArticleCommentID to the form as a hidden field.
         var parentArticleCommentID = commentBox.closest('.ItemComment').attr('id').replace(/[^\d.]/g, '');
-        $('#Form_Comment').append('<input id="Form_ParentArticleCommentID" name="ParentArticleCommentID" type="hidden" value="' + parentArticleCommentID + '" />');
+        $('#Form_Comment').append(
+            '<input id="Form_ParentArticleCommentID" name="ParentArticleCommentID" type="hidden" value="' + parentArticleCommentID + '" />');
     });
 
     function resetCommentBoxPlacement() {
@@ -69,10 +71,11 @@ jQuery(document).ready(function($) {
             if (!$(e.target).is('a.ReplyLink') && $(e.target).closest(commentBox).length === 0) {
                 // Hide the form on blur (de-focus) if empty.
                 if ($('#Form_GuestName').length && ($('#Form_GuestName').val() == '')
-                    && ($('#Form_GuestEmail').val() == '') && ($('#Form_Body').val() == ''))
+                    && ($('#Form_GuestEmail').val() == '') && ($('#Form_Body').val() == '')) {
                     resetCommentBoxPlacement();
-                else if ($('#Form_Body').val() == '')
+                } else if ($('#Form_Body').val() == '') {
                     resetCommentBoxPlacement();
+                }
             }
         }
     });
@@ -148,13 +151,14 @@ jQuery(document).ready(function($) {
     }
 
     // Set up paging
-    if ($.morepager)
+    if ($.morepager) {
         $('.MorePager').morepager({
             pageContainerSelector: 'ul.Comments',
             afterPageLoaded: function() {
                 $(document).trigger('CommentPagingComplete');
             }
         });
+    }
 
     // Hijack comment form button clicks.
     $('.CommentButton, a.PreviewButton').livequery('click', function() {
@@ -168,8 +172,9 @@ jQuery(document).ready(function($) {
         if (preview) {
             type = 'Preview';
             // If there is already a preview showing, kill processing.
-            if ($('div.Preview').length > 0 || jQuery.trim($(textbox).val()) == '')
+            if ($('div.Preview').length > 0 || jQuery.trim($(textbox).val()) == '') {
                 return false;
+            }
         }
 
         // Post the form, and append the results to #Discussion, and erase the textbox
@@ -184,17 +189,20 @@ jQuery(document).ready(function($) {
         var comments = $('ul.Comments li.ItemComment');
         var lastComment = $(comments).get(comments.length - 1);
         var lastArticleCommentID = $(lastComment).attr('id');
-        if (lastArticleCommentID)
-            lastArticleCommentID = lastArticleCommentID.indexOf('Article_') == 0 ? 0 : lastArticleCommentID.replace('Comment_', '');
-        else
+        if (lastArticleCommentID) {
+            lastArticleCommentID = lastArticleCommentID.indexOf('Article_') == 0 ? 0 : lastArticleCommentID.replace(
+                'Comment_', '');
+        } else {
             lastArticleCommentID = 0;
+        }
 
         postValues += '&' + prefix + 'LastArticleCommentID=' + lastArticleCommentID;
         var action = $(frm).attr('action');
-        if (action.indexOf('?') < 0)
+        if (action.indexOf('?') < 0) {
             action += '?';
-        else
+        } else {
             action += '&';
+        }
 
         if (articleID > 0) {
             action += 'articleid=' + articleID;
@@ -218,8 +226,9 @@ jQuery(document).ready(function($) {
 
                 var processedTargets = false;
                 // If there are targets, process them
-                if (json.Targets && json.Targets.length > 0)
+                if (json.Targets && json.Targets.length > 0) {
                     gdn.processTargets(json.Targets);
+                }
 
                 // If there is a redirect url, go to it
                 if (json.RedirectUrl != null && jQuery.trim(json.RedirectUrl) != '') {
@@ -230,8 +239,9 @@ jQuery(document).ready(function($) {
                 }
 
                 // Remove any old popups
-                if (json.FormSaved == true)
+                if (json.FormSaved == true) {
                     $('div.Popup,.Overlay').remove();
+                }
 
                 var commentID = json.ArticleCommentID;
 
@@ -255,8 +265,9 @@ jQuery(document).ready(function($) {
 
                 } else {
                     // Clean up the form
-                    if (processedTargets)
+                    if (processedTargets) {
                         btn = $('div.CommentForm :submit, div.EditCommentForm :submit');
+                    }
 
                     resetCommentForm(btn);
                     clearCommentForm(btn);
@@ -281,12 +292,15 @@ jQuery(document).ready(function($) {
                     }
                     // Remove any "More" pager links (because it is typically replaced with the latest comment by this function)
                     if (gdn.definition('PrependNewComments') != '1') // If prepending the latest comment, don't remove the pager.
+                    {
                         $('#PagerMore').remove();
+                    }
 
                     // Set the discussionid on the form in case the discussion was created by adding the last comment
                     var articleID = $(frm).find('[name$=ArticleID]');
                     if (articleID.length == 0 && json.ArticleID) {
-                        $(frm).append('<input type="hidden" name="' + prefix + 'ArticleID" value="' + json.ArticleID + '">');
+                        $(frm).append(
+                            '<input type="hidden" name="' + prefix + 'ArticleID" value="' + json.ArticleID + '">');
                     }
 
                     // Let listeners know that the comment was added.
@@ -320,8 +334,9 @@ jQuery(document).ready(function($) {
         }
 
         resetCommentForm(this);
-        if ($(this).hasClass('Cancel'))
+        if ($(this).hasClass('Cancel')) {
             clearCommentForm(this);
+        }
 
         return false;
     });
@@ -349,7 +364,8 @@ jQuery(document).ready(function($) {
 
     // ArticleCategoriesModule categories drop-down listing
     $('#ArticleCategoriesDropDown').change(function() {
-        var isAllCategoriesSelected = ($(this).children(':selected').attr('id') === "ArticleCategoriesDropDown_AllCategories");
+        var isAllCategoriesSelected = ($(this).children(':selected')
+            .attr('id') === "ArticleCategoriesDropDown_AllCategories");
         if (isAllCategoriesSelected) {
             window.location = gdn.url('/articles/categories');
             return false;

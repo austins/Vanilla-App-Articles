@@ -79,20 +79,24 @@ class ArticleController extends Gdn_Controller {
         // Get the article.
         $this->Article = $this->ArticleModel->getByUrlCode($articleUrlCode);
 
-        if (!$this->Article)
+        if (!$this->Article) {
             throw notFoundException('Article');
+        }
 
         // Set required permission.
         // If not published...
         if ($this->Article->Status != ArticleModel::STATUS_PUBLISHED) {
             // If author, only require View permission.
             if ($this->Article->InsertUserID == Gdn::session()->UserID) {
-                $this->permission('Articles.Articles.View', true, 'ArticleCategory', $this->Article->PermissionArticleCategoryID);
+                $this->permission('Articles.Articles.View', true, 'ArticleCategory',
+                    $this->Article->PermissionArticleCategoryID);
             } else {
-                $this->permission('Articles.Articles.Edit', true, 'ArticleCategory', $this->Article->PermissionArticleCategoryID);
+                $this->permission('Articles.Articles.Edit', true, 'ArticleCategory',
+                    $this->Article->PermissionArticleCategoryID);
             }
         } else {
-            $this->permission('Articles.Articles.View', true, 'ArticleCategory', $this->Article->PermissionArticleCategoryID);
+            $this->permission('Articles.Articles.View', true, 'ArticleCategory',
+                $this->Article->PermissionArticleCategoryID);
         }
 
         // Get the category.
@@ -138,8 +142,9 @@ class ArticleController extends Gdn_Controller {
         if (((count($this->RequestArgs) < 2) && (!$articleYear || !$articleUrlCode)) || !is_numeric($articleYear)
             || ($articleUrlCode == '') || !$this->Article
             || ($articleYear != $dateInsertedYear)
-        )
+        ) {
             throw notFoundException('Article');
+        }
 
         // Set the title.
         $this->title($this->Article->Name);
@@ -163,76 +168,6 @@ class ArticleController extends Gdn_Controller {
         $this->View = 'index';
 
         $this->render();
-    }
-
-    /**
-     * Adds meta tags to a controller method.
-     */
-    protected function addMetaTags() {
-        $headModule =& $this->Head;
-        $article = $this->Article;
-
-        $headModule->addTag('meta', array('property' => 'og:type', 'content' => 'article'));
-
-        if ($article->Excerpt != '') {
-            $Description = Gdn_Format::plainText($article->Excerpt, $article->Format);
-        } else {
-            $Description = sliceParagraph(Gdn_Format::plainText($article->Body, $article->Format), c('Articles.Excerpt.MaxLength'));
-        }
-        $this->description($Description);
-
-        $headModule->addTag('meta', array('property' => 'article:published_time',
-            'content' => date(DATE_ISO8601, strtotime($article->DateInserted))));
-        if ($article->DateUpdated) {
-            $headModule->addTag('meta', array('property' => 'article:modified_time',
-                'content' => date(DATE_ISO8601, strtotime($article->DateUpdated))));
-        }
-
-        $author = Gdn::userModel()->getID($article->InsertUserID);
-        $headModule->addTag('meta',
-            array('property' => 'article:author', 'content' => url(userUrl($author), true)));
-        $headModule->addTag('meta', array('property' => 'article:section', 'content' => $this->ArticleCategory->Name));
-
-        // Image meta info
-        $image = $this->ArticleMediaModel->getThumbnailByArticleID($article->ArticleID);
-        if(!$image) {
-          $image = $this->ArticleMediaModel->getByArticleID($article->ArticleID)->firstRow();
-        }
-        if ($image) {
-            $headModule->addTag('meta', array('property' => 'og:image', 'content' => url('/uploads' . $image->Path, true)));
-            $headModule->addTag('meta', array('property' => 'og:image:width', 'content' => $image->ImageWidth));
-            $headModule->addTag('meta', array('property' => 'og:image:height', 'content' => $image->ImageHeight));
-        }
-        
-        // Twitter card
-        $headModule->addTag('meta', array('name' => 'twitter:card', 'content' => 'summary'));
-
-        $twitterUsername = trim(c('Articles.TwitterUsername', ''));
-        if ($twitterUsername != '')
-            $headModule->addTag('meta', array('name' => 'twitter:site', 'content' => '@' . $twitterUsername));
-
-        $headModule->addTag('meta', array('name' => 'twitter:title', 'content' => $article->Name));
-        $headModule->addTag('meta', array('name' => 'twitter:description', 'content' => $Description));
-
-        if ($image) {
-            $headModule->addTag('meta', array('name' => 'twitter:image', 'content' => url('/uploads' . $image->Path, true)));
-        }
-    }
-
-    /**
-     * Sends options to a view via JSON.
-     *
-     * @param mixed $article is an article entity
-     */
-    private function sendOptions($article) {
-        require_once($this->fetchViewLocation('helper_functions', 'Article', 'Articles'));
-
-        ob_start();
-        showArticleOptions($article);
-        $options = ob_get_clean();
-
-        $this->jsonTarget("#Article_{$article->ArticleID} .OptionsMenu,.Section-Article .Article .OptionsMenu",
-            $options, 'ReplaceWith');
     }
 
     /**
@@ -303,19 +238,22 @@ class ArticleController extends Gdn_Controller {
         $this->permission('Articles.Articles.Delete', true, 'ArticleCategory', $article->PermissionArticleCategoryID);
 
         if ($this->Form->authenticatedPostBack()) {
-            if (!$this->ArticleModel->delete($articleID))
+            if (!$this->ArticleModel->delete($articleID)) {
                 $this->Form->addError('Failed to delete article.');
+            }
 
             if ($this->Form->errorCount() == 0) {
                 // Remove the "new article" activity for this article.
                 $this->ArticleModel->deleteActivity($articleID);
 
                 // Redirect.
-                if ($this->_DeliveryType === DELIVERY_TYPE_ALL)
+                if ($this->_DeliveryType === DELIVERY_TYPE_ALL) {
                     safeRedirect($target);
+                }
 
-                if ($target)
+                if ($target) {
                     $this->RedirectUrl = url($target);
+                }
 
                 $this->jsonTarget(".Section-ArticleList #Article_{$articleID}", null, 'SlideUp');
             }
@@ -350,14 +288,18 @@ class ArticleController extends Gdn_Controller {
                 $defaultTarget = articleUrl($article);
 
                 // Make sure comment is this user's or they have Delete permission
-                if ($comment->InsertUserID != $session->UserID || !C('Articles.Comments.AllowSelfDelete'))
-                    $this->permission('Articles.Comments.Delete', true, 'ArticleCategory', $article->PermissionArticleCategoryID);
+                if ($comment->InsertUserID != $session->UserID || !C('Articles.Comments.AllowSelfDelete')) {
+                    $this->permission('Articles.Comments.Delete', true, 'ArticleCategory',
+                        $article->PermissionArticleCategoryID);
+                }
 
                 // Make sure that content can (still) be edited
                 $editContentTimeout = c('Garden.EditContentTimeout', -1);
                 $canEdit = $editContentTimeout == -1 || strtotime($comment->DateInserted) + $editContentTimeout > time();
-                if (!$canEdit)
-                    $this->permission('Articles.Comments.Delete', true, 'ArticleCategory', $article->PermissionArticleCategoryID);
+                if (!$canEdit) {
+                    $this->permission('Articles.Comments.Delete', true, 'ArticleCategory',
+                        $article->PermissionArticleCategoryID);
+                }
 
                 // Delete the comment
                 if (!$this->ArticleCommentModel->delete($articleCommentID)) {
@@ -390,7 +332,6 @@ class ArticleController extends Gdn_Controller {
         $this->render();
     }
 
-
     /**
      * Display article page starting with a particular comment.
      *
@@ -399,8 +340,9 @@ class ArticleController extends Gdn_Controller {
     public function comment($articleCommentID) {
         // Get the ArticleID
         $comment = $this->ArticleCommentModel->getByID($articleCommentID);
-        if (!$comment)
+        if (!$comment) {
             throw notFoundException('Article comment');
+        }
 
         // Figure out how many comments are before this one
         $offset = $this->ArticleCommentModel->getOffset($comment);
@@ -414,5 +356,79 @@ class ArticleController extends Gdn_Controller {
         $article = $this->ArticleModel->getByID($comment->ArticleID);
 
         $this->index(Gdn_Format::date($article->DateInserted, '%Y'), $article->UrlCode, $pageNumber);
+    }
+
+    /**
+     * Adds meta tags to a controller method.
+     */
+    protected function addMetaTags() {
+        $headModule =& $this->Head;
+        $article = $this->Article;
+
+        $headModule->addTag('meta', array('property' => 'og:type', 'content' => 'article'));
+
+        if ($article->Excerpt != '') {
+            $Description = Gdn_Format::plainText($article->Excerpt, $article->Format);
+        } else {
+            $Description = sliceParagraph(Gdn_Format::plainText($article->Body, $article->Format),
+                c('Articles.Excerpt.MaxLength'));
+        }
+        $this->description($Description);
+
+        $headModule->addTag('meta', array('property' => 'article:published_time',
+            'content' => date(DATE_ISO8601, strtotime($article->DateInserted))));
+        if ($article->DateUpdated) {
+            $headModule->addTag('meta', array('property' => 'article:modified_time',
+                'content' => date(DATE_ISO8601, strtotime($article->DateUpdated))));
+        }
+
+        $author = Gdn::userModel()->getID($article->InsertUserID);
+        $headModule->addTag('meta',
+            array('property' => 'article:author', 'content' => url(userUrl($author), true)));
+        $headModule->addTag('meta', array('property' => 'article:section', 'content' => $this->ArticleCategory->Name));
+
+        // Image meta info
+        $image = $this->ArticleMediaModel->getThumbnailByArticleID($article->ArticleID);
+        if (!$image) {
+            $image = $this->ArticleMediaModel->getByArticleID($article->ArticleID)->firstRow();
+        }
+        if ($image) {
+            $headModule->addTag('meta',
+                array('property' => 'og:image', 'content' => url('/uploads' . $image->Path, true)));
+            $headModule->addTag('meta', array('property' => 'og:image:width', 'content' => $image->ImageWidth));
+            $headModule->addTag('meta', array('property' => 'og:image:height', 'content' => $image->ImageHeight));
+        }
+
+        // Twitter card
+        $headModule->addTag('meta', array('name' => 'twitter:card', 'content' => 'summary'));
+
+        $twitterUsername = trim(c('Articles.TwitterUsername', ''));
+        if ($twitterUsername != '') {
+            $headModule->addTag('meta', array('name' => 'twitter:site', 'content' => '@' . $twitterUsername));
+        }
+
+        $headModule->addTag('meta', array('name' => 'twitter:title', 'content' => $article->Name));
+        $headModule->addTag('meta', array('name' => 'twitter:description', 'content' => $Description));
+
+        if ($image) {
+            $headModule->addTag('meta',
+                array('name' => 'twitter:image', 'content' => url('/uploads' . $image->Path, true)));
+        }
+    }
+
+    /**
+     * Sends options to a view via JSON.
+     *
+     * @param mixed $article is an article entity
+     */
+    private function sendOptions($article) {
+        require_once($this->fetchViewLocation('helper_functions', 'Article', 'Articles'));
+
+        ob_start();
+        showArticleOptions($article);
+        $options = ob_get_clean();
+
+        $this->jsonTarget("#Article_{$article->ArticleID} .OptionsMenu,.Section-Article .Article .OptionsMenu",
+            $options, 'ReplaceWith');
     }
 }

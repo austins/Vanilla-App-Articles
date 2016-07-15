@@ -23,20 +23,20 @@ else
 
         <div class="Meta Meta-Article">
             <?php
-            Gdn::Controller()->fireEvent('BeforeArticleMeta');
+            Gdn::controller()->fireEvent('BeforeArticleMeta');
 
             echo articleTag($Article, 'Closed', 'Closed');
 
-            Gdn::Controller()->fireEvent('AfterArticleLabels');
+            Gdn::controller()->fireEvent('AfterArticleLabels');
             ?>
             <span
-                class="MItem ArticleCategory"><?php echo Anchor($Category->Name,
+                class="MItem ArticleCategory"><?php echo anchor($Category->Name,
                     articleCategoryUrl($Category)); ?></span>
                     <span
                         class="MItem ArticleDate"><?php echo Gdn_Format::date($Article->DateInserted,
                             '%e %B %Y - %l:%M %p'); ?></span>
             <span class="MItem ArticleAuthor"><?php echo articleAuthorAnchor($Author); ?></span>
-            <span class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText,
+            <span class="MItem MCount ArticleComments"><?php echo anchor($CommentCountText,
                     $ArticleUrl . '#comments'); ?></span>
         </div>
     </header>
@@ -88,10 +88,10 @@ if (c('Articles.Articles.ShowSimilarArticles')) {
             $SimilarArticleAuthor = Gdn::userModel()->getID($SimilarArticle->InsertUserID);
 
             echo '<li class="SimilarArticle">
-                ' . Anchor($SimilarArticle->Name, articleUrl($SimilarArticle)) . '
+                ' . anchor($SimilarArticle->Name, articleUrl($SimilarArticle)) . '
 
                 <div class="Meta Meta-Article">
-                    <span class="MItem ArticleCategory">' . Anchor($SimilarArticleCategory->Name, articleCategoryUrl($SimilarArticleCategory->UrlCode)) . '</span>
+                    <span class="MItem ArticleCategory">' . anchor($SimilarArticleCategory->Name, articleCategoryUrl($SimilarArticleCategory->UrlCode)) . '</span>
                     <span class="MItem ArticleDate">' . Gdn_Format::date($SimilarArticle->DateInserted, '%e %B %Y - %l:%M %p') . '</span>
                     <span class="MItem ArticleAuthor">' . articleAuthorAnchor($SimilarArticleAuthor) . '</span>
                 </div>

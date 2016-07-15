@@ -29,7 +29,7 @@ if (is_object($OtherCategories)) {
         </li>
         <li id="ReplacementCategory">
             <?php
-            echo $this->Form->Label('Replacement Category', 'ReplacementArticleCategoryID');
+            echo $this->Form->label('Replacement Category', 'ReplacementArticleCategoryID');
             echo $this->Form->DropDown(
                 'ReplacementArticleCategoryID',
                 $OtherCategories,

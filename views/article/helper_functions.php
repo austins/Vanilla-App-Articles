@@ -6,7 +6,7 @@ if (!function_exists('showArticleOptions')) {
         if (is_array($Article))
             $Article = (object)$Article;
 
-        $Sender = Gdn::Controller();
+        $sender = Gdn::controller();
         $session = Gdn::session();
         $Options = array();
 
@@ -35,7 +35,7 @@ if (!function_exists('showArticleOptions')) {
                 'Url' => '/article/delete/' . $Article->ArticleID,
                 'Class' => 'DeleteArticle Popup');
 
-            if (strtolower($Sender->ControllerName) === "articlecontroller")
+            if (strtolower($sender->ControllerName) === "articlecontroller")
                 $Options['DeleteArticle']['Url'] .= '?&target=' . urlencode(articleCategoryUrl($Category));
         }
 
@@ -44,10 +44,10 @@ if (!function_exists('showArticleOptions')) {
             echo '<div class="Options">';
             echo '<span class="ToggleFlyout OptionsMenu">';
             echo '<span class="OptionsTitle" title="' . t('Options') . '">' . t('Options') . '</span>';
-            echo Sprite('SpFlyoutHandle', 'Arrow');
+            echo sprite('SpFlyoutHandle', 'Arrow');
             echo '<ul class="Flyout MenuItems" style="display: none;">';
             foreach ($Options as $Code => $Option) {
-                echo Wrap(Anchor($Option['Label'], $Option['Url'], val('Class', $Option, $Code)), 'li');
+                echo wrap(anchor($Option['Label'], $Option['Url'], val('Class', $Option, $Code)), 'li');
             }
             echo '</ul>';
             echo '</span>';
@@ -76,7 +76,7 @@ if (!function_exists('ArticleTag')) {
 if (!function_exists('ShowCommentForm')) {
     function ShowCommentForm() {
         $session = Gdn::session();
-        $Controller = Gdn::Controller();
+        $Controller = Gdn::controller();
         $Article = $Controller->Article;
         $UserCanClose = $session->checkPermission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
         $UserCanComment = $session->checkPermission('Articles.Comments.Add', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
@@ -119,8 +119,8 @@ if (!function_exists('WriteArticleReactions')):
     function WriteArticleReactions($Comment, $Type = 'Comment') {
         list($RecordType, $RecordID) = RecordType($Comment);
 
-        Gdn::Controller()->EventArguments['RecordType'] = strtolower($RecordType);
-        Gdn::Controller()->EventArguments['RecordID'] = $RecordID;
+        Gdn::controller()->EventArguments['RecordType'] = strtolower($RecordType);
+        Gdn::controller()->EventArguments['RecordID'] = $RecordID;
 
         echo '<div class="Reactions">';
         Gdn_Theme::BulletRow();
@@ -129,13 +129,13 @@ if (!function_exists('WriteArticleReactions')):
         $GuestCommenting = (c('Articles.Comments.AllowGuests', false) && !$session->isValid());
         if (c('Articles.Comments.EnableThreadedComments', true) && !$Comment->ParentArticleCommentID) {
             if ($session->isValid() || $GuestCommenting) {
-                echo Anchor('<span class="ReactSprite ReactReply"></span> Reply',
+                echo anchor('<span class="ReactSprite ReactReply"></span> Reply',
                     '/compose/comment/' . $Comment->ArticleID . '/' . $Comment->ArticleCommentID,
                     'ReactButton ReplyLink Visible');
             }
         }
         
-        Gdn::Controller()->fireEvent('AfterArticleReactions');
+        Gdn::controller()->fireEvent('AfterArticleReactions');
         echo '</div>';
     }
 endif;
@@ -147,10 +147,10 @@ if (!function_exists('GetCommentOptions')):
         if (!is_numeric(val('ArticleCommentID', $Comment)))
             return $Options;
 
-        $Sender = Gdn::Controller();
+        $sender = Gdn::controller();
         $session = Gdn::session();
 
-        $Article = & $Sender->Article;
+        $Article = & $sender->Article;
         $ArticleCategoryID = val('ArticleCategoryID', $Article);
 
         // Determine if we still have time to edit
@@ -182,9 +182,9 @@ if (!function_exists('GetCommentOptions')):
                         . $Article->UrlCode), 'Class' => 'DeleteComment');
 
         // Allow plugins to add options
-        $Sender->EventArguments['CommentOptions'] = & $Options;
-        $Sender->EventArguments['Comment'] = $Comment;
-        $Sender->fireEvent('CommentOptions');
+        $sender->EventArguments['CommentOptions'] = & $Options;
+        $sender->EventArguments['Comment'] = $Comment;
+        $sender->fireEvent('CommentOptions');
 
         return $Options;
     }
@@ -198,10 +198,10 @@ if (!function_exists('WriteCommentOptions')):
             echo '<div class="Options">';
             echo '<span class="ToggleFlyout OptionsMenu">';
             echo '<span class="OptionsTitle" title="' . t('Options') . '">' . t('Options') . '</span>';
-            echo Sprite('SpFlyoutHandle', 'Arrow');
+            echo sprite('SpFlyoutHandle', 'Arrow');
             echo '<ul class="Flyout MenuItems">';
             foreach ($Options as $Code => $Option) {
-                echo Wrap(Anchor($Option['Label'], $Option['Url'], val('Class', $Option, $Code)),
+                echo wrap(anchor($Option['Label'], $Option['Url'], val('Class', $Option, $Code)),
                     'li');
             }
             echo '</ul>';

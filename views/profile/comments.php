@@ -5,7 +5,7 @@ echo '<h2 class="H">' . t('Article Comments') . '</h2>';
 $Comments = $this->data('Comments');
 
 if (!$Comments || count($Comments) == 0) {
-    echo Wrap(t("This user has not posted any article comments yet."), 'div', array('Class' => 'Empty'));
+    echo wrap(t("This user has not posted any article comments yet."), 'div', array('Class' => 'Empty'));
 } else {
     echo '<ul class="DataList SearchResults">';
 
@@ -17,13 +17,13 @@ if (!$Comments || count($Comments) == 0) {
             <?php $this->fireEvent('BeforeItemContent'); ?>
             <div class="ItemContent">
                 <div class="Message"><?php
-                    echo SliceString(Gdn_Format::Text(Gdn_Format::To($Comment->Body, $Comment->Format), false), 250);
+                    echo SliceString(Gdn_Format::Text(Gdn_Format::to($Comment->Body, $Comment->Format), false), 250);
                     ?></div>
                 <div class="Meta">
                     <span class="MItem"><?php echo t('Comment in', 'in') . ' '; ?>
-                        <b><?php echo Anchor(Gdn_Format::Text($Comment->ArticleName), $Permalink); ?></b></span>
+                        <b><?php echo anchor(Gdn_Format::Text($Comment->ArticleName), $Permalink); ?></b></span>
                     <span class="MItem"><?php printf(t('Comment by %s'), UserAnchor($User)); ?></span>
-                    <span class="MItem"><?php echo Anchor(Gdn_Format::date($Comment->DateInserted), $Permalink); ?></span>
+                    <span class="MItem"><?php echo anchor(Gdn_Format::date($Comment->DateInserted), $Permalink); ?></span>
                 </div>
             </div>
         </li>

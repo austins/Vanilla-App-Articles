@@ -1,6 +1,6 @@
 <?php defined('APPLICATION') or exit();
 
-$Controller = Gdn::Controller();
+$Controller = Gdn::controller();
 $session = Gdn::session();
 ?>
 <section id="comments">
@@ -36,7 +36,7 @@ $session = Gdn::session();
                         $User = Gdn::userModel()->getID($Comment->InsertUserID);
 
                     // Get user meta for articles app.
-                    $UserMeta = Gdn::userModel()->GetMeta($User->UserID, 'Articles.%', 'Articles.');
+                    $UserMeta = Gdn::userModel()->getMeta($User->UserID, 'Articles.%', 'Articles.');
                     $AuthorDisplayName = false;
                     if (isset($UserMeta['AuthorDisplayName'])) {
                         $AuthorDisplayName = $UserMeta['AuthorDisplayName'];
@@ -64,7 +64,7 @@ $session = Gdn::session();
 
                                         $this->fireEvent('AuthorPhoto');
                                     } else {
-                                        echo Wrap($Comment->GuestName, 'span', array('class' => 'Username GuestName'));
+                                        echo wrap($Comment->GuestName, 'span', array('class' => 'Username GuestName'));
                                     }
                                     ?>
                                 </span>
@@ -81,7 +81,7 @@ $session = Gdn::session();
                                 </div>
 
                                 <div class="Meta CommentMeta CommentInfo">
-                                <span class="MItem DateCreated"><?php echo Anchor(Gdn_Format::date($Comment->DateInserted,
+                                <span class="MItem DateCreated"><?php echo anchor(Gdn_Format::date($Comment->DateInserted,
                                             'html'), articleCommentUrl($Comment->ArticleCommentID), 'Permalink',
                                         array('name' => 'Item_' . ($CurrentOffset), 'rel' => 'nofollow')); ?></span>
                                     <?php
@@ -89,7 +89,7 @@ $session = Gdn::session();
 
                                     // Include IP Address if we have permission
                                     if ($session->checkPermission('Garden.Moderation.Manage'))
-                                        echo Wrap(IPAnchor($Comment->InsertIPAddress), 'span',
+                                        echo wrap(IPAnchor($Comment->InsertIPAddress), 'span',
                                             array('class' => 'MItem IPAddress'));
                                     ?>
                                 </div>
@@ -101,7 +101,7 @@ $session = Gdn::session();
                                         // DEPRECATED ARGUMENTS (as of 2.1)
                                         // $Comment->FormatBody, Object, and Type event args
                                         // added on 2014-09-12 for Emotify support.
-                                        $Comment->FormatBody = Gdn_Format::To($Comment->Body, $Comment->Format);
+                                        $Comment->FormatBody = Gdn_Format::to($Comment->Body, $Comment->Format);
                                         $Controller->EventArguments['Object'] = &$Comment;
                                         $Controller->EventArguments['Type'] = 'ArticleComment';
 

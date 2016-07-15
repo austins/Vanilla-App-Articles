@@ -1,43 +1,35 @@
-<?php defined('APPLICATION') or exit();
+<?php
 /**
- * Copyright (C) 2015  Austin S.
+ * Render functions.
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @copyright 2015-2016 Austin S.
+ * @license http://www.opensource.org/licenses/gpl-2.0.php GNU GPL v2
  */
 
 if (!function_exists('articleUrl')) {
     /**
      * Get the URL of an article.
      *
-     * @param object|array $Article
-     * @param int|string $Page
-     * @param bool $WithDomain
+     * @param object|array $article
+     * @param int|string $page
+     * @param bool $withDomain
      * @return string
      */
-    function articleUrl($Article, $Page = '', $WithDomain = true) {
+    function articleUrl($article, $page = '', $withDomain = true) {
         // If $Article type is an array, then cast it to an object.
-        if (is_array($Article))
-            $Article = (object)$Article;
+        if (is_array($article)) {
+            $article = (object)$article;
+        }
 
         // Set up the initial URL string.
-        $Result = '/article/' . Gdn_Format::date($Article->DateInserted, '%Y') . '/' . $Article->UrlCode;
+        $result = '/article/' . Gdn_Format::date($article->DateInserted, '%Y') . '/' . $article->UrlCode;
 
         // Add in the page number if necessary.
-        if ($Page && ($Page > 1 || Gdn::session()->UserID))
-            $Result .= '/p' . $Page;
+        if ($page && ($page > 1 || Gdn::session()->UserID)) {
+            $result .= '/p' . $page;
+        }
 
-        return url($Result, $WithDomain);
+        return url($result, $withDomain);
     }
 }
 
@@ -45,11 +37,11 @@ if (!function_exists('articleCommentUrl')) {
     /**
      * Get the URL for an article comment.
      *
-     * @param int $ArticleCommentID
+     * @param int $articleCommentID
      * @return string
      */
-    function articleCommentUrl($ArticleCommentID) {
-        return url("/article/comment/$ArticleCommentID/#Comment_$ArticleCommentID", true);
+    function articleCommentUrl($articleCommentID) {
+        return url("/article/comment/$articleCommentID/#Comment_$articleCommentID", true);
     }
 }
 
@@ -57,31 +49,31 @@ if (!function_exists('formatArticleBody')) {
     /**
      * Formats the body string of an article.
      *
-     * @param string $ArticleBody
-     * @param string $Format
+     * @param string $articleBody
+     * @param string $format
      * @return string
      */
-    function formatArticleBody($ArticleBody, $Format = 'Html') {
-        if (strcasecmp($Format, 'Html') == 0) {
+    function formatArticleBody($articleBody, $format = 'Html') {
+        if (strcasecmp($format, 'Html') == 0) {
             // Format links and links to videos.
-            $ArticleBody = Gdn_Format::Links($ArticleBody);
+            $articleBody = Gdn_Format::Links($articleBody);
 
             // Mentions and hashes.
-            $ArticleBody = Gdn_Format::Mentions($ArticleBody);
+            $articleBody = Gdn_Format::Mentions($articleBody);
 
             // Format new lines.
-            $ArticleBody = preg_replace("/(\015\012)|(\015)|(\012)/", "<br />", $ArticleBody);
-            $ArticleBody = FixNl2Br($ArticleBody);
+            $articleBody = preg_replace("/(\015\012)|(\015)|(\012)/", "<br />", $articleBody);
+            $articleBody = FixNl2Br($articleBody);
 
             // Convert br to paragraphs.
-            $ArticleBody = preg_replace('#(?:<br\s*/?>\s*?){2,}#', '</p><p>', $ArticleBody);
+            $articleBody = preg_replace('#(?:<br\s*/?>\s*?){2,}#', '</p><p>', $articleBody);
             // Add p on first paragraph.
-            $ArticleBody = '<p>' . $ArticleBody . '</p>';
+            $articleBody = '<p>' . $articleBody . '</p>';
         } else {
-            $ArticleBody = Gdn_Format::To($ArticleBody, $Format);
+            $articleBody = Gdn_Format::to($articleBody, $format);
         }
 
-        return $ArticleBody;
+        return $articleBody;
     }
 }
 
@@ -89,63 +81,74 @@ if (!function_exists('articleCategoryUrl')) {
     /**
      * Get the URL of an article category.
      *
-     * @param object|array|string $Category
-     * @param int|string $Page
-     * @param bool $WithDomain
+     * @param object|array|string $category
+     * @param int|string $page
+     * @param bool $withDomain
      * @return string
      */
-    function articleCategoryUrl($Category, $Page = '', $WithDomain = true) {
+    function articleCategoryUrl($category, $page = '', $withDomain = true) {
         // If $Category type is an array, then cast it to an object.
-        if (is_array($Category))
-            $Category = (object)$Category;
+        if (is_array($category)) {
+            $category = (object)$category;
+        }
 
         // If $Category is an object, then assign $UrlCode to UrlCode property,
         // else assume $Category is a string that is the UrlCode.
-        $UrlCode = isset($Category->UrlCode) ? $Category->UrlCode : $Category;
+        $urlCode = isset($category->UrlCode) ? $category->UrlCode : $category;
 
         // Set up the initial URL string.
-        $Result = '/articles/category/' . $UrlCode;
+        $result = '/articles/category/' . $urlCode;
 
         // Add in the page number if necessary.
-        if ($Page && ($Page > 1 || Gdn::session()->UserID))
-            $Result .= '/p' . $Page;
+        if ($page && ($page > 1 || Gdn::session()->UserID)) {
+            $result .= '/p' . $page;
+        }
 
-        return url($Result, $WithDomain);
+        return url($result, $withDomain);
     }
 }
 
 if (!function_exists('articleAuthorAnchor')) {
     /**
      * Get the URL for the author of an article.
+     *
+     * @param object $user
+     * @param array $cssClass
+     * @param null $options
+     * @return string
      */
-    function articleAuthorAnchor($User, $CssClass = null, $Options = null) {
-        static $NameUnique = NULL;
-        if ($NameUnique === NULL)
-            $NameUnique = c('Garden.Registration.NameUnique');
+    function articleAuthorAnchor($user, $cssClass = null, $options = null) {
+        static $nameUnique = null;
+        if ($nameUnique === null) {
+            $nameUnique = c('Garden.Registration.NameUnique');
+        }
 
-        if (is_array($CssClass)) {
-            $Options = $CssClass;
-            $CssClass = NULL;
-        } elseif (is_string($Options))
-            $Options = array('Px' => $Options);
+        if (is_array($cssClass)) {
+            $options = $cssClass;
+            $cssClass = null;
+        } elseif (is_string($options)) {
+            $options = array('Px' => $options);
+        }
 
-        $Px = getValue('Px', $Options, '');
+        $px = getValue('Px', $options, '');
 
-        $Name = getValue($Px.'Name', $User, t('Unknown'));
-        $UserID = getValue($Px.'UserID', $User, 0);
+        $name = getValue($px . 'Name', $user, t('Unknown'));
+        $userID = getValue($px . 'UserID', $user, 0);
 
-        $AuthorMeta = UserModel::GetMeta($User->UserID, 'Articles.%', 'Articles.');
-        if (isset($AuthorMeta['AuthorDisplayName']) && $AuthorMeta['AuthorDisplayName'] != "")
-            $Text = $AuthorMeta['AuthorDisplayName'];
-        else
-            $Text = getValue('Text', $Options, htmlspecialchars($Name)); // Allow anchor text to be overridden.
+        $authorMeta = UserModel::getMeta($user->UserID, 'Articles.%', 'Articles.');
+        if (isset($authorMeta['AuthorDisplayName']) && $authorMeta['AuthorDisplayName'] != "") {
+            $text = $authorMeta['AuthorDisplayName'];
+        } else {
+            $text = getValue('Text', $options, htmlspecialchars($name));
+        } // Allow anchor text to be overridden.
 
-        $Attributes = array(
-            'class' => $CssClass,
-            'rel' => getValue('Rel', $Options)
+        $attributes = array(
+            'class' => $cssClass,
+            'rel' => getValue('Rel', $options)
         );
 
-        $UserUrl = 'profile/articles/' . $UserID . '/' . $Name;
-        return '<a href="'.htmlspecialchars(url($UserUrl)).'"'.Attribute($Attributes).'>'.$Text.'</a>';
+        $userUrl = 'profile/articles/' . $userID . '/' . $name;
+
+        return '<a href="' . htmlspecialchars(url($userUrl)) . '"' . attribute($attributes) . '>' . $text . '</a>';
     }
 }

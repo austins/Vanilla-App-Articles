@@ -1,19 +1,9 @@
-<?php defined('APPLICATION') or exit();
+<?php
 /**
- * Copyright (C) 2015  Austin S.
+ * ArticlesHooks Plugin
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * @copyright 2015-2016 Austin S.
+ * @license http://www.opensource.org/licenses/gpl-2.0.php GNU GPL v2
  */
 
 /**
@@ -24,10 +14,10 @@ class ArticlesHooks extends Gdn_Plugin {
     /**
      * Add link to the articles controller in the main menu.
      *
-     * @param Gdn_Controller $Sender
+     * @param Gdn_Controller $sender
      */
-    public function Base_Render_Before($Sender) {
-        if ($Sender->Menu) {
+    public function base_render_before($sender) {
+        if ($sender->Menu) {
             $isMobileThemeActive = Gdn::themeManager()->currentTheme() === 'mobile';
             $isArticlesDefaultController = Gdn::router()->getDestination('DefaultController') === 'articles';
 
@@ -35,18 +25,21 @@ class ArticlesHooks extends Gdn_Plugin {
             // If the mobile theme is enabled, it will only show on the mobile theme's
             // menu if articles isn't set as the DefaultController route.
             if (c('Articles.ShowArticlesMenuLink', true)
-                    && (!$isMobileThemeActive || ($isMobileThemeActive && !$isArticlesDefaultController))) {
-                $Sender->Menu->AddLink('Articles', t('Articles'), '/articles', 'Articles.Articles.View');
+                && (!$isMobileThemeActive || ($isMobileThemeActive && !$isArticlesDefaultController))
+            ) {
+                $sender->Menu->addLink('Articles', t('Articles'), '/articles', 'Articles.Articles.View');
             }
 
             // Show Discussions menu link on mobile theme if articles is set as the DefaultController route
             // and if Vanilla is enabled because the mobile theme has a Home link.
-            if ($isMobileThemeActive && $isArticlesDefaultController && Gdn::ApplicationManager()->IsEnabled('Vanilla')) {
-                $Sender->Menu->AddLink('Discussions', t('Discussions'), '/discussions', 'Vanilla.Discussions.View');
+            if ($isMobileThemeActive && $isArticlesDefaultController && Gdn::applicationManager()
+                    ->isEnabled('Vanilla')
+            ) {
+                $sender->Menu->addLink('Discussions', t('Discussions'), '/discussions', 'Vanilla.Discussions.View');
             }
 
             if (c('Articles.ShowCategoriesMenuLink', false)) {
-                $Sender->Menu->AddLink('ArticleCategories', t('Article Categories'), '/articles/categories',
+                $sender->Menu->addLink('ArticleCategories', t('Article Categories'), '/articles/categories',
                     'Articles.Articles.View');
             }
         }
@@ -55,68 +48,34 @@ class ArticlesHooks extends Gdn_Plugin {
     /**
      * Automatically executed when this application is enabled.
      */
-    public function Setup() {
+    public function setup() {
         // Call structure.php to update database.
         include(PATH_APPLICATIONS . DS . 'articles' . DS . 'settings' . DS . 'structure.php');
         include(PATH_APPLICATIONS . DS . 'articles' . DS . 'settings' . DS . 'stub.php');
 
         // Save version number to config.
-        $ApplicationInfo = array();
+        $applicationInfo = array();
         include(PATH_APPLICATIONS . DS . 'articles' . DS . 'settings' . DS . 'about.php');
-        $Version = arrayValue('Version', $ApplicationInfo['Articles'], false);
-        if ($Version) {
-            $Save = array('Articles.Version' => $Version);
-            SaveToConfig($Save);
+        $version = arrayValue('Version', $applicationInfo['Articles'], false);
+        if ($version) {
+            $save = array('Articles.Version' => $version);
+            saveToConfig($save);
         }
-    }
-
-    /**
-     * Add the article search to the search.
-     *
-     * @param object $Sender SearchModel
-     */
-    public function SearchModel_Search_Handler($Sender) {
-        $SearchModel = new ArticleSearchModel();
-        $SearchModel->Search($Sender);
-    }
-
-    /**
-     * Create the Articles settings page.
-     * Runs the Dispatch method which handles methods for the page.
-     *
-     * @param SettingsController $Sender
-     */
-    public function SettingsController_Articles_Create($Sender) {
-        $this->Dispatch($Sender, $Sender->RequestArgs);
-    }
-
-    /**
-     * Add links for the setting pages to the dashboard sidebar.
-     *
-     * @param Gdn_Controller $Sender
-     */
-    public function Base_GetAppSettingsMenuItems_Handler($Sender) {
-        $GroupName = 'Articles';
-        $Menu = &$Sender->EventArguments['SideMenu'];
-
-        $Menu->AddItem($GroupName, $GroupName, false, array('class' => $GroupName));
-        $Menu->AddLink($GroupName, t('Settings'), '/settings/articles', 'Garden.Settings.Manage');
-        $Menu->AddLink($GroupName, t('Categories'), '/settings/articles/categories', 'Garden.Settings.Manage');
     }
 
     /**
      * The Index method of the Articles setting page.
      *
-     * @param SettingsController $Sender
+     * @param SettingsController $sender
      */
-    public function Controller_Index($Sender) {
+    public function controller_index($sender) {
         // Set required permission.
-        $Sender->permission('Garden.Settings.Manage');
+        $sender->permission('Garden.Settings.Manage');
 
         // Set up the configuration module.
-        $ConfigModule = new ConfigurationModule($Sender);
+        $configModule = new ConfigurationModule($sender);
 
-        $ConfigModule->Initialize(array(
+        $configModule->initialize(array(
             'Articles.ShowArticlesMenuLink' => array(
                 'LabelCode' => 'Show link to Articles page in main menu?',
                 'Control' => 'Checkbox'
@@ -151,441 +110,495 @@ class ArticlesHooks extends Gdn_Plugin {
             )
         ));
 
-        $Sender->ConfigurationModule = $ConfigModule;
+        $sender->ConfigurationModule = $configModule;
 
-        $Sender->title(t('Articles Settings'));
+        $sender->title(t('Articles Settings'));
 
-        $Sender->AddSideMenu('/settings/articles');
-        $Sender->View = $Sender->fetchViewLocation('articles', 'settings', 'articles');
-        $Sender->render();
+        $sender->addSideMenu('/settings/articles');
+        $sender->View = $sender->fetchViewLocation('articles', 'settings', 'articles');
+        $sender->render();
+    }
+
+    /**
+     * Add the article search to the search.
+     *
+     * @param object $sender SearchModel
+     */
+    public function searchModel_search_handler($sender) {
+        $searchModel = new ArticleSearchModel();
+        $searchModel->search($sender);
+    }
+
+    /**
+     * Create the Articles settings page.
+     * Runs the Dispatch method which handles methods for the page.
+     *
+     * @param SettingsController $sender
+     */
+    public function settingsController_articles_create($sender) {
+        $this->dispatch($sender, $sender->RequestArgs);
+    }
+
+    /**
+     * Add links for the setting pages to the dashboard sidebar.
+     *
+     * @param Gdn_Controller $sender
+     */
+    public function base_getAppSettingsMenuItems_handler($sender) {
+        $groupName = 'Articles';
+        $menu = &$sender->EventArguments['SideMenu'];
+
+        $menu->addItem($groupName, $groupName, false, array('class' => $groupName));
+        $menu->addLink($groupName, t('Settings'), '/settings/articles', 'Garden.Settings.Manage');
+        $menu->addLink($groupName, t('Categories'), '/settings/articles/categories', 'Garden.Settings.Manage');
     }
 
     /**
      * The Categories method of the Articles setting page.
      *
-     * @param SettingsController $Sender
+     * @param SettingsController $sender
      */
-    public function Controller_Categories($Sender) {
-        $Sender->title(t('Manage Article Categories'));
+    public function controller_categories($sender) {
+        $sender->title(t('Manage Article Categories'));
 
         // Set required permission.
-        $Sender->permission('Garden.Settings.Manage');
+        $sender->permission('Garden.Settings.Manage');
 
         // Add assets.
-        $Sender->addJsFile('js/library/nestedSortable.1.3.4/jquery-ui-1.8.11.custom.min.js');
-        $Sender->addJsFile('js/library/nestedSortable.1.3.4/jquery.ui.nestedSortable.js');
+        $sender->addJsFile('js/library/nestedSortable.1.3.4/jquery-ui-1.8.11.custom.min.js');
+        $sender->addJsFile('js/library/nestedSortable.1.3.4/jquery.ui.nestedSortable.js');
 
         // Set up the article category model.
-        $ArticleCategoryModel = new ArticleCategoryModel();
+        $articleCategoryModel = new ArticleCategoryModel();
 
-        $Categories = $ArticleCategoryModel->get();
-        $Sender->setData('Categories', $Categories, true);
+        $categories = $articleCategoryModel->get();
+        $sender->setData('Categories', $categories, true);
 
-        $Sender->AddSideMenu('/settings/articles/categories');
-        $Sender->View = $Sender->fetchViewLocation('categories', 'settings', 'articles');
-        $Sender->render();
+        $sender->addSideMenu('/settings/articles/categories');
+        $sender->View = $sender->fetchViewLocation('categories', 'settings', 'articles');
+        $sender->render();
     }
 
     /**
      * The Categories method of the Articles setting page.
      *
-     * @param SettingsController $Sender
+     * @param SettingsController $sender
      */
-    public function Controller_AddCategory($Sender) {
+    public function controller_addCategory($sender) {
         // Set required permission.
-        $Sender->permission('Garden.Settings.Manage');
+        $sender->permission('Garden.Settings.Manage');
 
         // Add asset.
-        $Sender->addJsFile('jquery.gardencheckboxgrid.js');
-        $Sender->addJsFile('articles.js', 'articles');
-        $Sender->addJsFile('articles.settings.js', 'articles');
+        $sender->addJsFile('jquery.gardencheckboxgrid.js');
+        $sender->addJsFile('articles.js', 'articles');
+        $sender->addJsFile('articles.settings.js', 'articles');
 
         // Set up the article category model.
-        $Sender->Form = new Gdn_Form();
-        $ArticleCategoryModel = new ArticleCategoryModel();
-        $Sender->Form->setModel($ArticleCategoryModel);
+        $sender->Form = new Gdn_Form();
+        $articleCategoryModel = new ArticleCategoryModel();
+        $sender->Form->setModel($articleCategoryModel);
 
         // If editing a category, then set the data in the form.
-        $Category = false;
-        if ($Sender->RequestArgs[0] === 'editcategory') {
-            $ArticleCategoryID = (int)$Sender->RequestArgs[1];
+        $category = false;
+        if ($sender->RequestArgs[0] === 'editcategory') {
+            $articleCategoryID = (int)$sender->RequestArgs[1];
 
-            if (is_numeric($ArticleCategoryID)) {
-                $Category = $ArticleCategoryModel->getByID($ArticleCategoryID);
+            if (is_numeric($articleCategoryID)) {
+                $category = $articleCategoryModel->getByID($articleCategoryID);
 
-                $Category->CustomPermissions = $ArticleCategoryID == $Category->PermissionArticleCategoryID;
+                $category->CustomPermissions = $articleCategoryID == $category->PermissionArticleCategoryID;
 
-                if ($Category)
-                    $Sender->Form->setData($Category);
-                else
+                if ($category) {
+                    $sender->Form->setData($category);
+                } else {
                     throw notFoundException(t('Article category'));
+                }
             } else {
                 throw notFoundException(t('Article category'));
             }
         }
 
         // Set the title of the page.
-        if (!$Category)
-            $Sender->title(t('Add Article Category'));
-        else
-            $Sender->title(t('Edit Article Category'));
+        if (!$category) {
+            $sender->title(t('Add Article Category'));
+        } else {
+            $sender->title(t('Edit Article Category'));
+        }
 
         // Handle the form.
-        if (!$Sender->Form->authenticatedPostBack()) {
-            if (!$Category)
-                $Sender->Form->addHidden('UrlCodeIsDefined', '0');
-            else
-                $Sender->Form->addHidden('UrlCodeIsDefined', '1');
+        if (!$sender->Form->authenticatedPostBack()) {
+            if (!$category) {
+                $sender->Form->addHidden('UrlCodeIsDefined', '0');
+            } else {
+                $sender->Form->addHidden('UrlCodeIsDefined', '1');
+            }
         } else { // The form was saved.
             // Define some validation rules for the fields being saved.
-            $Sender->Form->validateRule('Name', 'function:ValidateRequired');
-            $Sender->Form->validateRule('UrlCode', 'function:ValidateRequired', t('URL code is required.'));
+            $sender->Form->validateRule('Name', 'function:ValidateRequired');
+            $sender->Form->validateRule('UrlCode', 'function:ValidateRequired', t('URL code is required.'));
 
             // Manually validate certain fields.
-            $FormValues = $Sender->Form->formValues();
+            $formValues = $sender->Form->formValues();
 
-            if ($Category) {
-                $FormValues['ArticleCategoryID'] = $ArticleCategoryID;
-                $Sender->Form->setFormValue('ArticleCategoryID', $ArticleCategoryID);
+            if ($category) {
+                $formValues['ArticleCategoryID'] = $articleCategoryID;
+                $sender->Form->setFormValue('ArticleCategoryID', $articleCategoryID);
             }
 
             // Format URL code before saving.
-            $FormValues['UrlCode'] = Gdn_Format::url($FormValues['UrlCode']);
+            $formValues['UrlCode'] = Gdn_Format::url($formValues['UrlCode']);
 
             // Check if URL code is in use by another category.
-            $CategoryWithNewUrlCode = (bool)$ArticleCategoryModel->getByUrlCode($FormValues['UrlCode']);
-            if ((!$Category && $CategoryWithNewUrlCode)
-                || ($Category && $CategoryWithNewUrlCode && ($Category->UrlCode != $FormValues['UrlCode']))
-            )
-                $Sender->Form->addError('The specified URL code is already in use by another category.', 'UrlCode');
+            $categoryWithNewUrlCode = (bool)$articleCategoryModel->getByUrlCode($formValues['UrlCode']);
+            if ((!$category && $categoryWithNewUrlCode)
+                || ($category && $categoryWithNewUrlCode && ($category->UrlCode != $formValues['UrlCode']))
+            ) {
+                $sender->Form->addError('The specified URL code is already in use by another category.', 'UrlCode');
+            }
 
             // If there are no errors, then save the category.
-            if ($Sender->Form->errorCount() == 0) {
-                if ($Sender->Form->save($FormValues)) {
-                    if (!$Category) {
+            if ($sender->Form->errorCount() == 0) {
+                if ($sender->Form->save($formValues)) {
+                    if (!$category) {
                         // Inserting.
-                        $Sender->RedirectUrl = url('/settings/articles/categories/');
-                        $Sender->InformMessage(t('New article category added successfully.'));
+                        $sender->RedirectUrl = url('/settings/articles/categories/');
+                        $sender->informMessage(t('New article category added successfully.'));
                     } else {
                         // Editing.
-                        $Sender->InformMessage(t('The article category has been saved successfully.'));
+                        $sender->informMessage(t('The article category has been saved successfully.'));
                     }
                 }
             }
         }
 
         // Get all of the currently selected role/permission combinations for this junction.
-        $PermissionModel = Gdn::permissionModel();
-        if ($Category) {
-            $Permissions = $PermissionModel->GetJunctionPermissions(array('JunctionID' => $ArticleCategoryID), 'ArticleCategory', '', array('AddDefaults' => !$Category->CustomPermissions));
+        $permissionModel = Gdn::permissionModel();
+        if ($category) {
+            $permissions = $permissionModel->getJunctionPermissions(array('JunctionID' => isset($articleCategoryID) ? $articleCategoryID : 0),
+                'ArticleCategory', '', array('AddDefaults' => !$category->CustomPermissions));
         } else {
-            $Permissions = $PermissionModel->GetJunctionPermissions(array('JunctionID' => isset($ArticleCategoryID) ? $ArticleCategoryID : 0), 'ArticleCategory');
+            $permissions = $permissionModel->getJunctionPermissions(array('JunctionID' => isset($articleCategoryID) ? $articleCategoryID : 0),
+                'ArticleCategory');
         }
-        $Permissions = $PermissionModel->UnpivotPermissions($Permissions, true);
-        if ($Sender->deliveryType() == DELIVERY_TYPE_ALL) {
-            $Sender->setData('PermissionData', $Permissions, true);
+        $permissions = $permissionModel->unpivotPermissions($permissions, true);
+        if ($sender->deliveryType() == DELIVERY_TYPE_ALL) {
+            $sender->setData('PermissionData', $permissions, true);
         }
 
-        $Sender->AddSideMenu('/settings/articles/categories/');
-        $Sender->View = $Sender->fetchViewLocation('addcategory', 'settings', 'articles');
-        $Sender->render();
+        $sender->addSideMenu('/settings/articles/categories/');
+        $sender->View = $sender->fetchViewLocation('addcategory', 'settings', 'articles');
+        $sender->render();
     }
 
     /**
-     * @param SettingsController $Sender
+     * @param SettingsController $sender
      */
-    public function Controller_EditCategory($Sender) {
-        $this->Controller_AddCategory($Sender);
+    public function controller_aditCategory($sender) {
+        $this->controller_addCategory($sender);
     }
 
     /**
-     * @param SettingsController $Sender
+     * @param SettingsController $sender
      */
-    public function Controller_DeleteCategory($Sender) {
+    public function controller_deleteCategory($sender) {
         // Check permission.
-        $Sender->permission('Garden.Settings.Manage');
+        $sender->permission('Garden.Settings.Manage');
 
         // Set up head.
-        $Sender->title(t('Delete Article Category'));
-        $Sender->AddSideMenu('/settings/articles/categories/');
-        $Sender->addJsFile('articles.js', 'articles');
-        $Sender->addJsFile('articles.settings.js', 'articles');
+        $sender->title(t('Delete Article Category'));
+        $sender->addSideMenu('/settings/articles/categories/');
+        $sender->addJsFile('articles.js', 'articles');
+        $sender->addJsFile('articles.settings.js', 'articles');
 
         // Get category ID.
-        $ArticleCategoryID = false;
-        if (isset($Sender->RequestArgs[1]) && is_numeric($Sender->RequestArgs[1]))
-            $ArticleCategoryID = $Sender->RequestArgs[1];
+        $articleCategoryID = false;
+        if (isset($sender->RequestArgs[1]) && is_numeric($sender->RequestArgs[1])) {
+            $articleCategoryID = $sender->RequestArgs[1];
+        }
 
         // Get category data.
-        $Sender->Form = new Gdn_Form();
-        $ArticleCategoryModel = new ArticleCategoryModel();
-        $Category = $ArticleCategoryModel->getByID($ArticleCategoryID);
-        $Sender->setData('Category', $Category, true);
+        $sender->Form = new Gdn_Form();
+        $articleCategoryModel = new ArticleCategoryModel();
+        $category = $articleCategoryModel->getByID($articleCategoryID);
+        $sender->setData('Category', $category, true);
 
-        if (!$Category) {
-            $Sender->Form->addError('The specified article category could not be found.');
+        if (!$category) {
+            $sender->Form->addError('The specified article category could not be found.');
         } else {
             // Make sure the form knows which item we are deleting.
-            $Sender->Form->addHidden('ArticleCategoryID', $ArticleCategoryID);
+            $sender->Form->addHidden('ArticleCategoryID', $articleCategoryID);
 
             // Get a list of categories other than this one that can act as a replacement.
-            $OtherCategories = $ArticleCategoryModel->get(array(
-                'ArticleCategoryID <>' => $ArticleCategoryID,
+            $otherCategories = $articleCategoryModel->get(array(
+                'ArticleCategoryID <>' => $articleCategoryID,
                 'ArticleCategoryID >' => 0
             ));
-            $Sender->setData('OtherCategories', $OtherCategories, true);
+            $sender->setData('OtherCategories', $otherCategories, true);
 
-            if (!$Sender->Form->authenticatedPostBack()) {
-                $Sender->Form->setFormValue('DeleteArticles', '1'); // Checked by default
+            if (!$sender->Form->authenticatedPostBack()) {
+                $sender->Form->setFormValue('DeleteArticles', '1'); // Checked by default
             } else {
-                $ReplacementArticleCategoryID = $Sender->Form->getValue('ReplacementArticleCategoryID');
-                $ReplacementCategory = $ArticleCategoryModel->getByID($ReplacementArticleCategoryID);
+                $replacementArticleCategoryID = $sender->Form->getValue('ReplacementArticleCategoryID');
+                $replacementCategory = $articleCategoryModel->getByID($replacementArticleCategoryID);
                 // Error if:
                 // 1. The category being deleted is the last remaining category.
-                if ($OtherCategories->numRows() == 0)
-                    $Sender->Form->addError('You cannot remove the only remaining category.');
+                if ($otherCategories->numRows() == 0) {
+                    $sender->Form->addError('You cannot remove the only remaining category.');
+                }
 
-                if ($Sender->Form->errorCount() == 0) {
+                if ($sender->Form->errorCount() == 0) {
                     // Go ahead and delete the category.
                     try {
-                        $ArticleCategoryModel->delete($Category,
-                            $Sender->Form->getValue('ReplacementArticleCategoryID'));
+                        $articleCategoryModel->delete($category,
+                            $sender->Form->getValue('ReplacementArticleCategoryID'));
                     } catch (Exception $ex) {
-                        $Sender->Form->addError($ex);
+                        $sender->Form->addError($ex);
                     }
 
-                    if ($Sender->Form->errorCount() == 0) {
-                        $Sender->RedirectUrl = url('/settings/articles/categories/');
-                        $Sender->InformMessage(t('Deleting article category...'));
+                    if ($sender->Form->errorCount() == 0) {
+                        $sender->RedirectUrl = url('/settings/articles/categories/');
+                        $sender->informMessage(t('Deleting article category...'));
                     }
                 }
             }
         }
 
         // Render default view.
-        $Sender->View = $Sender->fetchViewLocation('deletecategory', 'settings', 'articles');
-        $Sender->render();
+        $sender->View = $sender->fetchViewLocation('deletecategory', 'settings', 'articles');
+        $sender->render();
     }
 
     /**
      * Adds 'Articles' tab to profiles and adds CSS & JS files to their head.
      *
-     * @param ProfileController $Sender
+     * @param ProfileController $sender
      */
-    public function ProfileController_AddProfileTabs_Handler($Sender) {
-        if (is_object($Sender->User) && ($Sender->User->UserID > 0)) {
-            $UserID = $Sender->User->UserID;
+    public function profileController_addProfileTabs_handler($sender) {
+        if (is_object($sender->User) && ($sender->User->UserID > 0)) {
+            $userID = $sender->User->UserID;
 
             // Add the article tab
-            if (($Sender->User->CountArticles > 0) || ArticleModel::canAdd('any', $UserID)) {
-                $ArticlesLabel = Sprite('SpArticles', 'SpMyDrafts Sprite') . ' ' . t('Articles');
+            if (($sender->User->CountArticles > 0) || ArticleModel::canAdd('any', $userID)) {
+                $articlesLabel = sprite('SpArticles', 'SpMyDrafts Sprite') . ' ' . t('Articles');
 
-                if (c('Articles.Profile.ShowCounts', true))
-                    $ArticlesLabel .= '<span class="Aside">' . CountString(GetValueR('User.CountArticles', $Sender,
-                            null), "/profile/count/articles?userid=$UserID") . '</span>';
+                if (c('Articles.Profile.ShowCounts', true)) {
+                    $articlesLabel .= '<span class="Aside">' . countString(getValueR('User.CountArticles', $sender,
+                            null), "/profile/count/articles?userid=$userID") . '</span>';
+                }
 
-                $Sender->AddProfileTab(t('Articles'),
-                    'profile/articles/' . $Sender->User->UserID . '/' . rawurlencode($Sender->User->Name), 'Articles',
-                    $ArticlesLabel);
+                $sender->addProfileTab(t('Articles'),
+                    'profile/articles/' . $sender->User->UserID . '/' . rawurlencode($sender->User->Name), 'Articles',
+                    $articlesLabel);
             }
 
             // Add the article comments tab
-            if (($Sender->User->CountArticleComments > 0) || ArticleCommentModel::canAdd('any', $UserID)) {
-                $ArticleCommentsLabel = Sprite('SpArticleComments', 'SpQuote Sprite') . ' ' . t('Article Comments');
+            if (($sender->User->CountArticleComments > 0) || ArticleCommentModel::canAdd('any', $userID)) {
+                $ArticleCommentsLabel = sprite('SpArticleComments', 'SpQuote Sprite') . ' ' . t('Article Comments');
 
-                if (c('Articles.Profile.ShowCounts', true))
-                    $ArticleCommentsLabel .= '<span class="Aside">' . CountString(GetValueR('User.CountArticleComments',
-                            $Sender, null), "/profile/count/articlecomments?userid=$UserID") . '</span>';
+                if (c('Articles.Profile.ShowCounts', true)) {
+                    $ArticleCommentsLabel .= '<span class="Aside">' . countString(getValueR('User.CountArticleComments',
+                            $sender, null), "/profile/count/articlecomments?userid=$userID") . '</span>';
+                }
 
-                $Sender->AddProfileTab(t('Article Comments'),
-                    'profile/articlecomments/' . $Sender->User->UserID . '/' . rawurlencode($Sender->User->Name),
+                $sender->addProfileTab(t('Article Comments'),
+                    'profile/articlecomments/' . $sender->User->UserID . '/' . rawurlencode($sender->User->Name),
                     'ArticleComments', $ArticleCommentsLabel);
             }
 
             // Add the article tab's CSS and Javascript.
-            $Sender->addJsFile('jquery.gardenmorepager.js');
-            $Sender->addJsFile('articles.js');
+            $sender->addJsFile('jquery.gardenmorepager.js');
+            $sender->addJsFile('articles.js');
         }
     }
 
     /**
      * Creates virtual 'Articles' method in ProfileController.
      *
-     * @param ProfileController $Sender
+     * @param ProfileController $sender
      */
-    public function ProfileController_Articles_Create($Sender, $UserReference = '', $Username = '', $Page = '', $UserID = '') {
+    public function profileController_articles_create($sender, $userReference = '', $username = '', $page = '',
+                                                      $userID = '') {
         // User must have at least one article or have permission to add articles for this page to be viewable.
-        if (is_numeric($UserReference))
-            $User = Gdn::userModel()->getID($UserReference);
-        else if (is_string($UserReference))
-            $User = Gdn::userModel()->getByUsername($UserReference);
+        if (is_numeric($userReference)) {
+            $user = Gdn::userModel()->getID($userReference);
+        } else if (is_string($userReference)) {
+            $user = Gdn::userModel()->getByUsername($userReference);
+        }
 
-        $UserCanAddArticle = ArticleModel::canAdd('any', $User->UserID);
-        if ($User && (!$UserCanAddArticle || (!$UserCanAddArticle && ($User->CountArticles == 0))))
-            redirect(userUrl($User));
+        $userCanAddArticle = ArticleModel::canAdd('any', $user->UserID);
+        if ($user && (!$userCanAddArticle || (!$userCanAddArticle && ($user->CountArticles == 0)))) {
+            redirect(userUrl($user));
+        }
 
-        $Sender->EditMode(false);
+        $sender->editMode(false);
 
         // Tell the ProfileController what tab to load
-        $Sender->GetUserInfo($UserReference, $Username, $UserID);
-        $Sender->_SetBreadcrumbs(t('Articles'), '/profile/articles');
-        $Sender->SetTabView('Articles', 'Articles', 'Profile', 'Articles');
-        $Sender->CountArticleCommentsPerPage = c('Articles.Articles.PerPage', 12);
+        $sender->getUserInfo($userReference, $username, $userID);
+        $sender->_setBreadcrumbs(t('Articles'), '/profile/articles');
+        $sender->setTabView('Articles', 'Articles', 'Profile', 'Articles');
+        $sender->CountArticleCommentsPerPage = c('Articles.Articles.PerPage', 12);
 
-        list($Offset, $Limit) = offsetLimit($Page, Gdn::config('Articles.Articles.PerPage', 12));
+        list($offset, $limit) = offsetLimit($page, Gdn::config('Articles.Articles.PerPage', 12));
 
-        $ArticleModel = new ArticleModel();
-        $Articles = $ArticleModel->getByUser($Sender->User->UserID, $Offset, $Limit,
+        $articleModel = new ArticleModel();
+        $articles = $articleModel->getByUser($sender->User->UserID, $offset, $limit,
             array('Status' => ArticleModel::STATUS_PUBLISHED))->result();
-        $CountArticles = $Offset + $ArticleModel->LastArticleCount + 1;
-        $Sender->setData('Articles', $Articles);
+        $countArticles = $offset + $articleModel->LastArticleCount + 1;
+        $sender->setData('Articles', $articles);
 
-        $Sender->ArticleCategoryModel = new ArticleCategoryModel();
-        $Sender->ArticleMediaModel = new ArticleMediaModel();
+        $sender->ArticleCategoryModel = new ArticleCategoryModel();
+        $sender->ArticleMediaModel = new ArticleMediaModel();
 
         // Build a pager
-        $PagerFactory = new Gdn_PagerFactory();
-        $Sender->Pager = $PagerFactory->getPager('MorePager', $Sender);
-        $Sender->Pager->MoreCode = 'More Articles';
-        $Sender->Pager->LessCode = 'Newer Articles';
-        $Sender->Pager->ClientID = 'Pager';
-        $Sender->Pager->configure(
-            $Offset,
-            $Limit,
-            $CountArticles,
-            userUrl($Sender->User, '', 'articles') . '/{Page}'
+        $pagerFactory = new Gdn_PagerFactory();
+        $sender->Pager = $pagerFactory->getPager('MorePager', $sender);
+        $sender->Pager->MoreCode = 'More Articles';
+        $sender->Pager->LessCode = 'Newer Articles';
+        $sender->Pager->ClientID = 'Pager';
+        $sender->Pager->configure(
+            $offset,
+            $limit,
+            $countArticles,
+            userUrl($sender->User, '', 'articles') . '/{Page}'
         );
 
         // Deliver JSON data if necessary
-        if ($Sender->deliveryType() != DELIVERY_TYPE_ALL && $Offset > 0) {
-            $Sender->setJson('LessRow', $Sender->Pager->ToString('less'));
-            $Sender->setJson('MoreRow', $Sender->Pager->ToString('more'));
-            $Sender->View = 'articles';
+        if ($sender->deliveryType() != DELIVERY_TYPE_ALL && $offset > 0) {
+            $sender->setJson('LessRow', $sender->Pager->ToString('less'));
+            $sender->setJson('MoreRow', $sender->Pager->ToString('more'));
+            $sender->View = 'articles';
         }
 
         // Set the HandlerType back to normal on the profilecontroller so that it fetches it's own views
-        $Sender->HandlerType = HANDLER_TYPE_NORMAL;
+        $sender->HandlerType = HANDLER_TYPE_NORMAL;
 
         // Do not show article options
-        $Sender->ShowOptions = false;
+        $sender->ShowOptions = false;
 
-        if ($Sender->Head) {
+        if ($sender->Head) {
             // These pages offer only duplicate content to search engines and are a bit slow.
-            $Sender->Head->addTag('meta', array('name' => 'robots', 'content' => 'noindex,noarchive'));
+            $sender->Head->addTag('meta', array('name' => 'robots', 'content' => 'noindex,noarchive'));
         }
 
         // Render the ProfileController
-        $Sender->addCssFile('articles.css', 'articles');
+        $sender->addCssFile('articles.css', 'articles');
 
         // Add CSS file for mobile theme if active.
         if (Gdn::themeManager()->currentTheme() === 'mobile') {
-            $Sender->addCssFile('articles.mobile.css', 'articles');
+            $sender->addCssFile('articles.mobile.css', 'articles');
         }
 
-        $Sender->render();
+        $sender->render();
     }
 
     /**
      * Creates virtual 'Article Comments' method in ProfileController.
      *
-     * @param ProfileController $Sender
+     * @param ProfileController $sender
      */
-    public function ProfileController_ArticleComments_Create($Sender, $UserReference = '', $Username = '',
-                                                             $Page = '', $UserID = '') {
+    public function profileController_articleComments_create($sender, $userReference = '', $username = '',
+                                                             $page = '', $userID = '') {
         // User must have at least one comment or have permission to add comments for this page to be viewable.
-        if (is_numeric($UserReference))
-            $User = Gdn::userModel()->getID($UserReference);
-        else if (is_string($UserReference))
-            $User = Gdn::userModel()->getByUsername($UserReference);
+        if (is_numeric($userReference)) {
+            $user = Gdn::userModel()->getID($userReference);
+        } else if (is_string($userReference)) {
+            $user = Gdn::userModel()->getByUsername($userReference);
+        }
 
-        $UserCanAddComment = ArticleCommentModel::canAdd('any', $User->UserID);
-        if ($User && (!$UserCanAddComment || (!$UserCanAddComment && ($User->CountArticleComments == 0))))
-            redirect(userUrl($User));
+        $userCanAddComment = ArticleCommentModel::canAdd('any', $user->UserID);
+        if ($user && (!$userCanAddComment || (!$userCanAddComment && ($user->CountArticleComments == 0)))) {
+            redirect(userUrl($user));
+        }
 
-        $Sender->EditMode(false);
+        $sender->editMode(false);
 
         // Tell the ProfileController what tab to load
-        $Sender->GetUserInfo($UserReference, $Username, $UserID);
-        $Sender->_SetBreadcrumbs(t('Article Comments'), '/profile/articlecomments');
-        $Sender->SetTabView('Article Comments', 'Comments', 'Profile', 'Articles');
-        $Sender->CountArticleCommentsPerPage = c('Articles.Comments.PerPage', 30);
+        $sender->getUserInfo($userReference, $username, $userID);
+        $sender->_setBreadcrumbs(t('Article Comments'), '/profile/articlecomments');
+        $sender->setTabView('Article Comments', 'Comments', 'Profile', 'Articles');
+        $sender->CountArticleCommentsPerPage = c('Articles.Comments.PerPage', 30);
 
-        list($Offset, $Limit) = offsetLimit($Page, Gdn::config('Articles.Comments.PerPage', 30));
+        list($offset, $limit) = offsetLimit($page, Gdn::config('Articles.Comments.PerPage', 30));
 
-        $ArticleCommentModel = new ArticleCommentModel();
-        $Comments = $ArticleCommentModel->getByUser($Sender->User->UserID, $Offset, $Limit)->result();
-        $CountArticleComments = $Offset + $ArticleCommentModel->LastCommentCount + 1;
-        $Sender->setData('Comments', $Comments);
+        $articleCommentModel = new ArticleCommentModel();
+        $comments = $articleCommentModel->getByUser($sender->User->UserID, $offset, $limit)->result();
+        $countArticleComments = $offset + $articleCommentModel->LastCommentCount + 1;
+        $sender->setData('Comments', $comments);
 
-        $Sender->ArticleModel = new ArticleModel();
+        $sender->ArticleModel = new ArticleModel();
 
         // Build a pager
-        $PagerFactory = new Gdn_PagerFactory();
-        $Sender->Pager = $PagerFactory->getPager('MorePager', $Sender);
-        $Sender->Pager->MoreCode = 'More Article Comments';
-        $Sender->Pager->LessCode = 'Newer Article Comments';
-        $Sender->Pager->ClientID = 'Pager';
-        $Sender->Pager->configure(
-            $Offset,
-            $Limit,
-            $CountArticleComments,
-            userUrl($Sender->User, '', 'articlecomments') . '/{Page}'
+        $pagerFactory = new Gdn_PagerFactory();
+        $sender->Pager = $pagerFactory->getPager('MorePager', $sender);
+        $sender->Pager->MoreCode = 'More Article Comments';
+        $sender->Pager->LessCode = 'Newer Article Comments';
+        $sender->Pager->ClientID = 'Pager';
+        $sender->Pager->configure(
+            $offset,
+            $limit,
+            $countArticleComments,
+            userUrl($sender->User, '', 'articlecomments') . '/{Page}'
         );
 
         // Deliver JSON data if necessary
-        if ($Sender->deliveryType() != DELIVERY_TYPE_ALL && $Offset > 0) {
-            $Sender->setJson('LessRow', $Sender->Pager->ToString('less'));
-            $Sender->setJson('MoreRow', $Sender->Pager->ToString('more'));
-            $Sender->View = 'comments';
+        if ($sender->deliveryType() != DELIVERY_TYPE_ALL && $offset > 0) {
+            $sender->setJson('LessRow', $sender->Pager->ToString('less'));
+            $sender->setJson('MoreRow', $sender->Pager->ToString('more'));
+            $sender->View = 'comments';
         }
 
         // Set the HandlerType back to normal on the profilecontroller so that it fetches it's own views
-        $Sender->HandlerType = HANDLER_TYPE_NORMAL;
+        $sender->HandlerType = HANDLER_TYPE_NORMAL;
 
         // Do not show article options
-        $Sender->ShowOptions = false;
+        $sender->ShowOptions = false;
 
-        if ($Sender->Head) {
+        if ($sender->Head) {
             // These pages offer only duplicate content to search engines and are a bit slow.
-            $Sender->Head->addTag('meta', array('name' => 'robots', 'content' => 'noindex,noarchive'));
+            $sender->Head->addTag('meta', array('name' => 'robots', 'content' => 'noindex,noarchive'));
         }
 
         // Render the ProfileController
-        $Sender->render();
+        $sender->render();
     }
 
     /**
      * Load author meta into the form when editing.
      *
-     * @param ProfileController $Sender ProfileController
+     * @param ProfileController $sender ProfileController
      */
-    public function ProfileController_BeforeEdit_Handler($Sender) {
-        $UserMeta = Gdn::userModel()->GetMeta($Sender->User->UserID, 'Articles.%', 'Articles.');
-        if (!is_array($UserMeta))
+    public function profileController_beforeEdit_handler($sender) {
+        $userMeta = Gdn::userModel()->getMeta($sender->User->UserID, 'Articles.%', 'Articles.');
+        if (!is_array($userMeta)) {
             return;
+        }
 
-        if (isset($UserMeta['AuthorDisplayName']))
-            $Sender->Form->setValue('Articles.AuthorDisplayName', $UserMeta['AuthorDisplayName']);
+        if (isset($userMeta['AuthorDisplayName'])) {
+            $sender->Form->setValue('Articles.AuthorDisplayName', $userMeta['AuthorDisplayName']);
+        }
 
-        if (isset($UserMeta['AuthorBio']))
-            $Sender->Form->setValue('Articles.AuthorBio', $UserMeta['AuthorBio']);
+        if (isset($userMeta['AuthorBio'])) {
+            $sender->Form->setValue('Articles.AuthorBio', $userMeta['AuthorBio']);
+        }
     }
 
     /**
      * Display author meta inputs when editing.
      *
-     * @param ProfileController $Sender ProfileController
+     * @param ProfileController $sender ProfileController
      */
-    public function ProfileController_EditMyAccountAfter_Handler($Sender) {
-        if (Gdn::session()->checkPermission(array('Garden.Users.Edit', 'Articles.Articles.Add'), false, 'ArticleCategory', 'any')) {
-            echo Wrap(
-                $Sender->Form->Label('Author Display Name', 'Articles.AuthorDisplayName') .
-                $Sender->Form->Textbox('Articles.AuthorDisplayName'),
+    public function profileController_editMyAccountAfter_handler($sender) {
+        if (Gdn::session()
+            ->checkPermission(array('Garden.Users.Edit', 'Articles.Articles.Add'), false, 'ArticleCategory', 'any')
+        ) {
+            echo wrap(
+                $sender->Form->label('Author Display Name', 'Articles.AuthorDisplayName') .
+                $sender->Form->textbox('Articles.AuthorDisplayName'),
                 'li');
 
-            echo Wrap(
-                $Sender->Form->Label('Author Bio', 'Articles.AuthorBio') .
-                $Sender->Form->Textbox('Articles.AuthorBio', array('multiline' => true)),
+            echo wrap(
+                $sender->Form->label('Author Bio', 'Articles.AuthorBio') .
+                $sender->Form->textbox('Articles.AuthorBio', array('multiline' => true)),
                 'li');
         }
     }
@@ -593,38 +606,41 @@ class ArticlesHooks extends Gdn_Plugin {
     /**
      * Display custom fields on profile.
      *
-     * @param UserInfoModule $Sender UserInfoModule
+     * @param UserInfoModule $sender UserInfoModule
      */
-    public function UserInfoModule_OnBasicInfo_Handler($Sender) {
+    public function userInfoModule_onBasicInfo_handler($sender) {
         // Get the custom fields.
-        $UserMeta = Gdn::userModel()->GetMeta($Sender->User->UserID, 'Articles.%', 'Articles.');
-        if (!is_array($UserMeta))
+        $userMeta = Gdn::userModel()->getMeta($sender->User->UserID, 'Articles.%', 'Articles.');
+        if (!is_array($userMeta)) {
             return;
+        }
 
         // Display author display name.
-        if (isset($UserMeta['AuthorDisplayName']) && ($UserMeta['AuthorDisplayName'] != '')
-                && ($Sender->User->Name != $UserMeta['AuthorDisplayName'])) {
+        if (isset($userMeta['AuthorDisplayName']) && ($userMeta['AuthorDisplayName'] != '')
+            && ($sender->User->Name != $userMeta['AuthorDisplayName'])
+        ) {
             echo ' <dt class="Articles Profile AuthorDisplayName">' . t('Author Display Name') . '</dt> ';
-            echo ' <dd class="Articles Profile AuthorDisplayName">' . Gdn_Format::Html($UserMeta['AuthorDisplayName']) . '</dd> ';
+            echo ' <dd class="Articles Profile AuthorDisplayName">' . Gdn_Format::html($userMeta['AuthorDisplayName']) . '</dd> ';
         }
     }
 
     /**
      * Display author bio on profile.
      *
-     * @param ProfileController $Sender ProfileController
+     * @param ProfileController $sender ProfileController
      */
-    public function ProfileController_AfterUserInfo_Handler($Sender) {
+    public function profileController_afterUserInfo_handler($sender) {
         // Get the custom fields.
-        $UserMeta = Gdn::userModel()->GetMeta($Sender->User->UserID, 'Articles.%', 'Articles.');
-        if (!is_array($UserMeta))
+        $userMeta = Gdn::userModel()->getMeta($sender->User->UserID, 'Articles.%', 'Articles.');
+        if (!is_array($userMeta)) {
             return;
+        }
 
         // Display author display name.
-        if (isset($UserMeta['AuthorBio']) && ($UserMeta['AuthorBio'] != '')) {
+        if (isset($userMeta['AuthorBio']) && ($userMeta['AuthorBio'] != '')) {
             echo '<dl id="BoxProfileAuthorBio" class="About">';
             echo ' <dt class="Articles Profile AuthorBio">' . t('Author Bio') . '</dt> ';
-            echo ' <dd class="Articles Profile AuthorBio">' . Gdn_Format::Html($UserMeta['AuthorBio']) . '</dd> ';
+            echo ' <dd class="Articles Profile AuthorBio">' . Gdn_Format::html($userMeta['AuthorBio']) . '</dd> ';
             echo '</dl>';
         }
     }
@@ -632,161 +648,74 @@ class ArticlesHooks extends Gdn_Plugin {
     /**
      * Save the author meta if it exists.
      *
-     * @param UserModel $Sender UserModel
+     * @param UserModel $sender UserModel
      */
-    public function UserModel_AfterSave_Handler($Sender) {
-        $UserID = val('UserID', $Sender->EventArguments);
-        $FormValues = val('FormPostValues', $Sender->EventArguments, array());
-        $AuthorInfo = array_intersect_key($FormValues,
+    public function userModel_afterSave_handler($sender) {
+        $userID = val('UserID', $sender->EventArguments);
+        $formValues = val('FormPostValues', $sender->EventArguments, array());
+        $authorInfo = array_intersect_key($formValues,
             array('Articles.AuthorDisplayName' => 1, 'Articles.AuthorBio' => 1));
 
-        foreach ($AuthorInfo as $k => $v) {
-            Gdn::UserMetaModel()->SetUserMeta($UserID, $k, $v);
+        foreach ($authorInfo as $k => $v) {
+            Gdn::userMetaModel()->setUserMeta($userID, $k, $v);
         }
     }
 
     /**
      * Remove Articles data when deleting a user.
      *
-     * @param UserModel $Sender UserModel.
+     * @param UserModel $sender UserModel.
      */
-    public function UserModel_BeforeDeleteUser_Handler($Sender) {
-        $UserID = val('UserID', $Sender->EventArguments);
-        $Options = val('Options', $Sender->EventArguments, array());
-        $Options = is_array($Options) ? $Options : array();
-        $Content =& $Sender->EventArguments['Content'];
+    public function userModel_beforeDeleteUser_handler($sender) {
+        $userID = val('UserID', $sender->EventArguments);
+        $options = val('Options', $sender->EventArguments, array());
+        $options = is_array($options) ? $options : array();
+        $content =& $sender->EventArguments['Content'];
 
-        $this->DeleteUserData($UserID, $Options, $Content);
-    }
-
-    /**
-     * Delete all of the Articles related information for a specific user.
-     *
-     * @param int $UserID The ID of the user to delete.
-     * @param array $Options An array of options:
-     *  - DeleteMethod: One of delete, wipe, or null
-     */
-    private function DeleteUserData($UserID, $Options = array(), &$Data = null) {
-        $SQL = Gdn::SQL();
-
-        // Comment deletion depends on method selected.
-        $DeleteMethod = val('DeleteMethod', $Options, 'delete');
-        if ($DeleteMethod == 'delete') {
-            // Clear out the last posts to the categories.
-            $SQL->update('ArticleCategory c')
-                ->join('Article a', 'a.ArticleID = c.LastArticleID')
-                ->where('a.InsertUserID', $UserID)
-                ->set('c.LastArticleID', null)
-                ->set('c.LastArticleCommentID', null)
-                ->put();
-
-            $SQL->update('ArticleCategory c')
-                ->join('ArticleComment ac', 'ac.ArticleCommentID = c.LastArticleCommentID')
-                ->where('ac.InsertUserID', $UserID)
-                ->set('c.LastArticleID', null)
-                ->set('c.LastArticleCommentID', null)
-                ->put();
-
-            // Grab all of the articles that the user has engaged in.
-            $ArticleIDs = $SQL
-                ->select('ArticleID')
-                ->from('ArticleComment')
-                ->where('InsertUserID', $UserID)
-                ->groupBy('ArticleID')
-                ->get()->resultArray();
-            $ArticleIDs = consolidateArrayValuesByKey($ArticleIDs, 'ArticleID');
-
-            Gdn::userModel()->GetDelete('ArticleComment', array('InsertUserID' => $UserID), $Data);
-
-            // Update the comment counts.
-            $CommentCounts = $SQL
-                ->select('ArticleID')
-                ->select('ArticleCommentID', 'count', 'CountArticleComments')
-                ->select('ArticleCommentID', 'max', 'LastArticleCommentID')
-                ->whereIn('ArticleID', $ArticleIDs)
-                ->groupBy('ArticleID')
-                ->get('ArticleComment')->resultArray();
-
-            foreach ($CommentCounts as $Row) {
-                $SQL->put('Article',
-                    array('CountArticleComments' => $Row['CountArticleComments'] + 1,
-                        'LastArticleCommentID' => $Row['LastArticleCommentID']),
-                    array('ArticleID' => $Row['ArticleID']));
-            }
-
-            // Update the last user IDs.
-            $SQL->update('Article a')
-                ->join('ArticleComment ac', 'a.LastArticleCommentID = ac.ArticleCommentID', 'left')
-                ->set('a.LastArticleCommentUserID', 'ac.InsertUserID', false, false)
-                ->set('a.DateLastArticleComment', 'ac.DateInserted', false, false)
-                ->whereIn('a.ArticleID', $ArticleIDs)
-                ->put();
-
-            // Update the last posts.
-            $Articles = $SQL
-                ->whereIn('ArticleID', $ArticleIDs)
-                ->where('LastArticleCommentUserID', $UserID)
-                ->get('Article');
-
-            // Delete the user's articles
-            Gdn::userModel()->GetDelete('Article', array('InsertUserID' => $UserID), $Data);
-
-            // Update the appropriate recent posts in the categories.
-            $ArticleCategoryModel = new ArticleCategoryModel();
-            $Categories = $ArticleCategoryModel->getWhere(array('LastArticleID' => null))->resultArray();
-            foreach ($Categories as $Category) {
-                $ArticleCategoryModel->SetRecentPost($Category['ArticleCategoryID']);
-            }
-        } else if ($DeleteMethod == 'wipe') {
-            // Erase the user's articles
-            $SQL->update('Article')
-                ->set('Status', 'Trash')
-                ->where('InsertUserID', $UserID)
-                ->put();
-
-            $SQL->update('ArticleComment')
-                ->set('Body', t('The user and all related content has been deleted.'))
-                ->set('Format', 'Deleted')
-                ->where('InsertUserID', $UserID)
-                ->put();
-        }
-
-        // Remove the user's profile information related to this application
-        $SQL->update('User')
-            ->set(array(
-                'CountArticles' => 0,
-                'CountArticleComments' => 0))
-            ->where('UserID', $UserID)
-            ->put();
+        $this->deleteUserData($userID, $options, $content);
     }
 
     /**
      * Adds count jobs for the DbaModel.
      *
-     * @param DbaController $Sender
+     * @param DbaController $sender
      */
-    public function DbaController_CountJobs_Handler($Sender) {
-        $Counts = array(
+    public function dbaController_countJobs_handler($sender) {
+        $counts = array(
             'Article' => array('CountArticleComments', 'FirstArticleCommentID', 'LastArticleCommentID',
                 'DateLastArticleComment', 'LastArticleCommentUserID'),
             'ArticleCategory' => array('CountArticles', 'CountArticleComments', 'LastArticleID', 'LastArticleCommentID',
                 'LastDateInserted')
         );
 
-        foreach ($Counts as $Table => $Columns) {
-            foreach ($Columns as $Column) {
-                $Name = "Recalculate $Table.$Column";
-                $Url = "/dba/counts.json?" . http_build_query(array('table' => $Table, 'column' => $Column));
+        foreach ($counts as $table => $columns) {
+            foreach ($columns as $Column) {
+                $name = "Recalculate $table.$Column";
+                $url = "/dba/counts.json?" . http_build_query(array('table' => $table, 'column' => $Column));
 
-                $Sender->Data['Jobs'][$Name] = $Url;
+                $sender->Data['Jobs'][$name] = $url;
             }
+        }
+    }
+
+    /**
+     * Add link to Articles Dashboard to the MeModule fly-out menu.
+     *
+     * @param MeModule $sender
+     */
+    public function meModule_flyoutMenu_handler($sender) {
+        $session = Gdn::session();
+
+        $permissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
+        if ($session->checkPermission($permissionsAllowed, false, 'ArticleCategory', 'any')) {
+            echo wrap(anchor(sprite('SpMyDiscussions') . ' ' . t('Articles Dashboard'), '/compose'), 'li');
         }
     }
 
     // TODO: The search/results.php view outputs a UserAnchor; the guest name gets linked to a profile.
     //    // Set the username of article guest comment search results to the GuestName.
-    //    public function SearchController_BeforeItemContent_Handler($Sender) {
-    //        $Row = &$Sender->EventArguments['Row'];
+    //    public function SearchController_BeforeItemContent_Handler($sender) {
+    //        $Row = &$sender->EventArguments['Row'];
     //
     //        if (($Row->RecordType === 'ArticleComment') && !$Row->UserID) {
     //            $ArticleCommentModel = new ArticleCommentModel();
@@ -796,56 +725,42 @@ class ArticlesHooks extends Gdn_Plugin {
     //        }
     //    }
 
-    /**
-     * Add link to Articles Dashboard to the MeModule fly-out menu.
-     *
-     * @param MeModule $Sender
-     */
-    public function MeModule_FlyoutMenu_Handler($Sender) {
-        $session = Gdn::session();
-
-        $PermissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
-        if ($session->checkPermission($PermissionsAllowed, false, 'ArticleCategory', 'any')) {
-            echo Wrap(Anchor(Sprite('SpMyDiscussions').' '.T('Articles Dashboard'), '/compose'), 'li');
-        }
+    public function discussionsController_render_before($sender) {
+        $sender->addModule('ArticlesModule');
     }
 
-    public function DiscussionsController_Render_Before($Sender) {
-        $Sender->addModule('ArticlesModule');
-    }
-
-    public function CategoriesController_Render_Before($Sender) {
-        $Sender->addModule('ArticlesModule');
+    public function categoriesController_render_before($sender) {
+        $sender->addModule('ArticlesModule');
     }
 
     /**
      * Provide default permissions for roles, based on the value in their Type column.
      *
-     * @param PermissionModel $Sender Instance of permission model that fired the event
+     * @param PermissionModel $sender Instance of permission model that fired the event
      */
-    public function PermissionModel_DefaultPermissions_Handler($Sender) {
+    public function permissionModel_defaultPermissions_handler($sender) {
         // Guest defaults
         $guestDefaults = array('Articles.Articles.View' => 1);
-        $Sender->AddDefault(RoleModel::TYPE_GUEST, $guestDefaults);
-        $Sender->AddDefault(RoleModel::TYPE_GUEST, $guestDefaults, 'ArticleCategory', -1);
+        $sender->addDefault(RoleModel::TYPE_GUEST, $guestDefaults);
+        $sender->addDefault(RoleModel::TYPE_GUEST, $guestDefaults, 'ArticleCategory', -1);
 
         // Unconfirmed defaults
         $unconfirmedDefaults = array('Articles.Articles.View' => 1);
-        $Sender->AddDefault(RoleModel::TYPE_UNCONFIRMED, $unconfirmedDefaults);
-        $Sender->AddDefault(RoleModel::TYPE_UNCONFIRMED, $unconfirmedDefaults, 'ArticleCategory', -1);
+        $sender->addDefault(RoleModel::TYPE_UNCONFIRMED, $unconfirmedDefaults);
+        $sender->addDefault(RoleModel::TYPE_UNCONFIRMED, $unconfirmedDefaults, 'ArticleCategory', -1);
 
         // Applicant defaults
         $applicantDefaults = array('Articles.Articles.View' => 1);
-        $Sender->AddDefault(RoleModel::TYPE_APPLICANT, $applicantDefaults);
-        $Sender->AddDefault(RoleModel::TYPE_APPLICANT, $applicantDefaults, 'ArticleCategory', -1);
+        $sender->addDefault(RoleModel::TYPE_APPLICANT, $applicantDefaults);
+        $sender->addDefault(RoleModel::TYPE_APPLICANT, $applicantDefaults, 'ArticleCategory', -1);
 
         // Member defaults
         $memberDefaults = array(
             'Articles.Articles.View' => 1,
             'Articles.Comments.Add' => 1
         );
-        $Sender->AddDefault(RoleModel::TYPE_MEMBER, $memberDefaults);
-        $Sender->AddDefault(RoleModel::TYPE_MEMBER, $memberDefaults, 'ArticleCategory', -1);
+        $sender->addDefault(RoleModel::TYPE_MEMBER, $memberDefaults);
+        $sender->addDefault(RoleModel::TYPE_MEMBER, $memberDefaults, 'ArticleCategory', -1);
 
         // Moderator defaults
         $moderatorDefaults = array(
@@ -858,8 +773,8 @@ class ArticlesHooks extends Gdn_Plugin {
             'Articles.Comments.Delete' => 1,
             'Articles.Comments.Edit' => 1
         );
-        $Sender->AddDefault(RoleModel::TYPE_MODERATOR, $moderatorDefaults);
-        $Sender->AddDefault(RoleModel::TYPE_MODERATOR, $moderatorDefaults, 'ArticleCategory', -1);
+        $sender->addDefault(RoleModel::TYPE_MODERATOR, $moderatorDefaults);
+        $sender->addDefault(RoleModel::TYPE_MODERATOR, $moderatorDefaults, 'ArticleCategory', -1);
 
         // Administrator defaults
         $administratorDefaults = array(
@@ -872,7 +787,108 @@ class ArticlesHooks extends Gdn_Plugin {
             'Articles.Comments.Delete' => 1,
             'Articles.Comments.Edit' => 1
         );
-        $Sender->AddDefault(RoleModel::TYPE_ADMINISTRATOR, $administratorDefaults);
-        $Sender->AddDefault(RoleModel::TYPE_ADMINISTRATOR, $administratorDefaults, 'ArticleCategory', -1);
+        $sender->addDefault(RoleModel::TYPE_ADMINISTRATOR, $administratorDefaults);
+        $sender->addDefault(RoleModel::TYPE_ADMINISTRATOR, $administratorDefaults, 'ArticleCategory', -1);
+    }
+
+    /**
+     * Delete all of the Articles related information for a specific user.
+     *
+     * @param int $userID The ID of the user to delete.
+     * @param array $options An array of options:
+     *  - DeleteMethod: One of delete, wipe, or null
+     */
+    private function deleteUserData($userID, $options = array(), &$data = null) {
+        $sql = Gdn::sql();
+
+        // Comment deletion depends on method selected.
+        $deleteMethod = val('DeleteMethod', $options, 'delete');
+        if ($deleteMethod == 'delete') {
+            // Clear out the last posts to the categories.
+            $sql->update('ArticleCategory c')
+                ->join('Article a', 'a.ArticleID = c.LastArticleID')
+                ->where('a.InsertUserID', $userID)
+                ->set('c.LastArticleID', null)
+                ->set('c.LastArticleCommentID', null)
+                ->put();
+
+            $sql->update('ArticleCategory c')
+                ->join('ArticleComment ac', 'ac.ArticleCommentID = c.LastArticleCommentID')
+                ->where('ac.InsertUserID', $userID)
+                ->set('c.LastArticleID', null)
+                ->set('c.LastArticleCommentID', null)
+                ->put();
+
+            // Grab all of the articles that the user has engaged in.
+            $articleIDs = $sql
+                ->select('ArticleID')
+                ->from('ArticleComment')
+                ->where('InsertUserID', $userID)
+                ->groupBy('ArticleID')
+                ->get()->resultArray();
+            $articleIDs = consolidateArrayValuesByKey($articleIDs, 'ArticleID');
+
+            Gdn::userModel()->getDelete('ArticleComment', array('InsertUserID' => $userID), $data);
+
+            // Update the comment counts.
+            $commentCounts = $sql
+                ->select('ArticleID')
+                ->select('ArticleCommentID', 'count', 'CountArticleComments')
+                ->select('ArticleCommentID', 'max', 'LastArticleCommentID')
+                ->whereIn('ArticleID', $articleIDs)
+                ->groupBy('ArticleID')
+                ->get('ArticleComment')->resultArray();
+
+            foreach ($commentCounts as $row) {
+                $sql->put('Article',
+                    array('CountArticleComments' => $row['CountArticleComments'] + 1,
+                        'LastArticleCommentID' => $row['LastArticleCommentID']),
+                    array('ArticleID' => $row['ArticleID']));
+            }
+
+            // Update the last user IDs.
+            $sql->update('Article a')
+                ->join('ArticleComment ac', 'a.LastArticleCommentID = ac.ArticleCommentID', 'left')
+                ->set('a.LastArticleCommentUserID', 'ac.InsertUserID', false, false)
+                ->set('a.DateLastArticleComment', 'ac.DateInserted', false, false)
+                ->whereIn('a.ArticleID', $articleIDs)
+                ->put();
+
+            // Update the last posts.
+            $articles = $sql
+                ->whereIn('ArticleID', $articleIDs)
+                ->where('LastArticleCommentUserID', $userID)
+                ->get('Article');
+
+            // Delete the user's articles
+            Gdn::userModel()->getDelete('Article', array('InsertUserID' => $userID), $data);
+
+            // Update the appropriate recent posts in the categories.
+            $articleCategoryModel = new ArticleCategoryModel();
+            $categories = $articleCategoryModel->getWhere(array('LastArticleID' => null))->resultArray();
+            foreach ($categories as $category) {
+                $articleCategoryModel->setRecentPost($category['ArticleCategoryID']);
+            }
+        } else if ($deleteMethod == 'wipe') {
+            // Erase the user's articles
+            $sql->update('Article')
+                ->set('Status', 'Trash')
+                ->where('InsertUserID', $userID)
+                ->put();
+
+            $sql->update('ArticleComment')
+                ->set('Body', t('The user and all related content has been deleted.'))
+                ->set('Format', 'Deleted')
+                ->where('InsertUserID', $userID)
+                ->put();
+        }
+
+        // Remove the user's profile information related to this application
+        $sql->update('User')
+            ->set(array(
+                'CountArticles' => 0,
+                'CountArticleComments' => 0))
+            ->where('UserID', $userID)
+            ->put();
     }
 }

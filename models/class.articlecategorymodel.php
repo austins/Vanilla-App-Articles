@@ -167,6 +167,51 @@ class ArticleCategoryModel extends Gdn_Model {
         }
     }
 
+    public static function clearCache() {
+        Gdn::cache()->remove(self::CACHE_KEY);
+    }
+
+    /**
+     * Grab and update the category cache
+     *
+     * @param int $ID
+     * @param array $data
+     */
+    public static function setCache($ID = false, $data = false) {
+        $categories = Gdn::cache()->get(self::CACHE_KEY);
+        self::$Categories = null;
+
+        if (!$categories) {
+            return;
+        }
+
+        // Extract actual category list, remove key if malformed
+        if (!$ID || !is_array($categories) || !array_key_exists('categories', $categories)) {
+            Gdn::cache()->remove(self::CACHE_KEY);
+
+            return;
+        }
+        $categories = $categories['categories'];
+
+        // Check for category in list, otherwise remove key if not found
+        if (!array_key_exists($ID, $categories)) {
+            Gdn::cache()->remove(self::CACHE_KEY);
+
+            return;
+        }
+
+        $category = $categories[$ID];
+        $category = array_merge($category, $data);
+        $categories[$ID] = $category;
+
+        // Update memcache entry
+        self::$Categories = $categories;
+        unset($categories);
+        self::buildCache();
+
+        self::joinUserData(self::$Categories);
+    }
+
     /**
      * Request rebuild mutex
      *
@@ -208,49 +253,6 @@ class ArticleCategoryModel extends Gdn_Model {
             Gdn_Cache::FEATURE_EXPIRY => $expiry,
             Gdn_Cache::FEATURE_SHARD => self::$ShardCache
         ));
-    }
-
-    public static function clearCache() {
-        Gdn::cache()->remove(self::CACHE_KEY);
-    }
-
-    /**
-     * Grab and update the category cache
-     *
-     * @param int $ID
-     * @param array $data
-     */
-    public static function setCache($ID = false, $data = false) {
-        $categories = Gdn::cache()->get(self::CACHE_KEY);
-        self::$Categories = null;
-
-        if (!$categories) {
-            return;
-        }
-
-        // Extract actual category list, remove key if malformed
-        if (!$ID || !is_array($categories) || !array_key_exists('categories', $categories)) {
-            Gdn::cache()->remove(self::CACHE_KEY);
-            return;
-        }
-        $categories = $categories['categories'];
-
-        // Check for category in list, otherwise remove key if not found
-        if (!array_key_exists($ID, $categories)) {
-            Gdn::cache()->remove(self::CACHE_KEY);
-            return;
-        }
-
-        $category = $categories[$ID];
-        $category = array_merge($category, $data);
-        $categories[$ID] = $category;
-
-        // Update memcache entry
-        self::$Categories = $categories;
-        unset($categories);
-        self::buildCache();
-
-        self::joinUserData(self::$Categories);
     }
 
     /**

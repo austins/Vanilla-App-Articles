@@ -69,8 +69,9 @@ class ArticlesController extends Gdn_Controller {
      * @throws NotFoundException if article not found
      */
     public function index($page = false) {
-        if (Gdn::router()->getDestination('DefaultController') !== 'articles')
+        if (Gdn::router()->getDestination('DefaultController') !== 'articles') {
             $this->title(t('Articles'));
+        }
 
         // TODO: Set title appropriately if not first page of index.
 
@@ -100,8 +101,9 @@ class ArticlesController extends Gdn_Controller {
         $this->Pager = $pagerFactory->getPager($this->EventArguments['PagerType'], $this);
         $this->Pager->ClientID = 'Pager';
         $this->Pager->configure($offset, $limit, $countArticles, 'articles/%1$s');
-        if (!$this->data('_PagerUrl'))
+        if (!$this->data('_PagerUrl')) {
             $this->setData('_PagerUrl', 'articles/{Page}');
+        }
         $this->setData('_Page', $page);
         $this->setData('_Limit', $limit);
         $this->fireEvent('AfterBuildPager');
@@ -127,13 +129,15 @@ class ArticlesController extends Gdn_Controller {
 
         list($offset, $limit) = offsetLimit($page, c('Articles.Articles.PerPage', 12));
         $page = pageNumber($offset, $limit);
-        
-        // Get the category.
-        if ($urlCode != '')
-            $this->ArticleCategory = $this->ArticleCategoryModel->getByUrlCode($urlCode);
 
-        if (!$this->ArticleCategory)
+        // Get the category.
+        if ($urlCode != '') {
+            $this->ArticleCategory = $this->ArticleCategoryModel->getByUrlCode($urlCode);
+        }
+
+        if (!$this->ArticleCategory) {
             throw notFoundException('Article category');
+        }
 
         $this->setData('ArticleCategory', $this->ArticleCategory);
 
@@ -155,9 +159,9 @@ class ArticlesController extends Gdn_Controller {
         $this->fireEvent('BeforeBuildPager');
         $this->Pager = $pagerFactory->getPager($this->EventArguments['PagerType'], $this);
         $this->Pager->ClientID = 'Pager';
-        $this->Pager->configure($offset, $limit, $countArticles, 'articles/category/'.$urlCode.'/%1$s');
+        $this->Pager->configure($offset, $limit, $countArticles, 'articles/category/' . $urlCode . '/%1$s');
         if (!$this->data('_PagerUrl')) {
-          $this->setData('_PagerUrl', 'articles/category/'.$urlCode.'/{Page}');
+            $this->setData('_PagerUrl', 'articles/category/' . $urlCode . '/{Page}');
         }
         $this->setData('_Page', $page);
         $this->setData('_Limit', $limit);

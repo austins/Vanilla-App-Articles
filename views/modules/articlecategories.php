@@ -17,7 +17,7 @@ $CurrentCategoryID = val('ArticleCategoryID', $this->_Sender->data('ArticleCateg
             <?php
             // All Categories link
             $AllArticlesClass = $OnAllCategoriesMethod ? array('class' => 'Active') : '';
-            echo Wrap(Anchor(t('All Categories'), '/articles/categories'), 'li', $AllArticlesClass);
+            echo wrap(anchor(t('All Categories'), '/articles/categories'), 'li', $AllArticlesClass);
 
             $ArticleModel = new ArticleModel();
             $ArticleOffset = 0;
@@ -35,7 +35,7 @@ $CurrentCategoryID = val('ArticleCategoryID', $this->_Sender->data('ArticleCateg
                 // Output category link
                 $CategoryClass = ($CurrentCategoryID === $Category->ArticleCategoryID) ? array('class' => 'Active') :
                     '';
-                echo Wrap(Anchor($Category->Name, articleCategoryUrl($Category)), 'li', $CategoryClass);
+                echo wrap(anchor($Category->Name, articleCategoryUrl($Category)), 'li', $CategoryClass);
             }
             ?>
         </ul>

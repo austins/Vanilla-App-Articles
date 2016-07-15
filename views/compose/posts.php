@@ -6,10 +6,10 @@ if (!function_exists('showArticleOptions'))
 $Articles = $this->data('Articles')->result();
 $ArticleCount = $this->data('Articles')->numRows();
 
-echo Wrap(t('Article Posts'), 'h1', array('class' => 'H'));
+echo wrap(t('Article Posts'), 'h1', array('class' => 'H'));
 
 if (count($Articles) == 0)
-    echo Wrap(t('No articles have been found.'), 'div');
+    echo wrap(t('No articles have been found.'), 'div');
 else {
     // Set up pager.
     $PagerOptions = array('Wrapper' => '<span class="PagerNub">&#160;</span><div %1$s>%2$s</div>',
@@ -40,7 +40,7 @@ else {
             <?php showArticleOptions($Article); ?>
 
             <div class="ItemContent Article">
-                <div class="Title"><?php echo Anchor($Article->Name, $ArticleUrl); ?></div>
+                <div class="Title"><?php echo anchor($Article->Name, $ArticleUrl); ?></div>
 
                 <div class="Meta Meta-Article">
                     <?php
@@ -56,17 +56,17 @@ else {
                             break;
                     }
 
-                    echo Wrap($Status, 'span', array('class' => 'Tag Tag-Status'));
+                    echo wrap($Status, 'span', array('class' => 'Tag Tag-Status'));
                     ?>
                     <span
-                        class="MItem MCount ArticleCategory"><?php echo Anchor($Category->Name,
+                        class="MItem MCount ArticleCategory"><?php echo anchor($Category->Name,
                             articleCategoryUrl($Category)); ?></span>
                     <span
                         class="MItem MCount ArticleDate"><?php echo Gdn_Format::date($Article->DateInserted,
                             '%e %B %Y - %l:%M %p'); ?></span>
                     <span class="MItem MCount ArticleAuthor"><?php echo articleAuthorAnchor($Author); ?></span>
                     <span
-                        class="MItem MCount ArticleComments"><?php echo Anchor($CommentCountText,
+                        class="MItem MCount ArticleComments"><?php echo anchor($CommentCountText,
                             $ArticleUrl . '#comments'); ?></span>
                 </div>
             </div>

@@ -10,7 +10,7 @@ $Categories = $this->data('Categories')->result();
 </div>
 
 <div class="FilterMenu">
-    <?php echo Anchor(t('Add Category'), '/settings/articles/addcategory/', 'SmallButton'); ?>
+    <?php echo anchor(t('Add Category'), '/settings/articles/addcategory/', 'SmallButton'); ?>
 </div>
 
 <h1><?php echo t('Organize Categories'); ?></h1>
@@ -22,12 +22,12 @@ $Categories = $this->data('Categories')->result();
             <tr>
               <td>
                  <strong>' . htmlspecialchars($Category->Name) . '</strong>
-                 ' . Anchor(htmlspecialchars(rawurldecode($CategoryUrl)), $CategoryUrl) . '
-                 ' . Wrap($Category->Description, 'blockquote') . '
+                 ' . anchor(htmlspecialchars(rawurldecode($CategoryUrl)), $CategoryUrl) . '
+                 ' . wrap($Category->Description, 'blockquote') . '
               </td>
               <td class="Buttons">'
-            . Anchor(t('Edit'), '/settings/articles/editcategory/' . $Category->ArticleCategoryID, 'SmallButton')
-            . Anchor(t('Delete'), '/settings/articles/deletecategory/' . $Category->ArticleCategoryID, 'SmallButton')
+            . anchor(t('Edit'), '/settings/articles/editcategory/' . $Category->ArticleCategoryID, 'SmallButton')
+            . anchor(t('Delete'), '/settings/articles/deletecategory/' . $Category->ArticleCategoryID, 'SmallButton')
             . '</td>
             </tr>
          </table>';
