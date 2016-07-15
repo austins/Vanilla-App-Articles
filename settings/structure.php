@@ -21,8 +21,8 @@
  *
  * Called by ArticleHooks->Setup() to update database upon enabling app.
  */
-$Database = Gdn::Database();
-$SQL = $Database->SQL();
+$Database = Gdn::database();
+$SQL = $Database->sql();
 $Construct = $Database->Structure();
 $Px = $Construct->DatabasePrefix();
 
@@ -51,7 +51,7 @@ $Construct->PrimaryKey('ArticleCategoryID')
     ->set($Explicit, $Drop);
 
 $SystemUserID = Gdn::userModel()->GetSystemUserID();
-$Now = Gdn_Format::ToDateTime();
+$Now = Gdn_Format::toDateTime();
 
 if ($SQL->getWhere('ArticleCategory', array('ArticleCategoryID' => -1))->numRows() == 0) {
     // Insert root article category for use with permissions.

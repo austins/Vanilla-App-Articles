@@ -321,7 +321,7 @@ class ArticleController extends Gdn_Controller {
             }
         }
 
-        $this->setData('Title', T('Delete Article'));
+        $this->setData('Title', t('Delete Article'));
         $this->render();
     }
 

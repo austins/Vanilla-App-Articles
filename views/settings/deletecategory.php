@@ -13,7 +13,7 @@ if (is_object($OtherCategories)) {
     <?php
     if ($OtherCategories->numRows() == 0) {
         ?>
-        <li><p class="Warning"><?php echo T('Are you sure you want to delete this category?'); ?></p></li>
+        <li><p class="Warning"><?php echo t('Are you sure you want to delete this category?'); ?></p></li>
     <?php
     } else {
         // Only show the delete articles checkbox if we're deleting a non-parent category.
@@ -25,7 +25,7 @@ if (is_object($OtherCategories)) {
             ?>
         </li>
         <li id="ReplacementWarning"><p
-                class="Warning"><?php echo T('<strong>Heads Up!</strong> Moving articles into a replacement category can result in articles vanishing (or appearing) if the replacement category has different permissions than the category being deleted.'); ?></p>
+                class="Warning"><?php echo t('<strong>Heads Up!</strong> Moving articles into a replacement category can result in articles vanishing (or appearing) if the replacement category has different permissions than the category being deleted.'); ?></p>
         </li>
         <li id="ReplacementCategory">
             <?php
@@ -41,7 +41,7 @@ if (is_object($OtherCategories)) {
             ?>
         </li>
         <li id="DeleteArticles">
-            <p class="Warning"><?php echo T('All articles in this category will be permanently deleted.'); ?></p>
+            <p class="Warning"><?php echo t('All articles in this category will be permanently deleted.'); ?></p>
         </li>
         </ul>
     <?php

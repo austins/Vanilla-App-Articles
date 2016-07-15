@@ -13,7 +13,7 @@ $Category = $this->ArticleCategory;
 if ($Article->CountArticleComments == 0)
     $CommentCountText = 'Comments';
 else
-    $CommentCountText = Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
+    $CommentCountText = Plural($Article->CountArticleComments, t('1 Comment'), t('%d Comments'));
 ?>
 <article id="Article_<?php echo $Article->ArticleID; ?>" class="Article">
     <?php showArticleOptions($Article); ?>
@@ -57,7 +57,7 @@ if (c('Articles.Articles.ShowAuthorInfo', false) && (count($authorMeta) > 0) && 
         </div>
 
         <div id="AboutTheAuthor">
-            <?php echo T('About the Author'); ?>
+            <?php echo t('About the Author'); ?>
         </div>
 
         <h2 class="H"><?php
@@ -80,7 +80,7 @@ if (c('Articles.Articles.ShowSimilarArticles')) {
 
     if ($SimilarArticles->numRows() > 0) {
         echo '<div id="SimilarArticles">
-            <h2 class="H">' . T('You may be interested in...') . '</h2>';
+            <h2 class="H">' . t('You may be interested in...') . '</h2>';
 
         echo '<ul class="DataList">';
         foreach ($SimilarArticles as $SimilarArticle) {

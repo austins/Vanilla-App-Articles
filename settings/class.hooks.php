@@ -36,17 +36,17 @@ class ArticlesHooks extends Gdn_Plugin {
             // menu if articles isn't set as the DefaultController route.
             if (c('Articles.ShowArticlesMenuLink', true)
                     && (!$isMobileThemeActive || ($isMobileThemeActive && !$isArticlesDefaultController))) {
-                $Sender->Menu->AddLink('Articles', T('Articles'), '/articles', 'Articles.Articles.View');
+                $Sender->Menu->AddLink('Articles', t('Articles'), '/articles', 'Articles.Articles.View');
             }
 
             // Show Discussions menu link on mobile theme if articles is set as the DefaultController route
             // and if Vanilla is enabled because the mobile theme has a Home link.
             if ($isMobileThemeActive && $isArticlesDefaultController && Gdn::ApplicationManager()->IsEnabled('Vanilla')) {
-                $Sender->Menu->AddLink('Discussions', T('Discussions'), '/discussions', 'Vanilla.Discussions.View');
+                $Sender->Menu->AddLink('Discussions', t('Discussions'), '/discussions', 'Vanilla.Discussions.View');
             }
 
             if (c('Articles.ShowCategoriesMenuLink', false)) {
-                $Sender->Menu->AddLink('ArticleCategories', T('Article Categories'), '/articles/categories',
+                $Sender->Menu->AddLink('ArticleCategories', t('Article Categories'), '/articles/categories',
                     'Articles.Articles.View');
             }
         }
@@ -63,7 +63,7 @@ class ArticlesHooks extends Gdn_Plugin {
         // Save version number to config.
         $ApplicationInfo = array();
         include(PATH_APPLICATIONS . DS . 'articles' . DS . 'settings' . DS . 'about.php');
-        $Version = ArrayValue('Version', $ApplicationInfo['Articles'], false);
+        $Version = arrayValue('Version', $ApplicationInfo['Articles'], false);
         if ($Version) {
             $Save = array('Articles.Version' => $Version);
             SaveToConfig($Save);
@@ -100,8 +100,8 @@ class ArticlesHooks extends Gdn_Plugin {
         $Menu = &$Sender->EventArguments['SideMenu'];
 
         $Menu->AddItem($GroupName, $GroupName, false, array('class' => $GroupName));
-        $Menu->AddLink($GroupName, T('Settings'), '/settings/articles', 'Garden.Settings.Manage');
-        $Menu->AddLink($GroupName, T('Categories'), '/settings/articles/categories', 'Garden.Settings.Manage');
+        $Menu->AddLink($GroupName, t('Settings'), '/settings/articles', 'Garden.Settings.Manage');
+        $Menu->AddLink($GroupName, t('Categories'), '/settings/articles/categories', 'Garden.Settings.Manage');
     }
 
     /**
@@ -153,7 +153,7 @@ class ArticlesHooks extends Gdn_Plugin {
 
         $Sender->ConfigurationModule = $ConfigModule;
 
-        $Sender->title(T('Articles Settings'));
+        $Sender->title(t('Articles Settings'));
 
         $Sender->AddSideMenu('/settings/articles');
         $Sender->View = $Sender->fetchViewLocation('articles', 'settings', 'articles');
@@ -166,7 +166,7 @@ class ArticlesHooks extends Gdn_Plugin {
      * @param SettingsController $Sender
      */
     public function Controller_Categories($Sender) {
-        $Sender->title(T('Manage Article Categories'));
+        $Sender->title(t('Manage Article Categories'));
 
         // Set required permission.
         $Sender->permission('Garden.Settings.Manage');
@@ -218,17 +218,17 @@ class ArticlesHooks extends Gdn_Plugin {
                 if ($Category)
                     $Sender->Form->setData($Category);
                 else
-                    throw notFoundException(T('Article category'));
+                    throw notFoundException(t('Article category'));
             } else {
-                throw notFoundException(T('Article category'));
+                throw notFoundException(t('Article category'));
             }
         }
 
         // Set the title of the page.
         if (!$Category)
-            $Sender->title(T('Add Article Category'));
+            $Sender->title(t('Add Article Category'));
         else
-            $Sender->title(T('Edit Article Category'));
+            $Sender->title(t('Edit Article Category'));
 
         // Handle the form.
         if (!$Sender->Form->authenticatedPostBack()) {
@@ -238,19 +238,19 @@ class ArticlesHooks extends Gdn_Plugin {
                 $Sender->Form->addHidden('UrlCodeIsDefined', '1');
         } else { // The form was saved.
             // Define some validation rules for the fields being saved.
-            $Sender->Form->ValidateRule('Name', 'function:ValidateRequired');
-            $Sender->Form->ValidateRule('UrlCode', 'function:ValidateRequired', T('URL code is required.'));
+            $Sender->Form->validateRule('Name', 'function:ValidateRequired');
+            $Sender->Form->validateRule('UrlCode', 'function:ValidateRequired', t('URL code is required.'));
 
             // Manually validate certain fields.
-            $FormValues = $Sender->Form->FormValues();
+            $FormValues = $Sender->Form->formValues();
 
             if ($Category) {
                 $FormValues['ArticleCategoryID'] = $ArticleCategoryID;
-                $Sender->Form->SetFormValue('ArticleCategoryID', $ArticleCategoryID);
+                $Sender->Form->setFormValue('ArticleCategoryID', $ArticleCategoryID);
             }
 
             // Format URL code before saving.
-            $FormValues['UrlCode'] = Gdn_Format::Url($FormValues['UrlCode']);
+            $FormValues['UrlCode'] = Gdn_Format::url($FormValues['UrlCode']);
 
             // Check if URL code is in use by another category.
             $CategoryWithNewUrlCode = (bool)$ArticleCategoryModel->getByUrlCode($FormValues['UrlCode']);
@@ -261,14 +261,14 @@ class ArticlesHooks extends Gdn_Plugin {
 
             // If there are no errors, then save the category.
             if ($Sender->Form->errorCount() == 0) {
-                if ($Sender->Form->Save($FormValues)) {
+                if ($Sender->Form->save($FormValues)) {
                     if (!$Category) {
                         // Inserting.
                         $Sender->RedirectUrl = url('/settings/articles/categories/');
-                        $Sender->InformMessage(T('New article category added successfully.'));
+                        $Sender->InformMessage(t('New article category added successfully.'));
                     } else {
                         // Editing.
-                        $Sender->InformMessage(T('The article category has been saved successfully.'));
+                        $Sender->InformMessage(t('The article category has been saved successfully.'));
                     }
                 }
             }
@@ -306,7 +306,7 @@ class ArticlesHooks extends Gdn_Plugin {
         $Sender->permission('Garden.Settings.Manage');
 
         // Set up head.
-        $Sender->title(T('Delete Article Category'));
+        $Sender->title(t('Delete Article Category'));
         $Sender->AddSideMenu('/settings/articles/categories/');
         $Sender->addJsFile('articles.js', 'articles');
         $Sender->addJsFile('articles.settings.js', 'articles');
@@ -336,9 +336,9 @@ class ArticlesHooks extends Gdn_Plugin {
             $Sender->setData('OtherCategories', $OtherCategories, true);
 
             if (!$Sender->Form->authenticatedPostBack()) {
-                $Sender->Form->SetFormValue('DeleteArticles', '1'); // Checked by default
+                $Sender->Form->setFormValue('DeleteArticles', '1'); // Checked by default
             } else {
-                $ReplacementArticleCategoryID = $Sender->Form->GetValue('ReplacementArticleCategoryID');
+                $ReplacementArticleCategoryID = $Sender->Form->getValue('ReplacementArticleCategoryID');
                 $ReplacementCategory = $ArticleCategoryModel->getByID($ReplacementArticleCategoryID);
                 // Error if:
                 // 1. The category being deleted is the last remaining category.
@@ -349,14 +349,14 @@ class ArticlesHooks extends Gdn_Plugin {
                     // Go ahead and delete the category.
                     try {
                         $ArticleCategoryModel->delete($Category,
-                            $Sender->Form->GetValue('ReplacementArticleCategoryID'));
+                            $Sender->Form->getValue('ReplacementArticleCategoryID'));
                     } catch (Exception $ex) {
                         $Sender->Form->addError($ex);
                     }
 
                     if ($Sender->Form->errorCount() == 0) {
                         $Sender->RedirectUrl = url('/settings/articles/categories/');
-                        $Sender->InformMessage(T('Deleting article category...'));
+                        $Sender->InformMessage(t('Deleting article category...'));
                     }
                 }
             }
@@ -378,26 +378,26 @@ class ArticlesHooks extends Gdn_Plugin {
 
             // Add the article tab
             if (($Sender->User->CountArticles > 0) || ArticleModel::canAdd('any', $UserID)) {
-                $ArticlesLabel = Sprite('SpArticles', 'SpMyDrafts Sprite') . ' ' . T('Articles');
+                $ArticlesLabel = Sprite('SpArticles', 'SpMyDrafts Sprite') . ' ' . t('Articles');
 
                 if (c('Articles.Profile.ShowCounts', true))
                     $ArticlesLabel .= '<span class="Aside">' . CountString(GetValueR('User.CountArticles', $Sender,
                             null), "/profile/count/articles?userid=$UserID") . '</span>';
 
-                $Sender->AddProfileTab(T('Articles'),
+                $Sender->AddProfileTab(t('Articles'),
                     'profile/articles/' . $Sender->User->UserID . '/' . rawurlencode($Sender->User->Name), 'Articles',
                     $ArticlesLabel);
             }
 
             // Add the article comments tab
             if (($Sender->User->CountArticleComments > 0) || ArticleCommentModel::canAdd('any', $UserID)) {
-                $ArticleCommentsLabel = Sprite('SpArticleComments', 'SpQuote Sprite') . ' ' . T('Article Comments');
+                $ArticleCommentsLabel = Sprite('SpArticleComments', 'SpQuote Sprite') . ' ' . t('Article Comments');
 
                 if (c('Articles.Profile.ShowCounts', true))
                     $ArticleCommentsLabel .= '<span class="Aside">' . CountString(GetValueR('User.CountArticleComments',
                             $Sender, null), "/profile/count/articlecomments?userid=$UserID") . '</span>';
 
-                $Sender->AddProfileTab(T('Article Comments'),
+                $Sender->AddProfileTab(t('Article Comments'),
                     'profile/articlecomments/' . $Sender->User->UserID . '/' . rawurlencode($Sender->User->Name),
                     'ArticleComments', $ArticleCommentsLabel);
             }
@@ -418,17 +418,17 @@ class ArticlesHooks extends Gdn_Plugin {
         if (is_numeric($UserReference))
             $User = Gdn::userModel()->getID($UserReference);
         else if (is_string($UserReference))
-            $User = Gdn::userModel()->GetByUsername($UserReference);
+            $User = Gdn::userModel()->getByUsername($UserReference);
 
         $UserCanAddArticle = ArticleModel::canAdd('any', $User->UserID);
         if ($User && (!$UserCanAddArticle || (!$UserCanAddArticle && ($User->CountArticles == 0))))
-            Redirect(userUrl($User));
+            redirect(userUrl($User));
 
         $Sender->EditMode(false);
 
         // Tell the ProfileController what tab to load
         $Sender->GetUserInfo($UserReference, $Username, $UserID);
-        $Sender->_SetBreadcrumbs(T('Articles'), '/profile/articles');
+        $Sender->_SetBreadcrumbs(t('Articles'), '/profile/articles');
         $Sender->SetTabView('Articles', 'Articles', 'Profile', 'Articles');
         $Sender->CountArticleCommentsPerPage = c('Articles.Articles.PerPage', 12);
 
@@ -457,7 +457,7 @@ class ArticlesHooks extends Gdn_Plugin {
         );
 
         // Deliver JSON data if necessary
-        if ($Sender->DeliveryType() != DELIVERY_TYPE_ALL && $Offset > 0) {
+        if ($Sender->deliveryType() != DELIVERY_TYPE_ALL && $Offset > 0) {
             $Sender->setJson('LessRow', $Sender->Pager->ToString('less'));
             $Sender->setJson('MoreRow', $Sender->Pager->ToString('more'));
             $Sender->View = 'articles';
@@ -496,17 +496,17 @@ class ArticlesHooks extends Gdn_Plugin {
         if (is_numeric($UserReference))
             $User = Gdn::userModel()->getID($UserReference);
         else if (is_string($UserReference))
-            $User = Gdn::userModel()->GetByUsername($UserReference);
+            $User = Gdn::userModel()->getByUsername($UserReference);
 
         $UserCanAddComment = ArticleCommentModel::canAdd('any', $User->UserID);
         if ($User && (!$UserCanAddComment || (!$UserCanAddComment && ($User->CountArticleComments == 0))))
-            Redirect(userUrl($User));
+            redirect(userUrl($User));
 
         $Sender->EditMode(false);
 
         // Tell the ProfileController what tab to load
         $Sender->GetUserInfo($UserReference, $Username, $UserID);
-        $Sender->_SetBreadcrumbs(T('Article Comments'), '/profile/articlecomments');
+        $Sender->_SetBreadcrumbs(t('Article Comments'), '/profile/articlecomments');
         $Sender->SetTabView('Article Comments', 'Comments', 'Profile', 'Articles');
         $Sender->CountArticleCommentsPerPage = c('Articles.Comments.PerPage', 30);
 
@@ -533,7 +533,7 @@ class ArticlesHooks extends Gdn_Plugin {
         );
 
         // Deliver JSON data if necessary
-        if ($Sender->DeliveryType() != DELIVERY_TYPE_ALL && $Offset > 0) {
+        if ($Sender->deliveryType() != DELIVERY_TYPE_ALL && $Offset > 0) {
             $Sender->setJson('LessRow', $Sender->Pager->ToString('less'));
             $Sender->setJson('MoreRow', $Sender->Pager->ToString('more'));
             $Sender->View = 'comments';
@@ -565,10 +565,10 @@ class ArticlesHooks extends Gdn_Plugin {
             return;
 
         if (isset($UserMeta['AuthorDisplayName']))
-            $Sender->Form->SetValue('Articles.AuthorDisplayName', $UserMeta['AuthorDisplayName']);
+            $Sender->Form->setValue('Articles.AuthorDisplayName', $UserMeta['AuthorDisplayName']);
 
         if (isset($UserMeta['AuthorBio']))
-            $Sender->Form->SetValue('Articles.AuthorBio', $UserMeta['AuthorBio']);
+            $Sender->Form->setValue('Articles.AuthorBio', $UserMeta['AuthorBio']);
     }
 
     /**
@@ -604,7 +604,7 @@ class ArticlesHooks extends Gdn_Plugin {
         // Display author display name.
         if (isset($UserMeta['AuthorDisplayName']) && ($UserMeta['AuthorDisplayName'] != '')
                 && ($Sender->User->Name != $UserMeta['AuthorDisplayName'])) {
-            echo ' <dt class="Articles Profile AuthorDisplayName">' . T('Author Display Name') . '</dt> ';
+            echo ' <dt class="Articles Profile AuthorDisplayName">' . t('Author Display Name') . '</dt> ';
             echo ' <dd class="Articles Profile AuthorDisplayName">' . Gdn_Format::Html($UserMeta['AuthorDisplayName']) . '</dd> ';
         }
     }
@@ -623,7 +623,7 @@ class ArticlesHooks extends Gdn_Plugin {
         // Display author display name.
         if (isset($UserMeta['AuthorBio']) && ($UserMeta['AuthorBio'] != '')) {
             echo '<dl id="BoxProfileAuthorBio" class="About">';
-            echo ' <dt class="Articles Profile AuthorBio">' . T('Author Bio') . '</dt> ';
+            echo ' <dt class="Articles Profile AuthorBio">' . t('Author Bio') . '</dt> ';
             echo ' <dd class="Articles Profile AuthorBio">' . Gdn_Format::Html($UserMeta['AuthorBio']) . '</dd> ';
             echo '</dl>';
         }
@@ -745,7 +745,7 @@ class ArticlesHooks extends Gdn_Plugin {
                 ->put();
 
             $SQL->update('ArticleComment')
-                ->set('Body', T('The user and all related content has been deleted.'))
+                ->set('Body', t('The user and all related content has been deleted.'))
                 ->set('Format', 'Deleted')
                 ->where('InsertUserID', $UserID)
                 ->put();

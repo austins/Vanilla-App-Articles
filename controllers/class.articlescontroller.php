@@ -70,7 +70,7 @@ class ArticlesController extends Gdn_Controller {
      */
     public function index($page = false) {
         if (Gdn::router()->getDestination('DefaultController') !== 'articles')
-            $this->title(T('Articles'));
+            $this->title(t('Articles'));
 
         // TODO: Set title appropriately if not first page of index.
 
@@ -171,7 +171,7 @@ class ArticlesController extends Gdn_Controller {
     public function categories() {
         $this->permission('Articles.Articles.View', true, 'ArticleCategory', 'any'); // Set required permission.
 
-        $this->title(T('Article Categories'));
+        $this->title(t('Article Categories'));
 
         // Get the categories.
         $wheres = array('ac.CountArticles >' => '0'); // Category must have at least one article.

@@ -1,6 +1,6 @@
 <?php defined('APPLICATION') or exit(); ?>
 <div id="ArticlesDashboardWrap">
-    <h1 class="H"><?php echo T('Articles Dashboard'); ?></h1>
+    <h1 class="H"><?php echo t('Articles Dashboard'); ?></h1>
 
     <div class="RecentlyPublished">
         <h2>Recently Published</h2>
@@ -59,9 +59,9 @@
                                     false), 250);
                                 ?></div>
                             <div class="Meta">
-                    <span class="MItem"><?php echo T('Comment in', 'in') . ' '; ?>
+                    <span class="MItem"><?php echo t('Comment in', 'in') . ' '; ?>
                         <b><?php echo Anchor(Gdn_Format::Text($Comment->ArticleName), $Permalink); ?></b></span>
-                                <span class="MItem"><?php printf(T('Comment by %s'), $UserName); ?></span>
+                                <span class="MItem"><?php printf(t('Comment by %s'), $UserName); ?></span>
                                 <span class="MItem"><?php echo Anchor(Gdn_Format::date($Comment->DateInserted),
                                         $Permalink); ?></span>
                             </div>

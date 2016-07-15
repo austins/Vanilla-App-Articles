@@ -418,7 +418,7 @@ class ArticleCategoryModel extends Gdn_Model {
             || !property_exists($category, 'Name')
             || $category->ArticleCategoryID <= 0
         ) {
-            throw new Exception(T('Invalid category for deletion.'));
+            throw new Exception(t('Invalid category for deletion.'));
         } else {
             // If there is a replacement category...
             if ($replacementArticleCategoryID > 0) {

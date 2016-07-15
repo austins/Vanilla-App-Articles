@@ -3,7 +3,7 @@
 $Articles = $this->Data->result();
 ?>
 <div class="Box BoxArticles">
-    <h4><?php echo T('Recent Articles'); ?></h4>
+    <h4><?php echo t('Recent Articles'); ?></h4>
     <ul class="PanelInfo PanelArticles DataList">
         <?php
         foreach ($Articles as $Article) :

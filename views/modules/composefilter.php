@@ -6,7 +6,7 @@ $RequestMethod = strtolower($Controller->RequestMethod);
 ?>
 <div class="BoxButtons BoxNewArticle">
     <?php
-    echo Anchor(T('New Article'), '/compose/article',
+    echo Anchor(t('New Article'), '/compose/article',
         'Button Action Big Primary BigButton NewArticle');
 
     Gdn::Controller()->fireEvent('AfterNewArticleButton');
@@ -16,11 +16,11 @@ $RequestMethod = strtolower($Controller->RequestMethod);
 <div class="BoxFilter BoxComposeFilter">
     <ul class="FilterMenu">
         <li <?php if ($RequestMethod == 'index') echo 'class="Active"'; ?>>
-            <?php echo Anchor(Sprite('SpArticlesDashboard', 'SpMyDiscussions Sprite') . ' ' . T('Articles Dashboard'), '/compose'); ?>
+            <?php echo Anchor(Sprite('SpArticlesDashboard', 'SpMyDiscussions Sprite') . ' ' . t('Articles Dashboard'), '/compose'); ?>
         </li>
 
         <li <?php if ($RequestMethod == 'posts') echo 'class="Active"'; ?>>
-            <?php echo Anchor(Sprite('SpArticles', 'SpMyDrafts Sprite') . ' ' . T('Articles'), '/compose/posts'); ?>
+            <?php echo Anchor(Sprite('SpArticles', 'SpMyDrafts Sprite') . ' ' . t('Articles'), '/compose/posts'); ?>
         </li>
     </ul>
 </div>

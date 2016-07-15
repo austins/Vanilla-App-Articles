@@ -5,7 +5,7 @@
 
 <br />
 
-<h3><?php echo T('Feedback'); ?></h3>
+<h3><?php echo t('Feedback'); ?></h3>
 
 <div class="Box Aside" style="text-align: center; padding: 10px;"><a
         href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=72R6B2BUCMH46" target="_blank"><img
@@ -13,6 +13,6 @@
 </div>
 
 <div class="Info">
-    <?php echo T('Articles.Settings.DonateInfo',
+    <?php echo t('Articles.Settings.DonateInfo',
         'If you like this application and want to support the developer, click the donation button to the right. :)'); ?>
 </div>

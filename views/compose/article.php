@@ -35,10 +35,10 @@ echo $this->Form->Errors();
         <div id="UrlCode">
             <?php
             echo Wrap('URL Code', 'strong') . ': ';
-            echo Wrap(htmlspecialchars($this->Form->GetValue('UrlCode')));
+            echo Wrap(htmlspecialchars($this->Form->getValue('UrlCode')));
             echo $this->Form->TextBox('UrlCode');
-            echo Anchor(T('edit'), '#', 'Edit');
-            echo Anchor(T('OK'), '#', 'Save SmallButton');
+            echo Anchor(t('edit'), '#', 'Edit');
+            echo Anchor(t('OK'), '#', 'Save SmallButton');
             ?>
         </div>
 
@@ -139,7 +139,7 @@ echo $this->Form->Errors();
 
         echo $this->Form->Button('Preview', array('class' => 'Button PreviewButton'));
 
-        echo Anchor(T('Cancel'), '/compose/posts', 'Button ComposeCancel');
+        echo Anchor(t('Cancel'), '/compose/posts', 'Button ComposeCancel');
 
         $this->fireEvent('AfterFormButtons');
         ?>

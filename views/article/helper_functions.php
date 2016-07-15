@@ -13,14 +13,14 @@ if (!function_exists('showArticleOptions')) {
         // Can the user edit?
         if ($session->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
             $Options['EditArticle'] = array(
-                'Label' => T('Edit'),
+                'Label' => t('Edit'),
                 'Url' => '/compose/editarticle/' . $Article->ArticleID);
 
         // Can the user close?
         if ($session->checkPermission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
             $NewClosed = (int)!$Article->Closed;
             $Options['CloseArticle'] = array(
-                'Label' => T($Article->Closed ? 'Reopen' : 'Close'),
+                'Label' => t($Article->Closed ? 'Reopen' : 'Close'),
                 'Url' => "/article/close/{$Article->ArticleID}?close={$NewClosed}",
                 'Class' => 'Hijack');
         }
@@ -31,7 +31,7 @@ if (!function_exists('showArticleOptions')) {
             $Category = $ArticleCategoryModel->getByID(val('ArticleCategoryID', $Article));
 
             $Options['DeleteArticle'] = array(
-                'Label' => T('Delete'),
+                'Label' => t('Delete'),
                 'Url' => '/article/delete/' . $Article->ArticleID,
                 'Class' => 'DeleteArticle Popup');
 
@@ -43,7 +43,7 @@ if (!function_exists('showArticleOptions')) {
         if (!empty($Options)) {
             echo '<div class="Options">';
             echo '<span class="ToggleFlyout OptionsMenu">';
-            echo '<span class="OptionsTitle" title="' . T('Options') . '">' . T('Options') . '</span>';
+            echo '<span class="OptionsTitle" title="' . t('Options') . '">' . t('Options') . '</span>';
             echo Sprite('SpFlyoutHandle', 'Arrow');
             echo '<ul class="Flyout MenuItems" style="display: none;">';
             foreach ($Options as $Code => $Option) {
@@ -69,7 +69,7 @@ if (!function_exists('ArticleTag')) {
         if (!$CssClass)
             $CssClass = "Tag-$Code";
 
-        return ' <span class="Tag ' . $CssClass . '" title="' . htmlspecialchars(T($Code)) . '">' . T($Code) . '</span> ';
+        return ' <span class="Tag ' . $CssClass . '" title="' . htmlspecialchars(t($Code)) . '">' . t($Code) . '</span> ';
     }
 }
 
@@ -86,7 +86,7 @@ if (!function_exists('ShowCommentForm')) {
         if ((bool)$Article->Closed) {
             ?>
             <div class="Foot Closed">
-                <div class="Note Closed"><?php echo T('This article has been closed.'); ?></div>
+                <div class="Note Closed"><?php echo t('This article has been closed.'); ?></div>
             </div>
         <?php
         } else if (!$session->isValid() && !$canGuestsComment) {
@@ -95,7 +95,7 @@ if (!function_exists('ShowCommentForm')) {
                     <div class="Note Closed SignInOrRegister"><?php
                         $Popup = (c('Garden.SignIn.Popup')) ? ' class="Popup"' : '';
                         echo FormatString(
-                            T('Sign In or Register to Comment.',
+                            t('Sign In or Register to Comment.',
                                 '<a href="{SignInUrl,html}"{Popup}>Sign In</a> or <a href="{RegisterUrl,html}">Register</a> to comment.'),
                             array(
                                 'SignInUrl' => url(SignInUrl(url(''))),
@@ -170,13 +170,13 @@ if (!function_exists('GetCommentOptions')):
 
         // Can the user edit the comment?
         if (($CanEdit && $session->UserID == $Comment->InsertUserID) || $session->checkPermission('Articles.Comments.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
-            $Options['EditComment'] = array('Label' => T('Edit') . ' ' . $TimeLeft,
+            $Options['EditComment'] = array('Label' => t('Edit') . ' ' . $TimeLeft,
                 'Url' => '/articles/compose/editcomment/' . $Comment->ArticleCommentID, 'EditComment');
 
         // Can the user delete the comment?
         $SelfDeleting = ($CanEdit && $session->UserID == $Comment->InsertUserID && c('Articles.Comments.AllowSelfDelete'));
         if ($SelfDeleting || $session->checkPermission('Articles.Comments.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
-            $Options['DeleteComment'] = array('Label' => T('Delete'),
+            $Options['DeleteComment'] = array('Label' => t('Delete'),
                 'Url' => '/articles/article/deletecomment/' . $Comment->ArticleCommentID . '/' . $session->TransientKey()
                     . '/?Target=' . urlencode('/article/' . Gdn_Format::date($Article->DateInserted, '%Y') . '/'
                         . $Article->UrlCode), 'Class' => 'DeleteComment');
@@ -197,7 +197,7 @@ if (!function_exists('WriteCommentOptions')):
         if (count($Options) > 0) {
             echo '<div class="Options">';
             echo '<span class="ToggleFlyout OptionsMenu">';
-            echo '<span class="OptionsTitle" title="' . T('Options') . '">' . T('Options') . '</span>';
+            echo '<span class="OptionsTitle" title="' . t('Options') . '">' . t('Options') . '</span>';
             echo Sprite('SpFlyoutHandle', 'Arrow');
             echo '<ul class="Flyout MenuItems">';
             foreach ($Options as $Code => $Option) {

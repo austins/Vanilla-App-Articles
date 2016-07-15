@@ -14,12 +14,12 @@ echo $this->Form->Errors();
         </li>
         <li id="UrlCode">
             <?php
-            echo Wrap(T('Category URL:'), 'strong');
+            echo Wrap(t('Category URL:'), 'strong');
             echo ' ' . Gdn::Request()->Url('/articles/category/', true);
-            echo Wrap(htmlspecialchars($this->Form->GetValue('UrlCode')));
+            echo Wrap(htmlspecialchars($this->Form->getValue('UrlCode')));
             echo $this->Form->TextBox('UrlCode');
-            echo Anchor(T('edit'), '#', 'Edit');
-            echo Anchor(T('OK'), '#', 'Save SmallButton');
+            echo Anchor(t('edit'), '#', 'Edit');
+            echo Anchor(t('OK'), '#', 'Save SmallButton');
             ?>
         </li>
         <li>

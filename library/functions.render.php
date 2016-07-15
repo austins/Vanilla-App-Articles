@@ -129,20 +129,20 @@ if (!function_exists('articleAuthorAnchor')) {
         } elseif (is_string($Options))
             $Options = array('Px' => $Options);
 
-        $Px = GetValue('Px', $Options, '');
+        $Px = getValue('Px', $Options, '');
 
-        $Name = GetValue($Px.'Name', $User, T('Unknown'));
-        $UserID = GetValue($Px.'UserID', $User, 0);
+        $Name = getValue($Px.'Name', $User, t('Unknown'));
+        $UserID = getValue($Px.'UserID', $User, 0);
 
         $AuthorMeta = UserModel::GetMeta($User->UserID, 'Articles.%', 'Articles.');
         if (isset($AuthorMeta['AuthorDisplayName']) && $AuthorMeta['AuthorDisplayName'] != "")
             $Text = $AuthorMeta['AuthorDisplayName'];
         else
-            $Text = GetValue('Text', $Options, htmlspecialchars($Name)); // Allow anchor text to be overridden.
+            $Text = getValue('Text', $Options, htmlspecialchars($Name)); // Allow anchor text to be overridden.
 
         $Attributes = array(
             'class' => $CssClass,
-            'rel' => GetValue('Rel', $Options)
+            'rel' => getValue('Rel', $Options)
         );
 
         $UserUrl = 'profile/articles/' . $UserID . '/' . $Name;

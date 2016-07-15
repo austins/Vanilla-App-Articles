@@ -5,15 +5,15 @@ $Categories = $this->data('Categories')->result();
 <h1><?php echo $this->title(); ?></h1>
 
 <div class="Info">
-    <?php echo T('Article categories are used to help organize articles.',
+    <?php echo t('Article categories are used to help organize articles.',
         'Categories are used to help organize articles.'); ?>
 </div>
 
 <div class="FilterMenu">
-    <?php echo Anchor(T('Add Category'), '/settings/articles/addcategory/', 'SmallButton'); ?>
+    <?php echo Anchor(t('Add Category'), '/settings/articles/addcategory/', 'SmallButton'); ?>
 </div>
 
-<h1><?php echo T('Organize Categories'); ?></h1>
+<h1><?php echo t('Organize Categories'); ?></h1>
 <ol class="Sortable">
     <?php
     foreach ($Categories as $Category) {
@@ -26,8 +26,8 @@ $Categories = $this->data('Categories')->result();
                  ' . Wrap($Category->Description, 'blockquote') . '
               </td>
               <td class="Buttons">'
-            . Anchor(T('Edit'), '/settings/articles/editcategory/' . $Category->ArticleCategoryID, 'SmallButton')
-            . Anchor(T('Delete'), '/settings/articles/deletecategory/' . $Category->ArticleCategoryID, 'SmallButton')
+            . Anchor(t('Edit'), '/settings/articles/editcategory/' . $Category->ArticleCategoryID, 'SmallButton')
+            . Anchor(t('Delete'), '/settings/articles/deletecategory/' . $Category->ArticleCategoryID, 'SmallButton')
             . '</td>
             </tr>
          </table>';

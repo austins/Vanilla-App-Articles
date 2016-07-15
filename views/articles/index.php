@@ -14,9 +14,9 @@ if ($Category) {
 
 if (count($Articles) == 0) {
     if ($Category) {
-        echo Wrap(T('No articles have been published in this category yet.'), 'div', array('class' => 'Empty'));
+        echo Wrap(t('No articles have been published in this category yet.'), 'div', array('class' => 'Empty'));
     } else {
-        echo Wrap(T('No articles have been published yet.'), 'div', array('class' => 'Empty'));
+        echo Wrap(t('No articles have been published yet.'), 'div', array('class' => 'Empty'));
     }
 } else {
     foreach ($Articles as $Article):
@@ -24,7 +24,7 @@ if (count($Articles) == 0) {
         $Author = Gdn::userModel()->getID($Article->InsertUserID);
 
         $CommentCountText = ($Article->CountArticleComments == 0) ? 'Comments' :
-            Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
+            Plural($Article->CountArticleComments, t('1 Comment'), t('%d Comments'));
 
         $Thumbnail = $this->ArticleMediaModel->getThumbnailByArticleID($Article->ArticleID);
         ?>

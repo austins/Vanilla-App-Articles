@@ -12,7 +12,7 @@ if ($GuestCommenting)
 $this->fireEvent('BeforeCommentForm');
 ?>
 <div id="CommentBox" class="<?php echo $this->EventArguments['FormCssClass']; ?>">
-    <h2 class="H"><?php echo T($Editing ? 'Edit Comment' : 'Leave a Comment'); ?></h2>
+    <h2 class="H"><?php echo t($Editing ? 'Edit Comment' : 'Leave a Comment'); ?></h2>
 
     <div class="CommentFormWrap">
         <?php if (Gdn::session()->isValid()): ?>
@@ -63,10 +63,10 @@ $this->fireEvent('BeforeCommentForm');
 
                     echo "<div class=\"Buttons\">\n";
                     $this->fireEvent('BeforeFormButtons');
-                    $CancelText = T('Home');
+                    $CancelText = t('Home');
                     $CancelClass = 'Back';
                     if ($Editing) {
-                        $CancelText = T('Cancel');
+                        $CancelText = t('Cancel');
                         $CancelClass = 'Cancel';
                     }
 
@@ -78,8 +78,8 @@ $this->fireEvent('BeforeCommentForm');
                     $ButtonOptions['tabindex'] = 2;
 
                     if ((!$Editing && $session->isValid()) || (!$Editing && $GuestCommenting)) {
-                        echo ' ' . Anchor(T('Preview'), '#', 'Button PreviewButton') . "\n";
-                        echo ' ' . Anchor(T('Edit'), '#', 'Button WriteButton Hidden') . "\n";
+                        echo ' ' . Anchor(t('Preview'), '#', 'Button PreviewButton') . "\n";
+                        echo ' ' . Anchor(t('Edit'), '#', 'Button WriteButton Hidden') . "\n";
                     }
 
                     if ($session->isValid()) {
@@ -97,7 +97,7 @@ $this->fireEvent('BeforeCommentForm');
                         if ($AllowSigninPopup)
                             $CssClass .= ' SignInPopup';
 
-                        echo Anchor(T('Sign In'), $AuthenticationUrl, $CssClass, $Attributes);
+                        echo Anchor(t('Sign In'), $AuthenticationUrl, $CssClass, $Attributes);
                     }
 
                     $this->fireEvent('AfterFormButtons');

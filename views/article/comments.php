@@ -11,7 +11,7 @@ $session = Gdn::session();
     $canGuestsComment = c('Articles.Comments.AllowGuests', false);
 
     if (($this->ArticleComments->numRows() > 0) || (!$session->isValid() && !$canGuestsComment)) {
-        echo '<h2 class="CommentHeading">' . T('Comments') . '</h2>';
+        echo '<h2 class="CommentHeading">' . t('Comments') . '</h2>';
     }
 
     if ($this->ArticleComments->numRows() > 0):
@@ -126,9 +126,9 @@ $session = Gdn::session();
             // Pager
             $this->fireEvent('AfterComments');
             if ($this->Pager->LastPage()) {
-                $LastCommentID = $this->AddDefinition('LastCommentID');
+                $LastCommentID = $this->addDefinition('LastCommentID');
                 if (!$LastCommentID || $this->ArticleCommentModel->LastArticleCommentID > $LastCommentID)
-                    $this->AddDefinition('LastCommentID', (int)$this->ArticleCommentModel->LastArticleCommentID);
+                    $this->addDefinition('LastCommentID', (int)$this->ArticleCommentModel->LastArticleCommentID);
             }
 
             echo '<div class="P PagerWrap">';

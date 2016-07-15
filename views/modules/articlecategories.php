@@ -10,14 +10,14 @@ $Categories = $this->Data->result();
 $CurrentCategoryID = val('ArticleCategoryID', $this->_Sender->data('ArticleCategory'), false);
 ?>
 <div class="Box BoxArticleCategories">
-    <h4><?php echo T('Article Categories'); ?></h4>
+    <h4><?php echo t('Article Categories'); ?></h4>
 
     <?php if (!C('Articles.Modules.ShowCategoriesAsDropDown', false)): ?>
         <ul class="PanelInfo PanelArticleCategories">
             <?php
             // All Categories link
             $AllArticlesClass = $OnAllCategoriesMethod ? array('class' => 'Active') : '';
-            echo Wrap(Anchor(T('All Categories'), '/articles/categories'), 'li', $AllArticlesClass);
+            echo Wrap(Anchor(t('All Categories'), '/articles/categories'), 'li', $AllArticlesClass);
 
             $ArticleModel = new ArticleModel();
             $ArticleOffset = 0;
@@ -42,9 +42,9 @@ $CurrentCategoryID = val('ArticleCategoryID', $this->_Sender->data('ArticleCateg
     <?php else: ?>
         <select id="ArticleCategoriesDropDown">
             <option disabled<?php echo(!$CurrentCategoryID ? ' selected' :
-                ''); ?>><?php echo T('Select a category...'); ?></option>
+                ''); ?>><?php echo t('Select a category...'); ?></option>
             <option id="ArticleCategoriesDropDown_AllCategories" value="all"<?php echo($OnAllCategoriesMethod ?
-                ' selected ' : ''); ?>><?php echo T('All Categories'); ?></option>
+                ' selected ' : ''); ?>><?php echo t('All Categories'); ?></option>
             <?php foreach ($Categories as $Category): ?>
                 <option id="ArticleCategoriesDropDown_ArticleCategory_<?php echo $Category->ArticleCategoryID; ?>"
                         value="<?php echo $Category->UrlCode; ?>"<?php echo(($CurrentCategoryID === $Category->ArticleCategoryID) ?

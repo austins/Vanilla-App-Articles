@@ -30,7 +30,7 @@ if (Gdn::config('Articles.Version') !== false)
 
 // Prep content meta data.
 $SystemUserID = Gdn::userModel()->GetSystemUserID();
-$Now = Gdn_Format::ToDateTime();
+$Now = Gdn_Format::toDateTime();
 
 // Insert first article.
 $ArticleModel = new ArticleModel();
@@ -47,10 +47,10 @@ if ($ArticleModel->getCount() == 0) {
         . " Aenean ut dolor eu purus egestas cursus. In aliquet magna"
         . " arcu, sed fermentum ipsum condimentum eget.";
 
-    $ArticleModel->Save(array(
+    $ArticleModel->save(array(
         'ArticleCategoryID' => 1,
         'Name' => $FirstArticleName,
-        'UrlCode' => Gdn_Format::Url($FirstArticleName),
+        'UrlCode' => Gdn_Format::url($FirstArticleName),
         'Body' => $FirstArticleBody,
         'Excerpt' => "This is the first article's excerpt. Read on to see more.",
         'Format' => 'Html',

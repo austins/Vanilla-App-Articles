@@ -6,10 +6,10 @@ if (!function_exists('showArticleOptions'))
 $Articles = $this->data('Articles')->result();
 $ArticleCount = $this->data('Articles')->numRows();
 
-echo Wrap(T('Article Posts'), 'h1', array('class' => 'H'));
+echo Wrap(t('Article Posts'), 'h1', array('class' => 'H'));
 
 if (count($Articles) == 0)
-    echo Wrap(T('No articles have been found.'), 'div');
+    echo Wrap(t('No articles have been found.'), 'div');
 else {
     // Set up pager.
     $PagerOptions = array('Wrapper' => '<span class="PagerNub">&#160;</span><div %1$s>%2$s</div>',
@@ -29,7 +29,7 @@ else {
         $Category = $this->ArticleCategoryModel->getByID($Article->ArticleCategoryID);
 
         $CommentCountText = ($Article->CountArticleComments == 0) ? '0 Comments'
-            : Plural($Article->CountArticleComments, T('1 Comment'), T('%d Comments'));
+            : Plural($Article->CountArticleComments, t('1 Comment'), t('%d Comments'));
 
         $CssClass = 'Item ItemArticle';
 
@@ -45,14 +45,14 @@ else {
                 <div class="Meta Meta-Article">
                     <?php
                     // Article status tag.
-                    $Status = T('Draft');
+                    $Status = t('Draft');
 
                     switch ($Article->Status) {
                         case ArticleModel::STATUS_PENDING:
-                            $Status = T('Pending Review');
+                            $Status = t('Pending Review');
                             break;
                         case ArticleModel::STATUS_PUBLISHED:
-                            $Status = T('Published');
+                            $Status = t('Published');
                             break;
                     }
 
