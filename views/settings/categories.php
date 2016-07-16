@@ -17,12 +17,14 @@ $categories = $this->data('Categories')->result();
 <ol class="Sortable">
     <?php
     foreach ($categories as $category) {
+        $categoryUrl = articleCategoryUrl($category);
+
         echo '<li id="Category_' . $category->ArticleCategoryID . '">';
         echo '<table>
             <tr>
               <td>
                  <strong>' . htmlspecialchars($category->Name) . '</strong>
-                 ' . anchor(htmlspecialchars(rawurldecode($CategoryUrl)), $CategoryUrl) . '
+                 ' . anchor($categoryUrl, $categoryUrl) . '
                  ' . wrap($category->Description, 'blockquote') . '
               </td>
               <td class="Buttons">'

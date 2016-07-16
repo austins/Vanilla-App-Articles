@@ -25,7 +25,7 @@ if (!function_exists('articleUrl')) {
         $result = '/article/' . Gdn_Format::date($article->DateInserted, '%Y') . '/' . $article->UrlCode;
 
         // Add in the page number if necessary.
-        if ($page && ($page > 1 || Gdn::session()->UserID)) {
+        if ($page && $page > 1) {
             $result .= '/p' . $page;
         }
 
@@ -56,14 +56,14 @@ if (!function_exists('formatArticleBody')) {
     function formatArticleBody($articleBody, $format = 'Html') {
         if (strcasecmp($format, 'Html') == 0) {
             // Format links and links to videos.
-            $articleBody = Gdn_Format::Links($articleBody);
+            $articleBody = Gdn_Format::links($articleBody);
 
             // Mentions and hashes.
-            $articleBody = Gdn_Format::Mentions($articleBody);
+            $articleBody = Gdn_Format::mentions($articleBody);
 
             // Format new lines.
             $articleBody = preg_replace("/(\015\012)|(\015)|(\012)/", "<br />", $articleBody);
-            $articleBody = FixNl2Br($articleBody);
+            $articleBody = fixnl2br($articleBody);
 
             // Convert br to paragraphs.
             $articleBody = preg_replace('#(?:<br\s*/?>\s*?){2,}#', '</p><p>', $articleBody);
@@ -97,10 +97,10 @@ if (!function_exists('articleCategoryUrl')) {
         $urlCode = isset($category->UrlCode) ? $category->UrlCode : $category;
 
         // Set up the initial URL string.
-        $result = '/articles/category/' . $urlCode;
+        $result = '/articles/category/' . rawurlencode($urlCode);
 
         // Add in the page number if necessary.
-        if ($page && ($page > 1 || Gdn::session()->UserID)) {
+        if ($page && $page > 1) {
             $result .= '/p' . $page;
         }
 
