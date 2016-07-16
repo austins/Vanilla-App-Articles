@@ -316,7 +316,7 @@ class ComposeController extends Gdn_Controller {
                 $this->Preview->InsertPhoto = $session->User->Photo;
                 $this->Preview->DateInserted = Gdn_Format::date();
                 $this->Preview->Body = arrayValue('Body', $formValues, '');
-                $this->Preview->Format = getValue('Format', $formValues, c('Garden.InputFormatter'));
+                $this->Preview->Format = val('Format', $formValues, c('Garden.InputFormatter'));
 
                 $this->EventArguments['Article'] = &$this->Article;
                 $this->EventArguments['Preview'] = &$this->Preview;
@@ -772,7 +772,7 @@ class ComposeController extends Gdn_Controller {
 
                     if ($this->_DeliveryType == DELIVERY_TYPE_ALL) {
                         $this->addAsset('Content', $this->fetchView('preview'));
-                        $this->Preview->Format = getValue('Format', $formValues, c('Garden.InputFormatter'));
+                        $this->Preview->Format = val('Format', $formValues, c('Garden.InputFormatter'));
                     } else {
                         $this->View = 'preview';
                     }
