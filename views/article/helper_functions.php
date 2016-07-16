@@ -1,53 +1,62 @@
 <?php defined('APPLICATION') or exit();
 
 if (!function_exists('showArticleOptions')) {
-    function showArticleOptions($Article) {
+    function showArticleOptions($article) {
         // If $Article type is an array, then cast it to an object.
-        if (is_array($Article))
-            $Article = (object)$Article;
+        if (is_array($article)) {
+            $article = (object)$article;
+        }
 
         $sender = Gdn::controller();
         $session = Gdn::session();
-        $Options = array();
+        $options = array();
 
         // Can the user edit?
-        if ($session->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
-            $Options['EditArticle'] = array(
+        if ($session->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory',
+            $article->PermissionArticleCategoryID)
+        ) {
+            $options['EditArticle'] = array(
                 'Label' => t('Edit'),
-                'Url' => '/compose/editarticle/' . $Article->ArticleID);
+                'Url' => '/compose/editarticle/' . $article->ArticleID);
+        }
 
         // Can the user close?
-        if ($session->checkPermission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
-            $NewClosed = (int)!$Article->Closed;
-            $Options['CloseArticle'] = array(
-                'Label' => t($Article->Closed ? 'Reopen' : 'Close'),
-                'Url' => "/article/close/{$Article->ArticleID}?close={$NewClosed}",
+        if ($session->checkPermission('Articles.Articles.Close', true, 'ArticleCategory',
+            $article->PermissionArticleCategoryID)
+        ) {
+            $newClosed = (int)!$article->Closed;
+            $options['CloseArticle'] = array(
+                'Label' => t($article->Closed ? 'Reopen' : 'Close'),
+                'Url' => "/article/close/{$article->ArticleID}?close={$newClosed}",
                 'Class' => 'Hijack');
         }
 
         // Can the user delete?
-        if ($session->checkPermission('Articles.Articles.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
-            $ArticleCategoryModel = new ArticleCategoryModel();
-            $Category = $ArticleCategoryModel->getByID(val('ArticleCategoryID', $Article));
+        if ($session->checkPermission('Articles.Articles.Delete', true, 'ArticleCategory',
+            $article->PermissionArticleCategoryID)
+        ) {
+            $articleCategoryModel = new ArticleCategoryModel();
+            $category = $articleCategoryModel->getByID(val('ArticleCategoryID', $article));
 
-            $Options['DeleteArticle'] = array(
+            $options['DeleteArticle'] = array(
                 'Label' => t('Delete'),
-                'Url' => '/article/delete/' . $Article->ArticleID,
+                'Url' => '/article/delete/' . $article->ArticleID,
                 'Class' => 'DeleteArticle Popup');
 
-            if (strtolower($sender->ControllerName) === "articlecontroller")
-                $Options['DeleteArticle']['Url'] .= '?&target=' . urlencode(articleCategoryUrl($Category));
+            if (strtolower($sender->ControllerName) === "articlecontroller") {
+                $options['DeleteArticle']['Url'] .= '?&target=' . urlencode(articleCategoryUrl($category));
+            }
         }
 
         // Render the article options menu.
-        if (!empty($Options)) {
+        if (!empty($options)) {
             echo '<div class="Options">';
             echo '<span class="ToggleFlyout OptionsMenu">';
             echo '<span class="OptionsTitle" title="' . t('Options') . '">' . t('Options') . '</span>';
             echo sprite('SpFlyoutHandle', 'Arrow');
             echo '<ul class="Flyout MenuItems" style="display: none;">';
-            foreach ($Options as $Code => $Option) {
-                echo wrap(anchor($Option['Label'], $Option['Url'], val('Class', $Option, $Code)), 'li');
+            foreach ($options as $code => $option) {
+                echo wrap(anchor($option['Label'], $option['Url'], val('Class', $option, $code)), 'li');
             }
             echo '</ul>';
             echo '</span>';
@@ -56,152 +65,169 @@ if (!function_exists('showArticleOptions')) {
     }
 }
 
-if (!function_exists('ArticleTag')) {
-    function articleTag($Article, $Column, $Code, $CssClass = false) {
-        if (is_array($Article))
-            $Article = (object)$Article;
+if (!function_exists('articleTag')) {
+    function articleTag($article, $column, $code, $cssClass = false) {
+        if (is_array($article)) {
+            $article = (object)$article;
+        }
 
-        if ((is_numeric($Article->$Column) && !$Article->$Column)
-            || (!is_numeric($Article->$Column) && strcasecmp($Article->$Column, $Code) != 0)
-        )
+        if ((is_numeric($article->$column) && !$article->$column)
+            || (!is_numeric($article->$column) && strcasecmp($article->$column, $code) != 0)
+        ) {
             return '';
+        }
 
-        if (!$CssClass)
-            $CssClass = "Tag-$Code";
+        if (!$cssClass) {
+            $cssClass = "Tag-$code";
+        }
 
-        return ' <span class="Tag ' . $CssClass . '" title="' . htmlspecialchars(t($Code)) . '">' . t($Code) . '</span> ';
+        return ' <span class="Tag ' . $cssClass . '" title="' . htmlspecialchars(t($code)) . '">' . t($code) . '</span> ';
     }
 }
 
-if (!function_exists('ShowCommentForm')) {
-    function ShowCommentForm() {
+if (!function_exists('showCommentForm')) {
+    function showCommentForm() {
         $session = Gdn::session();
-        $Controller = Gdn::controller();
-        $Article = $Controller->Article;
-        $UserCanClose = $session->checkPermission('Articles.Articles.Close', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
-        $UserCanComment = $session->checkPermission('Articles.Comments.Add', true, 'ArticleCategory', $Article->PermissionArticleCategoryID);
+        $controller = Gdn::controller();
+        $article = $controller->Article;
+        $userCanClose = $session->checkPermission('Articles.Articles.Close', true, 'ArticleCategory',
+            $article->PermissionArticleCategoryID);
+        $userCanComment = $session->checkPermission('Articles.Comments.Add', true, 'ArticleCategory',
+            $article->PermissionArticleCategoryID);
         $canGuestsComment = c('Articles.Comments.AllowGuests', false);
 
         // Closed notification
-        if ((bool)$Article->Closed) {
+        if ((bool)$article->Closed) {
             ?>
             <div class="Foot Closed">
                 <div class="Note Closed"><?php echo t('This article has been closed.'); ?></div>
             </div>
-        <?php
+            <?php
         } else if (!$session->isValid() && !$canGuestsComment) {
-                ?>
-                <div class="Foot Closed">
-                    <div class="Note Closed SignInOrRegister"><?php
-                        $Popup = (c('Garden.SignIn.Popup')) ? ' class="Popup"' : '';
-                        echo FormatString(
-                            t('Sign In or Register to Comment.',
-                                '<a href="{SignInUrl,html}"{Popup}>Sign In</a> or <a href="{RegisterUrl,html}">Register</a> to comment.'),
-                            array(
-                                'SignInUrl' => url(SignInUrl(url(''))),
-                                'RegisterUrl' => url(RegisterUrl(url(''))),
-                                'Popup' => $Popup
-                            )
-                        ); ?>
-                    </div>
+            ?>
+            <div class="Foot Closed">
+                <div class="Note Closed SignInOrRegister"><?php
+                    $popup = (c('Garden.SignIn.Popup')) ? ' class="Popup"' : '';
+                    echo formatString(
+                        t('Sign In or Register to Comment.',
+                            '<a href="{SignInUrl,html}"{Popup}>Sign In</a> or <a href="{RegisterUrl,html}">Register</a> to comment.'),
+                        array(
+                            'SignInUrl' => url(signInUrl(url(''))),
+                            'RegisterUrl' => url(registerUrl(url(''))),
+                            'Popup' => $popup
+                        )
+                    ); ?>
                 </div>
+            </div>
             <?php
         }
 
-        if ((($Article->Closed == '1') && $UserCanClose)
-                || (($Article->Closed == '0') && $UserCanComment)
-                || (!$session->isValid() && $canGuestsComment))
-            echo $Controller->FetchView('comment', 'compose', 'Articles');
+        if ((($article->Closed == '1') && $userCanClose)
+            || (($article->Closed == '0') && $userCanComment)
+            || (!$session->isValid() && $canGuestsComment)
+        ) {
+            echo $controller->fetchView('comment', 'compose', 'Articles');
+        }
     }
 }
 
-if (!function_exists('WriteArticleReactions')):
-    function WriteArticleReactions($Comment, $Type = 'Comment') {
-        list($RecordType, $RecordID) = RecordType($Comment);
+if (!function_exists('writeArticleReactions')):
+    function writeArticleReactions($comment, $type = 'Comment') {
+        list($recordType, $recordID) = recordType($comment);
 
-        Gdn::controller()->EventArguments['RecordType'] = strtolower($RecordType);
-        Gdn::controller()->EventArguments['RecordID'] = $RecordID;
+        Gdn::controller()->EventArguments['RecordType'] = strtolower($recordType);
+        Gdn::controller()->EventArguments['RecordID'] = $recordID;
 
         echo '<div class="Reactions">';
-        Gdn_Theme::BulletRow();
+        Gdn_Theme::bulletRow();
 
         $session = Gdn::session();
-        $GuestCommenting = (c('Articles.Comments.AllowGuests', false) && !$session->isValid());
-        if (c('Articles.Comments.EnableThreadedComments', true) && !$Comment->ParentArticleCommentID) {
-            if ($session->isValid() || $GuestCommenting) {
+        $guestCommenting = (c('Articles.Comments.AllowGuests', false) && !$session->isValid());
+        if (c('Articles.Comments.EnableThreadedComments', true) && !$comment->ParentArticleCommentID) {
+            if ($session->isValid() || $guestCommenting) {
                 echo anchor('<span class="ReactSprite ReactReply"></span> Reply',
-                    '/compose/comment/' . $Comment->ArticleID . '/' . $Comment->ArticleCommentID,
+                    '/compose/comment/' . $comment->ArticleID . '/' . $comment->ArticleCommentID,
                     'ReactButton ReplyLink Visible');
             }
         }
-        
+
         Gdn::controller()->fireEvent('AfterArticleReactions');
         echo '</div>';
     }
 endif;
 
-if (!function_exists('GetCommentOptions')):
-    function GetCommentOptions($Comment) {
-        $Options = array();
+if (!function_exists('getCommentOptions')):
+    function getCommentOptions($comment) {
+        $options = array();
 
-        if (!is_numeric(val('ArticleCommentID', $Comment)))
-            return $Options;
+        if (!is_numeric(val('ArticleCommentID', $comment))) {
+            return $options;
+        }
 
         $sender = Gdn::controller();
         $session = Gdn::session();
 
-        $Article = & $sender->Article;
-        $ArticleCategoryID = val('ArticleCategoryID', $Article);
+        $article = &$sender->Article;
+        $articleCategoryID = val('ArticleCategoryID', $article);
 
         // Determine if we still have time to edit
-        $EditContentTimeout = c('Garden.EditContentTimeout', -1);
-        $CanEdit = $EditContentTimeout == -1 || strtotime($Comment->DateInserted) + $EditContentTimeout > time();
+        $editContentTimeout = c('Garden.EditContentTimeout', -1);
+        $canEdit = $editContentTimeout == -1 || strtotime($comment->DateInserted) + $editContentTimeout > time();
 
         // Don't allow guests to edit.
-        if (!$session->isValid())
-            $CanEdit = false;
+        if (!$session->isValid()) {
+            $canEdit = false;
+        }
 
-        $TimeLeft = '';
+        $timeLeft = '';
 
-        if ($CanEdit && $EditContentTimeout > 0 && !$session->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID)) {
-            $TimeLeft = strtotime($Comment->DateInserted) + $EditContentTimeout - time();
-            $TimeLeft = $TimeLeft > 0 ? ' (' . Gdn_Format::Seconds($TimeLeft) . ')' : '';
+        if ($canEdit && $editContentTimeout > 0 && !$session->checkPermission('Articles.Articles.Edit', true,
+                'ArticleCategory', $article->PermissionArticleCategoryID)
+        ) {
+            $timeLeft = strtotime($comment->DateInserted) + $editContentTimeout - time();
+            $timeLeft = $timeLeft > 0 ? ' (' . Gdn_Format::seconds($timeLeft) . ')' : '';
         }
 
         // Can the user edit the comment?
-        if (($CanEdit && $session->UserID == $Comment->InsertUserID) || $session->checkPermission('Articles.Comments.Edit', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
-            $Options['EditComment'] = array('Label' => t('Edit') . ' ' . $TimeLeft,
-                'Url' => '/articles/compose/editcomment/' . $Comment->ArticleCommentID, 'EditComment');
+        if (($canEdit && $session->UserID == $comment->InsertUserID) || $session->checkPermission('Articles.Comments.Edit',
+                true, 'ArticleCategory', $article->PermissionArticleCategoryID)
+        ) {
+            $options['EditComment'] = array('Label' => t('Edit') . ' ' . $timeLeft,
+                'Url' => '/articles/compose/editcomment/' . $comment->ArticleCommentID, 'EditComment');
+        }
 
         // Can the user delete the comment?
-        $SelfDeleting = ($CanEdit && $session->UserID == $Comment->InsertUserID && c('Articles.Comments.AllowSelfDelete'));
-        if ($SelfDeleting || $session->checkPermission('Articles.Comments.Delete', true, 'ArticleCategory', $Article->PermissionArticleCategoryID))
-            $Options['DeleteComment'] = array('Label' => t('Delete'),
-                'Url' => '/articles/article/deletecomment/' . $Comment->ArticleCommentID . '/' . $session->TransientKey()
-                    . '/?Target=' . urlencode('/article/' . Gdn_Format::date($Article->DateInserted, '%Y') . '/'
-                        . $Article->UrlCode), 'Class' => 'DeleteComment');
+        $selfDeleting = ($canEdit && $session->UserID == $comment->InsertUserID && c('Articles.Comments.AllowSelfDelete'));
+        if ($selfDeleting || $session->checkPermission('Articles.Comments.Delete', true, 'ArticleCategory',
+                $article->PermissionArticleCategoryID)
+        ) {
+            $options['DeleteComment'] = array('Label' => t('Delete'),
+                'Url' => '/articles/article/deletecomment/' . $comment->ArticleCommentID . '/' . $session->transientKey()
+                    . '/?Target=' . urlencode('/article/' . Gdn_Format::date($article->DateInserted, '%Y') . '/'
+                        . $article->UrlCode), 'Class' => 'DeleteComment');
+        }
 
         // Allow plugins to add options
-        $sender->EventArguments['CommentOptions'] = & $Options;
-        $sender->EventArguments['Comment'] = $Comment;
+        $sender->EventArguments['CommentOptions'] = &$options;
+        $sender->EventArguments['Comment'] = $comment;
         $sender->fireEvent('CommentOptions');
 
-        return $Options;
+        return $options;
     }
 endif;
 
-if (!function_exists('WriteCommentOptions')):
-    function WriteCommentOptions($Comment) {
-        $Options = GetCommentOptions($Comment);
+if (!function_exists('writeCommentOptions')):
+    function writeCommentOptions($comment) {
+        $options = getCommentOptions($comment);
 
-        if (count($Options) > 0) {
+        if (count($options) > 0) {
             echo '<div class="Options">';
             echo '<span class="ToggleFlyout OptionsMenu">';
             echo '<span class="OptionsTitle" title="' . t('Options') . '">' . t('Options') . '</span>';
             echo sprite('SpFlyoutHandle', 'Arrow');
             echo '<ul class="Flyout MenuItems">';
-            foreach ($Options as $Code => $Option) {
-                echo wrap(anchor($Option['Label'], $Option['Url'], val('Class', $Option, $Code)),
+            foreach ($options as $code => $option) {
+                echo wrap(anchor($option['Label'], $option['Url'], val('Class', $option, $code)),
                     'li');
             }
             echo '</ul>';

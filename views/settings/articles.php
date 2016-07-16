@@ -1,9 +1,9 @@
 <?php defined('APPLICATION') or exit(); ?>
 <h1><?php echo $this->title(); ?></h1>
 
-<?php echo $this->ConfigurationModule->ToString(); ?>
+<?php echo $this->ConfigurationModule->toString(); ?>
 
-<br />
+<br/>
 
 <h3><?php echo t('Feedback'); ?></h3>
 

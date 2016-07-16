@@ -1,13 +1,13 @@
 <?php defined('APPLICATION') or exit();
 
-$Controller = Gdn::controller();
+$controller = Gdn::controller();
 $session = Gdn::session();
 ?>
 <section id="comments">
     <?php
-    $Comments = $this->ArticleComments->result();
-    $Article = $this->Article;
-    $CurrentOffset = 0;
+    $comments = $this->ArticleComments->result();
+    $article = $this->Article;
+    $currentOffset = 0;
     $canGuestsComment = c('Articles.Comments.AllowGuests', false);
 
     if (($this->ArticleComments->numRows() > 0) || (!$session->isValid() && !$canGuestsComment)) {
@@ -22,57 +22,60 @@ $session = Gdn::session();
             $this->Pager->Wrapper = '<span %1$s>%2$s</span>';
             echo '<span class="BeforeCommentHeading">';
             $this->fireEvent('BeforeCommentHeading');
-            echo $this->Pager->ToString('less');
+            echo $this->Pager->toString('less');
             echo '</span>';
             ?>
 
             <ul class="MessageList DataList Comments">
                 <?php
-                foreach ($Comments as $Comment) {
-                    $CssClass = 'Item Alt ItemComment';
+                foreach ($comments as $comment) {
+                    $cssClass = 'Item Alt ItemComment';
 
-                    $User = false;
-                    if (is_numeric($Comment->InsertUserID))
-                        $User = Gdn::userModel()->getID($Comment->InsertUserID);
-
-                    // Get user meta for articles app.
-                    $UserMeta = Gdn::userModel()->getMeta($User->UserID, 'Articles.%', 'Articles.');
-                    $AuthorDisplayName = false;
-                    if (isset($UserMeta['AuthorDisplayName'])) {
-                        $AuthorDisplayName = $UserMeta['AuthorDisplayName'];
+                    $user = false;
+                    if (is_numeric($comment->InsertUserID)) {
+                        $user = Gdn::userModel()->getID($comment->InsertUserID);
                     }
 
-                    $ParentArticleCommentID = is_numeric($Comment->ParentArticleCommentID) ?
-                        $Comment->ParentArticleCommentID : false;
-                    if ($ParentArticleCommentID)
-                        $CssClass .= ' ItemCommentReply';
+                    // Get user meta for articles app.
+                    $userMeta = Gdn::userModel()->getMeta($user->UserID, 'Articles.%', 'Articles.');
+                    $authorDisplayName = false;
+                    if (isset($userMeta['AuthorDisplayName'])) {
+                        $authorDisplayName = $userMeta['AuthorDisplayName'];
+                    }
+
+                    $parentArticleCommentID = is_numeric($comment->ParentArticleCommentID) ?
+                        $comment->ParentArticleCommentID : false;
+                    if ($parentArticleCommentID) {
+                        $cssClass .= ' ItemCommentReply';
+                    }
                     ?>
-                    <li class="<?php echo $CssClass; ?>" id="Comment_<?php echo $Comment->ArticleCommentID; ?>">
+                    <li class="<?php echo $cssClass; ?>" id="Comment_<?php echo $comment->ArticleCommentID; ?>">
                         <div class="Comment">
-                            <?php WriteCommentOptions($Comment); ?>
+                            <?php writeCommentOptions($comment); ?>
 
                             <div class="Item-Header CommentHeader">
                                 <div class="AuthorWrap">
                                 <span class="Author">
                                     <?php
-                                    if ($User) {
-                                        echo UserPhoto($User);
-                                        echo UserAnchor($User, 'Username');
+                                    if ($user) {
+                                        echo userPhoto($user);
+                                        echo userAnchor($user, 'Username');
 
-                                        if (($AuthorDisplayName != '') && ($AuthorDisplayName != $User->Name))
-                                            echo ' (' . $AuthorDisplayName . ')';
+                                        if (($authorDisplayName != '') && ($authorDisplayName != $user->Name)) {
+                                            echo ' (' . $authorDisplayName . ')';
+                                        }
 
                                         $this->fireEvent('AuthorPhoto');
                                     } else {
-                                        echo wrap($Comment->GuestName, 'span', array('class' => 'Username GuestName'));
+                                        echo wrap($comment->GuestName, 'span', array('class' => 'Username GuestName'));
                                     }
                                     ?>
                                 </span>
-                                <span class="AuthorInfo">
+                                    <span class="AuthorInfo">
                                     <?php
-                                    echo ' ' . WrapIf(htmlspecialchars(val('Title', $User)), 'span',
+                                    echo ' ' . wrapIf(htmlspecialchars(val('Title', $user)), 'span',
                                             array('class' => 'MItem AuthorTitle'));
-                                    echo ' ' . WrapIf(htmlspecialchars(val('Location', $User)), 'span',
+                                    echo ' ' . wrapIf(htmlspecialchars(val('Location', $user)), 'span',
                                             array('class' => 'MItem AuthorLocation'));
 
                                     $this->fireEvent('AuthorInfo');
@@ -81,16 +84,18 @@ $session = Gdn::session();
                                 </div>
 
                                 <div class="Meta CommentMeta CommentInfo">
-                                <span class="MItem DateCreated"><?php echo anchor(Gdn_Format::date($Comment->DateInserted,
-                                            'html'), articleCommentUrl($Comment->ArticleCommentID), 'Permalink',
-                                        array('name' => 'Item_' . ($CurrentOffset), 'rel' => 'nofollow')); ?></span>
+                                <span
+                                    class="MItem DateCreated"><?php echo anchor(Gdn_Format::date($comment->DateInserted,
+                                        'html'), articleCommentUrl($comment->ArticleCommentID), 'Permalink',
+                                        array('name' => 'Item_' . ($currentOffset), 'rel' => 'nofollow')); ?></span>
                                     <?php
-                                    echo DateUpdated($Comment, array('<span class="MItem">', '</span>'));
+                                    echo dateUpdated($comment, array('<span class="MItem">', '</span>'));
 
                                     // Include IP Address if we have permission
-                                    if ($session->checkPermission('Garden.Moderation.Manage'))
-                                        echo wrap(IPAnchor($Comment->InsertIPAddress), 'span',
+                                    if ($session->checkPermission('Garden.Moderation.Manage')) {
+                                        echo wrap(ipAnchor($comment->InsertIPAddress), 'span',
                                             array('class' => 'MItem IPAddress'));
+                                    }
                                     ?>
                                 </div>
                             </div>
@@ -101,45 +106,46 @@ $session = Gdn::session();
                                         // DEPRECATED ARGUMENTS (as of 2.1)
                                         // $Comment->FormatBody, Object, and Type event args
                                         // added on 2014-09-12 for Emotify support.
-                                        $Comment->FormatBody = Gdn_Format::to($Comment->Body, $Comment->Format);
-                                        $Controller->EventArguments['Object'] = &$Comment;
-                                        $Controller->EventArguments['Type'] = 'ArticleComment';
+                                        $comment->FormatBody = Gdn_Format::to($comment->Body, $comment->Format);
+                                        $controller->EventArguments['Object'] = &$comment;
+                                        $controller->EventArguments['Type'] = 'ArticleComment';
 
-                                        $Controller->fireEvent('BeforeCommentBody');
-                                        echo $Comment->FormatBody;
-                                        $Controller->fireEvent('AfterCommentFormat');
+                                        $controller->fireEvent('BeforeCommentBody');
+                                        echo $comment->FormatBody;
+                                        $controller->fireEvent('AfterCommentFormat');
                                         ?>
                                     </div>
                                     <?php
                                     $this->fireEvent('AfterCommentBody');
-                                    WriteArticleReactions($Comment);
+                                    writeArticleReactions($comment);
                                     ?>
                                 </div>
                             </div>
                         </div>
                     </li>
                     <?php
-                    $CurrentOffset++;
+                    $currentOffset++;
                 } ?>
             </ul>
             <?php
             // Pager
             $this->fireEvent('AfterComments');
-            if ($this->Pager->LastPage()) {
-                $LastCommentID = $this->addDefinition('LastCommentID');
-                if (!$LastCommentID || $this->ArticleCommentModel->LastArticleCommentID > $LastCommentID)
+            if ($this->Pager->lastPage()) {
+                $lastCommentID = $this->addDefinition('LastCommentID');
+                if (!$lastCommentID || $this->ArticleCommentModel->LastArticleCommentID > $lastCommentID) {
                     $this->addDefinition('LastCommentID', (int)$this->ArticleCommentModel->LastArticleCommentID);
+                }
             }
 
             echo '<div class="P PagerWrap">';
             $this->Pager->Wrapper = '<div %1$s>%2$s</div>';
-            echo $this->Pager->ToString('more');
+            echo $this->Pager->toString('more');
             echo '</div>';
             ?>
         </div>
-    <?php
+        <?php
     endif;
 
-    ShowCommentForm();
+    showCommentForm();
     ?>
 </section>

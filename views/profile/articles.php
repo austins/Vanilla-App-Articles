@@ -9,5 +9,5 @@ if (!$this->data('Articles') || count($this->data('Articles')) == 0) {
     include($this->fetchViewLocation('index', 'articles', 'Articles'));
     echo '</section>';
 
-    echo $this->Pager->ToString('more');
+    echo $this->Pager->toString('more');
 }

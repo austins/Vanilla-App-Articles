@@ -1,26 +1,26 @@
 <?php defined('APPLICATION') or exit();
 
-$Category = $this->data('Category');
-$OtherCategories = $this->data('OtherCategories');
+$category = $this->data('Category');
+$otherCategories = $this->data('OtherCategories');
 
-echo $this->Form->Open();
-echo $this->Form->Errors();
+echo $this->Form->open();
+echo $this->Form->errors();
 
-if (is_object($OtherCategories)) {
+if (is_object($otherCategories)) {
     ?>
     <h1><?php echo $this->title(); ?></h1>
     <ul>
     <?php
-    if ($OtherCategories->numRows() == 0) {
+    if ($otherCategories->numRows() == 0) {
         ?>
         <li><p class="Warning"><?php echo t('Are you sure you want to delete this category?'); ?></p></li>
-    <?php
+        <?php
     } else {
         // Only show the delete articles checkbox if we're deleting a non-parent category.
         ?>
         <li>
             <?php
-            echo $this->Form->CheckBox('DeleteArticles', "Move articles in this category to a replacement category.",
+            echo $this->Form->checkBox('DeleteArticles', "Move articles in this category to a replacement category.",
                 array('value' => '1'));
             ?>
         </li>
@@ -30,9 +30,9 @@ if (is_object($OtherCategories)) {
         <li id="ReplacementCategory">
             <?php
             echo $this->Form->label('Replacement Category', 'ReplacementArticleCategoryID');
-            echo $this->Form->DropDown(
+            echo $this->Form->dropDown(
                 'ReplacementArticleCategoryID',
-                $OtherCategories,
+                $otherCategories,
                 array(
                     'ValueField' => 'ArticleCategoryID',
                     'TextField' => 'Name',
@@ -44,7 +44,7 @@ if (is_object($OtherCategories)) {
             <p class="Warning"><?php echo t('All articles in this category will be permanently deleted.'); ?></p>
         </li>
         </ul>
-    <?php
+        <?php
     }
-    echo $this->Form->Close('Proceed');
+    echo $this->Form->close('Proceed');
 }

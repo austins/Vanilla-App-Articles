@@ -288,7 +288,7 @@ class ArticleController extends Gdn_Controller {
                 $defaultTarget = articleUrl($article);
 
                 // Make sure comment is this user's or they have Delete permission
-                if ($comment->InsertUserID != $session->UserID || !C('Articles.Comments.AllowSelfDelete')) {
+                if ($comment->InsertUserID != $session->UserID || !c('Articles.Comments.AllowSelfDelete')) {
                     $this->permission('Articles.Comments.Delete', true, 'ArticleCategory',
                         $article->PermissionArticleCategoryID);
                 }
@@ -324,7 +324,7 @@ class ArticleController extends Gdn_Controller {
         }
 
         if ($this->Form->errorCount() > 0) {
-            $this->setJson('ErrorMessage', $this->Form->Errors());
+            $this->setJson('ErrorMessage', $this->Form->errors());
         } else {
             $this->jsonTarget("#Comment_$articleCommentID", '', 'SlideUp');
         }

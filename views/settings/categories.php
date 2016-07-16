@@ -1,6 +1,6 @@
 <?php defined('APPLICATION') or exit();
 
-$Categories = $this->data('Categories')->result();
+$categories = $this->data('Categories')->result();
 ?>
 <h1><?php echo $this->title(); ?></h1>
 
@@ -16,18 +16,18 @@ $Categories = $this->data('Categories')->result();
 <h1><?php echo t('Organize Categories'); ?></h1>
 <ol class="Sortable">
     <?php
-    foreach ($Categories as $Category) {
-        echo '<li id="Category_' . $Category->ArticleCategoryID . '">';
+    foreach ($categories as $category) {
+        echo '<li id="Category_' . $category->ArticleCategoryID . '">';
         echo '<table>
             <tr>
               <td>
-                 <strong>' . htmlspecialchars($Category->Name) . '</strong>
+                 <strong>' . htmlspecialchars($category->Name) . '</strong>
                  ' . anchor(htmlspecialchars(rawurldecode($CategoryUrl)), $CategoryUrl) . '
-                 ' . wrap($Category->Description, 'blockquote') . '
+                 ' . wrap($category->Description, 'blockquote') . '
               </td>
               <td class="Buttons">'
-            . anchor(t('Edit'), '/settings/articles/editcategory/' . $Category->ArticleCategoryID, 'SmallButton')
-            . anchor(t('Delete'), '/settings/articles/deletecategory/' . $Category->ArticleCategoryID, 'SmallButton')
+            . anchor(t('Edit'), '/settings/articles/editcategory/' . $category->ArticleCategoryID, 'SmallButton')
+            . anchor(t('Delete'), '/settings/articles/deletecategory/' . $category->ArticleCategoryID, 'SmallButton')
             . '</td>
             </tr>
          </table>';

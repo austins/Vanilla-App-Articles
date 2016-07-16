@@ -323,7 +323,7 @@ class ComposeController extends Gdn_Controller {
                 $this->fireEvent('BeforeArticlePreview');
 
                 if ($this->_DeliveryType == DELIVERY_TYPE_ALL) {
-                    $this->addAsset('Content', $this->FetchView('preview'));
+                    $this->addAsset('Content', $this->fetchView('preview'));
                 } else {
                     $this->View = 'preview';
                 }
@@ -758,7 +758,7 @@ class ComposeController extends Gdn_Controller {
 
             if ($this->Form->errorCount() > 0) {
                 // Return the form errors.
-                $this->errorMessage($this->Form->Errors());
+                $this->errorMessage($this->Form->errors());
             } else {
                 // There are no form errors.
                 if ($preview) {
@@ -771,7 +771,7 @@ class ComposeController extends Gdn_Controller {
                     $this->Preview->Body = arrayValue('Body', $formValues, '');
 
                     if ($this->_DeliveryType == DELIVERY_TYPE_ALL) {
-                        $this->addAsset('Content', $this->FetchView('preview'));
+                        $this->addAsset('Content', $this->fetchView('preview'));
                         $this->Preview->Format = getValue('Format', $formValues, c('Garden.InputFormatter'));
                     } else {
                         $this->View = 'preview';

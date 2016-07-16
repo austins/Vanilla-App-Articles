@@ -464,8 +464,8 @@ class ArticlesHooks extends Gdn_Plugin {
 
         // Deliver JSON data if necessary
         if ($sender->deliveryType() != DELIVERY_TYPE_ALL && $offset > 0) {
-            $sender->setJson('LessRow', $sender->Pager->ToString('less'));
-            $sender->setJson('MoreRow', $sender->Pager->ToString('more'));
+            $sender->setJson('LessRow', $sender->Pager->toString('less'));
+            $sender->setJson('MoreRow', $sender->Pager->toString('more'));
             $sender->View = 'articles';
         }
 
@@ -542,8 +542,8 @@ class ArticlesHooks extends Gdn_Plugin {
 
         // Deliver JSON data if necessary
         if ($sender->deliveryType() != DELIVERY_TYPE_ALL && $offset > 0) {
-            $sender->setJson('LessRow', $sender->Pager->ToString('less'));
-            $sender->setJson('MoreRow', $sender->Pager->ToString('more'));
+            $sender->setJson('LessRow', $sender->Pager->toString('less'));
+            $sender->setJson('MoreRow', $sender->Pager->toString('more'));
             $sender->View = 'comments';
         }
 

@@ -1,8 +1,8 @@
 <?php defined('APPLICATION') or exit();
 
-$Controller = Gdn::controller();
-$ControllerName = strtolower($Controller->ControllerName);
-$RequestMethod = strtolower($Controller->RequestMethod);
+$controller = Gdn::controller();
+$controllerName = strtolower($controller->ControllerName);
+$requestMethod = strtolower($controller->RequestMethod);
 ?>
 <div class="BoxButtons BoxNewArticle">
     <?php
@@ -15,11 +15,16 @@ $RequestMethod = strtolower($Controller->RequestMethod);
 
 <div class="BoxFilter BoxComposeFilter">
     <ul class="FilterMenu">
-        <li <?php if ($RequestMethod == 'index') echo 'class="Active"'; ?>>
-            <?php echo anchor(sprite('SpArticlesDashboard', 'SpMyDiscussions Sprite') . ' ' . t('Articles Dashboard'), '/compose'); ?>
+        <li <?php if ($requestMethod == 'index') {
+            echo 'class="Active"';
+        } ?>>
+            <?php echo anchor(sprite('SpArticlesDashboard', 'SpMyDiscussions Sprite') . ' ' . t('Articles Dashboard'),
+                '/compose'); ?>
         </li>
 
-        <li <?php if ($RequestMethod == 'posts') echo 'class="Active"'; ?>>
+        <li <?php if ($requestMethod == 'posts') {
+            echo 'class="Active"';
+        } ?>>
             <?php echo anchor(sprite('SpArticles', 'SpMyDrafts Sprite') . ' ' . t('Articles'), '/compose/posts'); ?>
         </li>
     </ul>

@@ -2,32 +2,33 @@
 
 echo '<h2 class="H">' . t('Article Comments') . '</h2>';
 
-$Comments = $this->data('Comments');
+$comments = $this->data('Comments');
 
-if (!$Comments || count($Comments) == 0) {
+if (!$comments || count($comments) == 0) {
     echo wrap(t("This user has not posted any article comments yet."), 'div', array('Class' => 'Empty'));
 } else {
     echo '<ul class="DataList SearchResults">';
 
-    foreach ($Comments as $Comment) {
-        $Permalink = '/article/comment/' . $Comment->ArticleCommentID . '/#Comment_' . $Comment->ArticleCommentID;
-        $User = UserBuilder($Comment, 'Insert');
+    foreach ($comments as $comment) {
+        $permalink = '/article/comment/' . $comment->ArticleCommentID . '/#Comment_' . $comment->ArticleCommentID;
+        $user = userBuilder($comment, 'Insert');
         ?>
-        <li id="<?php echo 'Comment_' . $Comment->ArticleCommentID; ?>" class="Item">
+        <li id="<?php echo 'Comment_' . $comment->ArticleCommentID; ?>" class="Item">
             <?php $this->fireEvent('BeforeItemContent'); ?>
             <div class="ItemContent">
                 <div class="Message"><?php
-                    echo SliceString(Gdn_Format::Text(Gdn_Format::to($Comment->Body, $Comment->Format), false), 250);
+                    echo sliceString(Gdn_Format::text(Gdn_Format::to($comment->Body, $comment->Format), false), 250);
                     ?></div>
                 <div class="Meta">
                     <span class="MItem"><?php echo t('Comment in', 'in') . ' '; ?>
-                        <b><?php echo anchor(Gdn_Format::Text($Comment->ArticleName), $Permalink); ?></b></span>
-                    <span class="MItem"><?php printf(t('Comment by %s'), UserAnchor($User)); ?></span>
-                    <span class="MItem"><?php echo anchor(Gdn_Format::date($Comment->DateInserted), $Permalink); ?></span>
+                        <b><?php echo anchor(Gdn_Format::text($comment->ArticleName), $permalink); ?></b></span>
+                    <span class="MItem"><?php printf(t('Comment by %s'), userAnchor($user)); ?></span>
+                    <span class="MItem"><?php echo anchor(Gdn_Format::date($comment->DateInserted),
+                            $permalink); ?></span>
                 </div>
             </div>
         </li>
-    <?php
+        <?php
     }
 
     echo '</ul>';
