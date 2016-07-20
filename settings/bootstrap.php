@@ -13,5 +13,6 @@ $Options = array('Extension' => 'articles');
 
 Gdn_Autoloader::registerMap($Map, $Context, $Path, $Options);
 
-// Include the functions.render.php file.
+// Include the function files.
+require_once(PATH_APPLICATIONS . DS . 'articles' . DS . 'library' . DS . 'functions.general.php');
 require_once(PATH_APPLICATIONS . DS . 'articles' . DS . 'library' . DS . 'functions.render.php');

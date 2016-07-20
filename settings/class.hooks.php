@@ -18,7 +18,7 @@ class ArticlesHooks extends Gdn_Plugin {
      */
     public function base_render_before($sender) {
         if ($sender->Menu) {
-            $isMobileThemeActive = Gdn::themeManager()->currentTheme() === 'mobile';
+            $isMobileThemeActive = isMobileThemeActive();
             $isArticlesDefaultController = Gdn::router()->getDestination('DefaultController') === 'articles';
 
             // Show Articles menu link.
@@ -484,7 +484,7 @@ class ArticlesHooks extends Gdn_Plugin {
         $sender->addCssFile('articles.css', 'articles');
 
         // Add CSS file for mobile theme if active.
-        if (Gdn::themeManager()->currentTheme() === 'mobile') {
+        if (isMobileThemeActive()) {
             $sender->addCssFile('articles.mobile.css', 'articles');
         }
 
