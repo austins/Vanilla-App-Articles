@@ -7,6 +7,11 @@
  */
 
 if (!function_exists('isMobileThemeActive')) {
+    /**
+     * Check if default mobile theme is active.
+     *
+     * @return bool
+     */
     function isMobileThemeActive() {
         $themeManager = Gdn::themeManager();
 

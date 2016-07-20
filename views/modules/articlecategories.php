@@ -6,7 +6,7 @@ $requestMethod = strtolower($this->_Sender->RequestMethod);
 $onArticlesController = ($controllerName === 'articlescontroller');
 $onAllCategoriesMethod = ($onArticlesController && ($requestMethod === 'categories'));
 
-$categories = $this->Data->result();
+$categories = &$this->Data;
 $currentCategoryID = val('ArticleCategoryID', $this->_Sender->data('ArticleCategory'), false);
 ?>
 <div class="Box BoxArticleCategories">
@@ -25,7 +25,7 @@ $currentCategoryID = val('ArticleCategoryID', $this->_Sender->data('ArticleCateg
             $articleWheres = array('a.Status' => ArticleModel::STATUS_PUBLISHED);
             foreach ($categories as $category) {
                 // Category must have at least one published article.
-                $articleWheres['a.ArticleCategoryID'] = $category->ArticleCategoryID;
+                $articleWheres['a.ArticleCategoryID'] = $category['ArticleCategoryID'];
                 $article = $articleModel->get($articleOffset, $articleLimit, $articleWheres)->firstRow();
                 $publishedArticleExists = isset($article->ArticleID);
 
@@ -34,9 +34,9 @@ $currentCategoryID = val('ArticleCategoryID', $this->_Sender->data('ArticleCateg
                 }
 
                 // Output category link
-                $categoryClass = ($currentCategoryID === $category->ArticleCategoryID) ? array('class' => 'Active') :
+                $categoryClass = ($currentCategoryID === $category['ArticleCategoryID']) ? array('class' => 'Active') :
                     '';
-                echo wrap(anchor($category->Name, articleCategoryUrl($category)), 'li', $categoryClass);
+                echo wrap(anchor($category['Name'], articleCategoryUrl($category)), 'li', $categoryClass);
             }
             ?>
         </ul>
@@ -47,9 +47,9 @@ $currentCategoryID = val('ArticleCategoryID', $this->_Sender->data('ArticleCateg
             <option id="ArticleCategoriesDropDown_AllCategories" value="all"<?php echo($onAllCategoriesMethod ?
                 ' selected ' : ''); ?>><?php echo t('All Categories'); ?></option>
             <?php foreach ($categories as $category): ?>
-                <option id="ArticleCategoriesDropDown_ArticleCategory_<?php echo $category->ArticleCategoryID; ?>"
-                        value="<?php echo $category->UrlCode; ?>"<?php echo(($currentCategoryID === $category->ArticleCategoryID) ?
-                    ' selected' : ''); ?>><?php echo $category->Name; ?></option>
+                <option id="ArticleCategoriesDropDown_ArticleCategory_<?php echo $category['ArticleCategoryID']; ?>"
+                        value="<?php echo $category['UrlCode']; ?>"<?php echo(($currentCategoryID === $category['ArticleCategoryID']) ?
+                    ' selected' : ''); ?>><?php echo $category['Name']; ?></option>
             <?php endforeach; ?>
         </select>
     <?php endif; ?>

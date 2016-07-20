@@ -16,13 +16,8 @@ if (!function_exists('articleUrl')) {
      * @return string
      */
     function articleUrl($article, $page = '', $withDomain = true) {
-        // If $Article type is an array, then cast it to an object.
-        if (is_array($article)) {
-            $article = (object)$article;
-        }
-
         // Set up the initial URL string.
-        $result = '/article/' . Gdn_Format::date($article->DateInserted, '%Y') . '/' . $article->UrlCode;
+        $result = '/article/' . Gdn_Format::date(val('DateInserted', $article), '%Y') . '/' . val('UrlCode', $article);
 
         // Add in the page number if necessary.
         if ($page && $page > 1) {
@@ -87,14 +82,7 @@ if (!function_exists('articleCategoryUrl')) {
      * @return string
      */
     function articleCategoryUrl($category, $page = '', $withDomain = true) {
-        // If $Category type is an array, then cast it to an object.
-        if (is_array($category)) {
-            $category = (object)$category;
-        }
-
-        // If $Category is an object, then assign $UrlCode to UrlCode property,
-        // else assume $Category is a string that is the UrlCode.
-        $urlCode = isset($category->UrlCode) ? $category->UrlCode : $category;
+        $urlCode = is_string($category) ? $category : val('UrlCode', $category);
 
         // Set up the initial URL string.
         $result = '/articles/category/' . rawurlencode($urlCode);

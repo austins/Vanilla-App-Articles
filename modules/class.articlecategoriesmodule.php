@@ -12,10 +12,15 @@
 class ArticleCategoriesModule extends Gdn_Module {
     public function __construct($sender = '') {
         // Load categories.
-        $articleCategoryModel = new ArticleCategoryModel();
+        $categories = ArticleCategoryModel::categories();
 
-        $categoriesWheres = array('ac.CountArticles >' => '0'); // Category must have at least one article.
-        $categories = $articleCategoryModel->get($categoriesWheres);
+        // Filter out the categories the current user doesn't have permission to view
+        // along with those with zero article count.
+        foreach ($categories as $i => $category) {
+            if (!$category['PermsArticlesView'] || $category['CountArticles'] === 0) {
+                unset($categories[$i]);
+            }
+        }
 
         $this->Data = $categories;
 

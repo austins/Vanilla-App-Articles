@@ -177,9 +177,17 @@ class ArticlesController extends Gdn_Controller {
 
         $this->title(t('Article Categories'));
 
-        // Get the categories.
-        $wheres = array('ac.CountArticles >' => '0'); // Category must have at least one article.
-        $categories = $this->ArticleCategoryModel->get($wheres);
+        // Load categories.
+        $categories = ArticleCategoryModel::categories();
+
+        // Filter out the categories the current user doesn't have permission to view
+        // along with those with zero article count.
+        foreach ($categories as $i => $category) {
+            if (!$category['PermsArticlesView'] || $category['CountArticles'] === 0) {
+                unset($categories[$i]);
+            }
+        }
+
         $this->setData('ArticleCategories', $categories, true);
 
         $this->render();
