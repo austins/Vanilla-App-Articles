@@ -14,8 +14,13 @@ foreach ($this->data('Articles') as $article) {
     $itemString .= wrap(Gdn_Format::text($article->InsertName), 'dc:creator');
     $itemString .= wrap($article->ArticleID . '@' . url('/articles'), 'guid', array('isPermaLink' => 'false'));
 
-    $description = ($article->Excerpt !== "" ? $article->Excerpt : $article->Body);
-    $itemString .= wrap('<![CDATA[' . Gdn_Format::plainText($description, $article->Format) . ']]>', 'description');
+    if ($article->Excerpt != '') {
+        $description = Gdn_Format::plainText($article->Excerpt, $article->Format);
+    } else {
+        $description = sliceParagraph(Gdn_Format::plainText($article->Body, $article->Format),
+            c('Articles.Excerpt.MaxLength'));
+    }
+    $itemString .= wrap('<![CDATA[' . $description . ']]>', 'description');
 
     $itemString .= wrap('<![CDATA[' . Gdn_Format::rssHtml($article->Body, $article->Format) . ']]>', 'content:encoded');
 
