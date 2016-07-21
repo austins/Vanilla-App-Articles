@@ -368,12 +368,12 @@ class ArticleController extends Gdn_Controller {
         $headModule->addTag('meta', array('property' => 'og:type', 'content' => 'article'));
 
         if ($article->Excerpt != '') {
-            $Description = Gdn_Format::plainText($article->Excerpt, $article->Format);
+            $description = Gdn_Format::plainText($article->Excerpt, $article->Format);
         } else {
-            $Description = sliceParagraph(Gdn_Format::plainText($article->Body, $article->Format),
+            $description = sliceParagraph(Gdn_Format::plainText($article->Body, $article->Format),
                 c('Articles.Excerpt.MaxLength'));
         }
-        $this->description($Description);
+        $this->description($description);
 
         $headModule->addTag('meta', array('property' => 'article:published_time',
             'content' => date(DATE_ISO8601, strtotime($article->DateInserted))));
@@ -408,7 +408,7 @@ class ArticleController extends Gdn_Controller {
         }
 
         $headModule->addTag('meta', array('name' => 'twitter:title', 'content' => $article->Name));
-        $headModule->addTag('meta', array('name' => 'twitter:description', 'content' => $Description));
+        $headModule->addTag('meta', array('name' => 'twitter:description', 'content' => $description));
 
         if ($image) {
             $headModule->addTag('meta',
