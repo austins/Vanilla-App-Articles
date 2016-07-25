@@ -293,7 +293,7 @@ class ArticlesHooks extends Gdn_Plugin {
     /**
      * @param SettingsController $sender
      */
-    public function controller_aditCategory($sender) {
+    public function controller_editCategory($sender) {
         $this->controller_addCategory($sender);
     }
 
