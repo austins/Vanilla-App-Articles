@@ -73,6 +73,10 @@ class ArticlesController extends Gdn_Controller {
             $this->title(t('Articles'));
         }
 
+        if ($this->Head) {
+            $this->Head->addRss(url('/articles/feed.rss', true), $this->Head->title());
+        }
+
         // TODO: Set title appropriately if not first page of index.
 
         // Set required permission.
@@ -143,6 +147,10 @@ class ArticlesController extends Gdn_Controller {
 
         // Set the title.
         $this->title($this->ArticleCategory->Name);
+
+        if ($this->Head) {
+            $this->Head->addRss($this->SelfUrl . '/feed.rss', $this->Head->title());
+        }
 
         // Get published articles.
         $wheres = array(
