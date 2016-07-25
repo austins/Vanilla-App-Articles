@@ -149,7 +149,7 @@ class ArticlesController extends Gdn_Controller {
         $this->title($this->ArticleCategory->Name);
 
         if ($this->Head) {
-            $this->Head->addRss($this->SelfUrl . '/feed.rss', $this->Head->title());
+            $this->Head->addRss(url('/articles/category/' . $urlCode . '/feed.rss', true), $this->Head->title());
         }
 
         // Get published articles.
