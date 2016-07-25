@@ -277,7 +277,7 @@ class ComposeController extends Gdn_Controller {
             }
 
             // Retrieve author user ID.
-            if ($formValues['AuthorUserName'] !== "") {
+            if (val('AuthorUserName', $formValues)) {
                 $author = $userModel->getByUsername($formValues['AuthorUserName']);
             }
 
@@ -289,7 +289,7 @@ class ComposeController extends Gdn_Controller {
                 $permissionArticleCategoryID = val('PermissionArticleCategoryID', $category, 'any');
                 if (!$session->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory',
                         $permissionArticleCategoryID)
-                    && ($formValues['AuthorUserName'] == "")
+                    && (!val('AuthorUserName', $formValues))
                 ) {
                     // Set author to current user if current user does not have Edit permission.
                     $author = $session->User;
