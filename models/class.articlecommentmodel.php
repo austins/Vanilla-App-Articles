@@ -166,7 +166,7 @@ class ArticleCommentModel extends Gdn_Model {
 
                 // Add the activity.
                 $articleName = $article->Name;
-                if (c('Articles.Comments.AddActivity', true)) {
+                if (c('Articles.Comments.AddActivity', false)) {
                     $this->addActivity($fields, $insert, $primaryKeyVal, $articleName);
                 }
 

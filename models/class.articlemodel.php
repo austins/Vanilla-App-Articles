@@ -314,7 +314,7 @@ class ArticleModel extends Gdn_Model {
             $fields = $this->Validation->validationFields();
 
             // Add the activity.
-            if (c('Articles.Articles.AddActivity', true)) {
+            if (c('Articles.Articles.AddActivity', false)) {
                 $this->addActivity($fields, $insert);
             }
 
