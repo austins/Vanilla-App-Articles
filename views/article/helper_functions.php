@@ -12,9 +12,7 @@ if (!function_exists('showArticleOptions')) {
         $options = array();
 
         // Can the user edit?
-        if ($session->checkPermission('Articles.Articles.Edit', true, 'ArticleCategory',
-            $article->PermissionArticleCategoryID)
-        ) {
+        if (ArticleModel::canEdit($article)) {
             $options['EditArticle'] = array(
                 'Label' => t('Edit'),
                 'Url' => '/compose/editarticle/' . $article->ArticleID);

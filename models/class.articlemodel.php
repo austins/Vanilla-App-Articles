@@ -81,7 +81,7 @@ class ArticleModel extends Gdn_Model {
             return true;
         }
 
-        // Authors can edit article even if they don't have edit permission.
+        // Author can edit article even if they don't have edit permission.
         if (Gdn::session()->UserID == val('InsertUserID', $article)) {
             return true;
         }

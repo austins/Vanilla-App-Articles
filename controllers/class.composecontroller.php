@@ -417,12 +417,14 @@ class ComposeController extends Gdn_Controller {
         }
 
         // If the article doesn't exist, then throw an exception.
-        if (!$article) {
+        if (!isset($article)) {
             throw notFoundException('Article');
         }
 
         // Set allowed permission.
-        $this->permission('Articles.Articles.Edit', true, 'ArticleCategory', $article->PermissionArticleCategoryID);
+        if (!ArticleModel::canEdit($article)) {
+            throw permissionException('Articles.Articles.Edit');
+        }
 
         $this->setData('Article', $article, true);
 
