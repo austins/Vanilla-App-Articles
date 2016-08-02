@@ -1,10 +1,10 @@
-.Article {
+article.Article {
     padding-bottom: 10px;
     border-bottom: 1px solid #DDD;
     margin-bottom: 14px;
 }
 
-.Article.ClearFix {
+article.Article.ClearFix {
     display: inline-table;
     table-layout: fixed;
     width: 100%;
@@ -16,9 +16,9 @@ body.Articles.category .ArticleBody,
     word-wrap: break-word;
 }
 
-body.Articles.index .Article,
-body.Articles.category .Article,
-#dashboard_profile_articles .Article {
+body.Articles.index article.Article,
+body.Articles.category article.Article,
+#dashboard_profile_articles article.Article {
     position: relative;
 }
 
@@ -29,7 +29,7 @@ body.Articles.category .Options,
     right: 0;
 }
 
-.Article:last-of-type {
+article.Article:last-of-type {
     border-bottom: 0;
     margin-bottom: 0;
 }
@@ -62,18 +62,18 @@ body.Articles.category .Options,
     text-align: center;
 }
 
-body.Articles.index .Article .Options > .ToggleFlyout,
-body.Articles.category .Article .Options > .ToggleFlyout,
-#dashboard_profile_articles .Article .Options > .ToggleFlyout {
+body.Articles.index article.Article .Options > .ToggleFlyout,
+body.Articles.category article.Article .Options > .ToggleFlyout,
+#dashboard_profile_articles article.Article .Options > .ToggleFlyout {
     display: none;
 }
 
-body.Articles.index .Article:hover .Options > .ToggleFlyout,
-body.Articles.index .Article .Options > .ToggleFlyout.Open,
-body.Articles.category .Article:hover .Options > .ToggleFlyout,
-body.Articles.category .Article .Options > .ToggleFlyout.Open,
-#dashboard_profile_articles .Article:hover .Options > .ToggleFlyout,
-#dashboard_profile_articles .Article .Options > .ToggleFlyout.Open {
+body.Articles.index article.Article:hover .Options > .ToggleFlyout,
+body.Articles.index article.Article .Options > .ToggleFlyout.Open,
+body.Articles.category article.Article:hover .Options > .ToggleFlyout,
+body.Articles.category article.Article .Options > .ToggleFlyout.Open,
+#dashboard_profile_articles article.Article:hover .Options > .ToggleFlyout,
+#dashboard_profile_articles article.Article .Options > .ToggleFlyout.Open {
     display: block;
 }
 
