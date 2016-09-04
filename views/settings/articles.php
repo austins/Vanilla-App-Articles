@@ -14,5 +14,5 @@
 
 <div class="Info">
     <?php echo t('Articles.Settings.DonateInfo',
-        'If you like this application and want to support the developer, click the donation button to the right. :)'); ?>
+        'If you like this application and would like to support the developer, click the donation button to the right. :)'); ?>
 </div>
