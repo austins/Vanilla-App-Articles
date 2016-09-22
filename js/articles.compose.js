@@ -101,8 +101,7 @@ jQuery(document).ready(function($) {
     $('.UploadedImageInsert').livequery('click', function(e) {
         e.preventDefault();
 
-        var linkUrl = $(this).attr('href');
-        var imageUrl = window.location.protocol + '//' + location.host + linkUrl;
+        var imageUrl = $(this).attr('href');
         var bodyFormat = $('#Form_Body').attr('Format');
 
         var imageCode = '';
