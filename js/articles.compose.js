@@ -33,7 +33,7 @@ jQuery(document).ready(function($) {
                         '<div class="UploadedImage"><img src="' + imagePath + '" alt="" /></div>' +
                         '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' + imagePath + '">Insert into Post</a>' +
                         '<br /><a class="UploadedImageDelete" href="' + gdn.url('/articles/compose/deleteimage/'
-                            + response.ArticleMediaID) + '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>');
+                            + response.ArticleMediaID) + '/?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>');
 
                 // Add new image to hidden form field to be passed to the controller.
                 var uploadedImageIDs = createCustomElement('input', {
@@ -77,7 +77,7 @@ jQuery(document).ready(function($) {
                         '<div class="UploadedImage"><img src="' + imagePath + '" alt="" /></div>' +
                         '<div class="UploadedImageActions"><a class="UploadedImageDelete" href="' + gdn.url(
                             '/articles/compose/deleteimage/'
-                            + response.ArticleMediaID) + '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>');
+                            + response.ArticleMediaID) + '/?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>');
 
                 // Add new image to hidden form field to be passed to the controller.
                 var uploadedThumbnailID = createCustomElement('input', {
@@ -136,8 +136,7 @@ jQuery(document).ready(function($) {
         deliveryType: 'BOOL',
         afterConfirm: function(json, sender) {
             var isThumbnail = ($(sender).closest('#UploadedThumbnail').length > 0);
-            var linkUrl = jQuery(sender).attr('href').split('?')[0]; // Retrieve part of URL without query string.
-            var articleMediaID = linkUrl.substring(linkUrl.lastIndexOf('/') + 1);
+            var articleMediaID = (jQuery(sender).attr('href').match("/deleteimage/(.*)/?DeliveryMethod")[1]).split('/')[0];
 
             $('#ArticleMedia_' + articleMediaID).remove();
 

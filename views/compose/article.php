@@ -70,7 +70,7 @@ echo $this->Form->errors();
                                 '<div class="UploadedImage"><img src="' . $imagePath . '" alt="" /></div>' .
                                 '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' . $imagePath . '">Insert into Post</a>' .
                                 '<br /><a class="UploadedImageDelete" href="' . url('/articles/compose/deleteimage/'
-                                    . $uploadedImage->ArticleMediaID) . '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>';
+                                    . $uploadedImage->ArticleMediaID) . '/?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>';
                         }
                     }
                 }
@@ -97,7 +97,7 @@ echo $this->Form->errors();
                             '<div class="UploadedImage"><img src="' . $imagePath . '" alt="" /></div>' .
                             '<div class="UploadedImageActions"><a class="UploadedImageInsert" href="' . $imagePath . '">Insert into Post</a>' .
                             '<br /><a class="UploadedImageDelete" href="' . url('/articles/compose/deleteimage/'
-                                . $uploadedThumbnail->ArticleMediaID) . '?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>';
+                                . $uploadedThumbnail->ArticleMediaID) . '/?DeliveryMethod=JSON&DeliveryType=BOOL">Delete</a></div></div>';
                     }
                 }
                 ?>
