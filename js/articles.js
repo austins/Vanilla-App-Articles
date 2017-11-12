@@ -262,7 +262,6 @@ jQuery(document).ready(function($) {
 
                     $(frm).trigger('PreviewLoaded', [frm]);
                     $(frm).find('.TextBoxWrapper').hide().after(json.Data);
-
                 } else {
                     // Clean up the form
                     if (processedTargets) {

@@ -692,7 +692,7 @@ class ComposeController extends Gdn_Controller {
         // Set the model on the form.
         $this->Form->setModel($this->ArticleCommentModel);
 
-        if (!$this->Form->authenticatedPostBack()) {
+        if (!$guestCommenting && !$this->Form->authenticatedPostBack()) {
             if (isset($this->Comment)) {
                 $this->Form->setData((array)$this->Comment);
             }
