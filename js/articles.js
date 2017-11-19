@@ -232,9 +232,11 @@ jQuery(document).ready(function($) {
 
                 // If there is a redirect url, go to it
                 if (json.RedirectUrl != null && jQuery.trim(json.RedirectUrl) != '') {
-                    resetCommentForm(btn);
-                    clearCommentForm(btn);
+                    /* resetCommentForm(btn);
+                    clearCommentForm(btn); */
                     window.location.replace(json.RedirectUrl);
+                    location.reload();
+
                     return false;
                 }
 
@@ -306,7 +308,9 @@ jQuery(document).ready(function($) {
                     $(document).trigger('CommentAdded');
                     $(frm).triggerHandler('complete');
                 }
+
                 gdn.inform(json);
+
                 return false;
             },
             complete: function(XMLHttpRequest, textStatus) {
