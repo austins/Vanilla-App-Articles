@@ -97,6 +97,7 @@ class ArticleCommentModel extends Gdn_Model {
         $comments = $this->SQL->get();
 
         $result =& $comments->result();
+
         $this->LastCommentCount = $comments->numRows();
         if (count($result) > 0) {
             $this->LastArticleCommentID = $result[count($result) - 1]->ArticleCommentID;

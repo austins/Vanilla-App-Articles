@@ -517,10 +517,26 @@ class ArticlesHooks extends Gdn_Plugin {
 
         $articleCommentModel = new ArticleCommentModel();
         $comments = $articleCommentModel->getByUser($sender->User->UserID, $offset, $limit)->result();
-        $countArticleComments = $offset + $articleCommentModel->LastCommentCount + 1;
-        $sender->setData('Comments', $comments);
 
         $sender->ArticleModel = new ArticleModel();
+
+        $articleCategoryModel = new ArticleCategoryModel();
+        foreach ($comments as $i => $comment) {
+            // User can view their own comments.
+            if (Gdn::session()->UserID == $sender->User->UserID)
+                break;
+
+            // Filter out the comments the current user doesn't have permission to view
+            // based on each comment's article's category.
+            $article = $sender->ArticleModel->getByID($comment->ArticleID);
+            $category = $articleCategoryModel::categories($article->ArticleCategoryID);
+            if (!$category['PermsArticlesView']) {
+                unset($comments[$i]);
+            }
+        }
+
+        $countArticleComments = $offset + $articleCommentModel->LastCommentCount + 1;
+        $sender->setData('Comments', $comments);
 
         // Build a pager
         $pagerFactory = new Gdn_PagerFactory();
