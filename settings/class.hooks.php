@@ -520,18 +520,17 @@ class ArticlesHooks extends Gdn_Plugin {
 
         $sender->ArticleModel = new ArticleModel();
 
-        $articleCategoryModel = new ArticleCategoryModel();
-        foreach ($comments as $i => $comment) {
-            // User can view their own comments.
-            if (Gdn::session()->UserID == $sender->User->UserID)
-                break;
+        // User can view their own comments, otherwise if logged in user is viewing another user's profile, filter out
+        // the comments the current user doesn't have permission to view based on each comment's article's category.
+        if (intval(Gdn::session()->UserID) !== $sender->User->UserID) {
+            $articleCategoryModel = new ArticleCategoryModel();
 
-            // Filter out the comments the current user doesn't have permission to view
-            // based on each comment's article's category.
-            $article = $sender->ArticleModel->getByID($comment->ArticleID);
-            $category = $articleCategoryModel::categories($article->ArticleCategoryID);
-            if (!$category['PermsArticlesView']) {
-                unset($comments[$i]);
+            foreach ($comments as $i => $comment) {
+                $article = $sender->ArticleModel->getByID($comment->ArticleID);
+                $category = $articleCategoryModel::categories($article->ArticleCategoryID);
+                if (!$category['PermsArticlesView']) {
+                    unset($comments[$i]);
+                }
             }
         }
 
