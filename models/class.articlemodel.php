@@ -28,9 +28,10 @@ class ArticleModel extends Gdn_Model {
     public static function canAdd($permissionArticleCategoryID = 'any', $userID = false) {
         $addPermission = 'Articles.Articles.Add';
 
+        // SystemUser doesn't have any assigned roles by default, so if UserID is SystemUserID, then return true.
         // If no UserID passed, check current session permission.
-        if (!$userID && Gdn::session()
-                ->checkPermission($addPermission, true, 'ArticleCategory', $permissionArticleCategoryID)
+        if (($userID && $userID == Gdn::userModel()->getSystemUserID())
+                || (!$userID && Gdn::session()->checkPermission($addPermission, true, 'ArticleCategory', $permissionArticleCategoryID))
         ) {
             return true;
         }
