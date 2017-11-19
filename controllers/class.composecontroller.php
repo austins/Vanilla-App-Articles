@@ -814,7 +814,7 @@ class ComposeController extends Gdn_Controller {
         $this->View = 'editcomment';
 
         $parentArticleCommentID = null;
-        if (!is_numeric($this->Comment->ParentArticleCommentID) && ($this->Comment->ParentArticleCommentID > 0)) {
+        if (is_numeric($this->Comment->ParentArticleCommentID) && ($this->Comment->ParentArticleCommentID > 0)) {
             $parentArticleCommentID = $this->Comment->ParentArticleCommentID;
         }
 
