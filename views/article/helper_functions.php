@@ -52,7 +52,7 @@ if (!function_exists('showArticleOptions')) {
             echo '<span class="ToggleFlyout OptionsMenu">';
             echo '<span class="OptionsTitle" title="' . t('Options') . '">' . t('Options') . '</span>';
             echo sprite('SpFlyoutHandle', 'Arrow');
-            echo '<ul class="Flyout MenuItems" style="display: none;">';
+            echo '<ul class="Flyout MenuItems">';
             foreach ($options as $code => $option) {
                 echo wrap(anchor($option['Label'], $option['Url'], val('Class', $option, $code)), 'li');
             }

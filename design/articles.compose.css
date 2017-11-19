@@ -1,3 +1,7 @@
+#articles_compose_posts .ItemArticle .OptionsTitle {
+    visibility: visible;
+}
+
 #articles_compose_article #content-left,
 #articles_compose_editarticle #content-left {
     max-width: none;
