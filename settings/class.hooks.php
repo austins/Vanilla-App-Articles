@@ -46,6 +46,129 @@ class ArticlesHooks extends Gdn_Plugin {
     }
 
     /**
+     * Check if an upgrade to the category-based permissions is needed.
+     * Make changes via the PermissionModel if an upgrade is needed.
+     */
+    private function upgradeToCategoryBasedPerms() {
+        $currentVersion = c('Articles.Version');
+
+        // Only make changes via the PermissionModel if an upgrade is needed
+        // if Articles is being installed new or upgraded from a version older than v1.2.0.
+        if (!$currentVersion || version_compare($currentVersion, '1.2.0', '<')) {
+            $permissionModel = Gdn::permissionModel();
+            $permissionModel->Database = Gdn::database();
+            $permissionModel->SQL = $permissionModel->Database->sql();
+
+            $permissionModel->undefine(array(
+                'Articles.Articles.Add',
+                'Articles.Articles.Close',
+                'Articles.Articles.Delete',
+                'Articles.Articles.Edit',
+                'Articles.Articles.View',
+                'Articles.Comments.Add',
+                'Articles.Comments.Delete',
+                'Articles.Comments.Edit'
+            ));
+
+            // Define some global category-based permissions.
+            $permissionModel->define(array(
+                'Articles.Articles.Add' => 0,
+                'Articles.Articles.Close' => 0,
+                'Articles.Articles.Delete' => 0,
+                'Articles.Articles.Edit' => 0,
+                'Articles.Articles.View' => 1,
+                'Articles.Comments.Add' => 1,
+                'Articles.Comments.Delete' => 0,
+                'Articles.Comments.Edit' => 0
+            ),
+                'tinyint',
+                'ArticleCategory',
+                'PermissionArticleCategoryID');
+
+            // Set default permissions for roles.
+            // Guest defaults
+            $permissionModel->save(array(
+                'Role' => 'Guest',
+                'JunctionTable' => 'ArticleCategory',
+                'JunctionColumn' => 'PermissionArticleCategoryID',
+                'JunctionID' => -1,
+                'Articles.Articles.View' => 1
+            ), true);
+
+            // Unconfirmed defaults
+            $permissionModel->save(array(
+                'Role' => 'Unconfirmed',
+                'JunctionTable' => 'ArticleCategory',
+                'JunctionColumn' => 'PermissionArticleCategoryID',
+                'JunctionID' => -1,
+                'Articles.Articles.View' => 1
+            ), true);
+
+            // Applicant defaults
+            $permissionModel->save(array(
+                'Role' => 'Applicant',
+                'JunctionTable' => 'ArticleCategory',
+                'JunctionColumn' => 'PermissionArticleCategoryID',
+                'JunctionID' => -1,
+                'Articles.Articles.View' => 1
+            ), true);
+
+            // Member defaults
+            $permissionModel->save(array(
+                'Role' => 'Member',
+                'JunctionTable' => 'ArticleCategory',
+                'JunctionColumn' => 'PermissionArticleCategoryID',
+                'JunctionID' => -1,
+                'Articles.Articles.View' => 1,
+                'Articles.Comments.Add' => 1
+            ), true);
+
+            // Moderator defaults
+            $permissionModel->save(array(
+                'Role' => 'Moderator',
+                'JunctionTable' => 'ArticleCategory',
+                'JunctionColumn' => 'PermissionArticleCategoryID',
+                'JunctionID' => -1,
+                'Articles.Articles.Add' => 1,
+                'Articles.Articles.Close' => 1,
+                'Articles.Articles.Delete' => 1,
+                'Articles.Articles.Edit' => 1,
+                'Articles.Articles.View' => 1,
+                'Articles.Comments.Add' => 1,
+                'Articles.Comments.Delete' => 1,
+                'Articles.Comments.Edit' => 1
+            ), true);
+
+            // Administrator defaults
+            $permissionModel->save(array(
+                'Role' => 'Administrator',
+                'JunctionTable' => 'ArticleCategory',
+                'JunctionColumn' => 'PermissionArticleCategoryID',
+                'JunctionID' => -1,
+                'Articles.Articles.Add' => 1,
+                'Articles.Articles.Close' => 1,
+                'Articles.Articles.Delete' => 1,
+                'Articles.Articles.Edit' => 1,
+                'Articles.Articles.View' => 1,
+                'Articles.Comments.Add' => 1,
+                'Articles.Comments.Delete' => 1,
+                'Articles.Comments.Edit' => 1
+            ), true);
+        }
+    }
+
+    private function updateVersion() {
+        // Save version number to config.
+        $ApplicationInfo = array();
+        include(PATH_APPLICATIONS . DS . 'articles' . DS . 'settings' . DS . 'about.php');
+
+        $version = arrayValue('Version', $ApplicationInfo['Articles'], false);
+        if ($version) {
+            saveToConfig(array('Articles.Version' => $version));
+        }
+    }
+
+    /**
      * Automatically executed when this application is enabled.
      */
     public function setup() {
@@ -53,13 +176,15 @@ class ArticlesHooks extends Gdn_Plugin {
         include(PATH_APPLICATIONS . DS . 'articles' . DS . 'settings' . DS . 'structure.php');
         include(PATH_APPLICATIONS . DS . 'articles' . DS . 'settings' . DS . 'stub.php');
 
-        // Save version number to config.
-        $applicationInfo = array();
-        include(PATH_APPLICATIONS . DS . 'articles' . DS . 'settings' . DS . 'about.php');
-        $version = arrayValue('Version', $applicationInfo['Articles'], false);
-        if ($version) {
-            $save = array('Articles.Version' => $version);
-            saveToConfig($save);
+        $this->upgradeToCategoryBasedPerms();
+
+        $this->updateVersion();
+    }
+
+    public function utilityController_render_before($sender) {
+        if ($sender->RequestMethod === 'structure') {
+            $this->upgradeToCategoryBasedPerms();
+            $this->updateVersion();
         }
     }
 
