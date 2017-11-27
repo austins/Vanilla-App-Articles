@@ -242,12 +242,12 @@ class ArticleCommentModel extends Gdn_Model {
      * @return Gdn_DataSet
      * @throws InvalidArgumentException on invalid article ID.
      */
-    public function getByArticleID($articleID, $offset = 0, $limit = false, $wheres = null) {
+    public function getByArticleID($articleID, $offset = 0, $limit = false, $wheres = array()) {
         if (!is_numeric($articleID)) {
             throw new InvalidArgumentException('The article ID must be a numeric value.');
         }
 
-        $wheres = array('ac.ArticleID' => $articleID);
+        $wheres['ac.ArticleID'] = $articleID;
 
         $comments = $this->get($offset, $limit, $wheres);
 
@@ -264,12 +264,12 @@ class ArticleCommentModel extends Gdn_Model {
      * @return bool
      * @throws InvalidArgumentException on invalid comment ID.
      */
-    public function getByID($articleCommentID, $offset = 0, $limit = false, $wheres = null) {
+    public function getByID($articleCommentID, $offset = 0, $limit = false, $wheres = array()) {
         if (!is_numeric($articleCommentID)) {
             throw new InvalidArgumentException('The comment ID must be a numeric value.');
         }
 
-        $wheres = array('ac.ArticleCommentID' => $articleCommentID);
+        $wheres['ac.ArticleCommentID'] = $articleCommentID;
 
         $comment = $this->get($offset, $limit, $wheres)->firstRow();
 

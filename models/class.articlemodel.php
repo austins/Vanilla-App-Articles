@@ -458,11 +458,7 @@ class ArticleModel extends Gdn_Model {
      * @param null|array $wheres
      * @return bool|object
      */
-    public function getByUser($userID, $offset = 0, $limit = false, $wheres = null) {
-        if (!$wheres) {
-            $wheres = array();
-        }
-
+    public function getByUser($userID, $offset = 0, $limit = false, $wheres = array()) {
         $wheres['InsertUserID'] = $userID;
 
         $articles = $this->get($offset, $limit, $wheres);
