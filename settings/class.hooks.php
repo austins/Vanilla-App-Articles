@@ -48,6 +48,8 @@ class ArticlesHooks extends Gdn_Plugin {
     /**
      * Check if an upgrade to the category-based permissions is needed.
      * Make changes via the PermissionModel if an upgrade is needed.
+     *
+     * @since 1.2.0
      */
     private function upgradeToCategoryBasedPerms() {
         $currentVersion = c('Articles.Version');
