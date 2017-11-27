@@ -28,7 +28,7 @@ The word "article" stands for content produced by both bloggers and journalists,
 
 ## Upgrading
 
-*If upgrading to Articles 1.2.0 from an older version, you must reconfigure your role permissions for this application since global permissions have been replaced with category-based permissions.
+*If you're upgrading to Articles 1.2.0 from an older version and have modified the role permissions related to Articles, you must reconfigure your permissions since global permissions have been replaced with category-based permissions.
 
 **Steps to upgrade:**
 1. Extract this download to your Vanilla installation's `/applications` folder. Overwrite old application files.
