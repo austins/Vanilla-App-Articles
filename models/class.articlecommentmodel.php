@@ -264,14 +264,14 @@ class ArticleCommentModel extends Gdn_Model {
      * @return bool
      * @throws InvalidArgumentException on invalid comment ID.
      */
-    public function getByID($articleCommentID, $offset = 0, $limit = false, $wheres = array()) {
+    public function getByID($articleCommentID) {
         if (!is_numeric($articleCommentID)) {
             throw new InvalidArgumentException('The comment ID must be a numeric value.');
         }
 
-        $wheres['ac.ArticleCommentID'] = $articleCommentID;
+        $wheres = array('ac.ArticleCommentID' => $articleCommentID);
 
-        $comment = $this->get($offset, $limit, $wheres)->firstRow();
+        $comment = $this->get(0, false, $wheres)->firstRow();
 
         return $comment;
     }
