@@ -258,9 +258,6 @@ class ArticleCommentModel extends Gdn_Model {
      * Get article comment by ID.
      *
      * @param $articleCommentID
-     * @param int $offset
-     * @param bool $limit
-     * @param null|array $wheres
      * @return bool
      * @throws InvalidArgumentException on invalid comment ID.
      */
@@ -294,6 +291,25 @@ class ArticleCommentModel extends Gdn_Model {
         $comments = $this->get($offset, $limit, $wheres);
 
         return $comments;
+    }
+
+    /**
+     * Get replies (comments) by parent article comment ID.
+     *
+     * @param $parentArticleCommentID
+     * @return bool
+     * @throws InvalidArgumentException on invalid comment ID.
+     */
+    public function getRepliesByID($parentArticleCommentID) {
+        if (!is_numeric($parentArticleCommentID)) {
+            throw new InvalidArgumentException('The comment ID must be a numeric value.');
+        }
+
+        $wheres = array('ac.ParentArticleCommentID' => $parentArticleCommentID);
+
+        $replies = $this->get(0, false, $wheres);
+
+        return $replies;
     }
 
     /**

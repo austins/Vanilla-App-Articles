@@ -83,6 +83,122 @@ if (!function_exists('articleTag')) {
     }
 }
 
+if (!function_exists('writeComment')) {
+    function writeComment($comment, &$currentOffset) {
+        $controller = Gdn::controller();
+        $session = Gdn::session();
+
+        $cssClass = 'Item Alt ItemComment';
+
+        $user = false;
+        if (is_numeric($comment->InsertUserID)) {
+            $user = Gdn::userModel()->getID($comment->InsertUserID);
+        }
+
+        // Get user meta for articles app.
+        $userMeta = Gdn::userModel()->getMeta($user->UserID, 'Articles.%', 'Articles.');
+        $authorDisplayName = false;
+        if (isset($userMeta['AuthorDisplayName'])) {
+            $authorDisplayName = $userMeta['AuthorDisplayName'];
+        }
+
+        $parentArticleCommentID = is_numeric($comment->ParentArticleCommentID) ? $comment->ParentArticleCommentID : false;
+        if ($parentArticleCommentID) {
+            $cssClass .= ' ItemCommentReply';
+        }
+        ?>
+        <li class="<?php echo $cssClass; ?>" id="Comment_<?php echo $comment->ArticleCommentID; ?>">
+            <div class="Comment">
+                <?php writeCommentOptions($comment); ?>
+
+                <div class="Item-Header CommentHeader">
+                    <div class="AuthorWrap">
+                                <span class="Author">
+                                    <?php
+                                    if ($user) {
+                                        echo userPhoto($user);
+                                        echo userAnchor($user, 'Username');
+
+                                        if (($authorDisplayName != '') && ($authorDisplayName != $user->Name)) {
+                                            echo ' (' . $authorDisplayName . ')';
+                                        }
+
+                                        $controller->fireEvent('AuthorPhoto');
+                                    } else {
+                                        echo wrap($comment->GuestName, 'span', array('class' => 'Username GuestName'));
+                                    }
+                                    ?>
+                                </span>
+                        <span class="AuthorInfo">
+                                    <?php
+                                    echo ' ' . wrapIf(htmlspecialchars(val('Title', $user)), 'span',
+                                            array('class' => 'MItem AuthorTitle'));
+                                    echo ' ' . wrapIf(htmlspecialchars(val('Location', $user)), 'span',
+                                            array('class' => 'MItem AuthorLocation'));
+
+                                    $controller->fireEvent('AuthorInfo');
+                                    ?>
+                                </span>
+                    </div>
+
+                    <div class="Meta CommentMeta CommentInfo">
+                                <span
+                                        class="MItem DateCreated"><?php echo anchor(Gdn_Format::date($comment->DateInserted,
+                                        'html'), articleCommentUrl($comment->ArticleCommentID), 'Permalink',
+                                        array('name' => 'Item_' . ($currentOffset), 'rel' => 'nofollow')); ?></span>
+                        <?php
+                        echo dateUpdated($comment, array('<span class="MItem">', '</span>'));
+
+                        // Include IP Address if we have permission
+                        if ($session->checkPermission('Garden.Moderation.Manage')) {
+                            echo wrap(ipAnchor($comment->InsertIPAddress), 'span',
+                                array('class' => 'MItem IPAddress'));
+                        }
+                        ?>
+                    </div>
+                </div>
+                <div class="Item-BodyWrap">
+                    <div class="Item-Body">
+                        <div class="Message">
+                            <?php
+                            // DEPRECATED ARGUMENTS (as of 2.1)
+                            // $Comment->FormatBody, Object, and Type event args
+                            // added on 2014-09-12 for Emotify support.
+                            $comment->FormatBody = Gdn_Format::to($comment->Body, $comment->Format);
+                            $controller->EventArguments['Object'] = &$comment;
+                            $controller->EventArguments['Type'] = 'ArticleComment';
+
+                            $controller->fireEvent('BeforeCommentBody');
+                            echo $comment->FormatBody;
+                            $controller->fireEvent('AfterCommentFormat');
+                            ?>
+                        </div>
+                        <?php
+                        $controller->fireEvent('AfterCommentBody');
+                        writeArticleReactions($comment);
+                        ?>
+                    </div>
+                </div>
+            </div>
+        </li>
+        <?php
+        $currentOffset++;
+
+        // Retrieve threaded comment replies and, if any, display them.
+        if (!$parentArticleCommentID) {
+            $repliesData = $controller->ArticleCommentModel->getRepliesByID($comment->ArticleCommentID);
+
+            if ($repliesData->numRows() > 0) {
+                $replies = $repliesData->result();
+
+                foreach ($replies as $reply) {
+                    writeComment($reply, $currentOffset);
+                }
+            }
+        }
+    }
+}
+
 if (!function_exists('showCommentForm')) {
     function showCommentForm() {
         $session = Gdn::session();

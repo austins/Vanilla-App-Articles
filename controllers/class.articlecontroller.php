@@ -131,7 +131,7 @@ class ArticleController extends Gdn_Controller {
         $this->canonicalUrl(articleUrl($this->Article, pageNumber($offset, $limit, 0, false)));
 
         // Get the comments.
-        $this->ArticleComments = $this->ArticleCommentModel->getByArticleID($this->Article->ArticleID, $offset, $limit);
+        $this->ArticleComments = $this->ArticleCommentModel->getByArticleID($this->Article->ArticleID, $offset, $limit, array('ac.ParentArticleCommentID' => null));
 
         // Validate slugs.
         $dateInsertedYear = Gdn_Format::date($this->Article->DateInserted, '%Y');
