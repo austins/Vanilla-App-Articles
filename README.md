@@ -14,7 +14,7 @@ Too many times have we seen posts about embedding, integrating, and unifying Van
 - File upload for article thumbnail and images.
 - Top-level categories.
 - Simple and clean presentation of articles.
-- Stability and performance is of importance, and Vanilla 2.1+ is the target for compatibility.
+- Stability and performance is of importance, and Vanilla 2.3+ is the target for compatibility.
 
 The word "article" stands for content produced by both bloggers and journalists, and is interchangeable with "blog post."
 
