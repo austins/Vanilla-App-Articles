@@ -94,7 +94,8 @@ class ArticlesHooks extends Gdn_Plugin {
                 'JunctionTable' => 'ArticleCategory',
                 'JunctionColumn' => 'PermissionArticleCategoryID',
                 'JunctionID' => -1,
-                'Articles.Articles.View' => 1
+                'Articles.Articles.View' => 1,
+                'Articles.Comments.Add' => 0
             ), true);
 
             // Unconfirmed defaults
@@ -103,7 +104,8 @@ class ArticlesHooks extends Gdn_Plugin {
                 'JunctionTable' => 'ArticleCategory',
                 'JunctionColumn' => 'PermissionArticleCategoryID',
                 'JunctionID' => -1,
-                'Articles.Articles.View' => 1
+                'Articles.Articles.View' => 1,
+                'Articles.Comments.Add' => 0
             ), true);
 
             // Applicant defaults
@@ -112,7 +114,8 @@ class ArticlesHooks extends Gdn_Plugin {
                 'JunctionTable' => 'ArticleCategory',
                 'JunctionColumn' => 'PermissionArticleCategoryID',
                 'JunctionID' => -1,
-                'Articles.Articles.View' => 1
+                'Articles.Articles.View' => 1,
+                'Articles.Comments.Add' => 0
             ), true);
 
             // Member defaults
@@ -856,64 +859,6 @@ class ArticlesHooks extends Gdn_Plugin {
 
     public function categoriesController_render_before($sender) {
         $sender->addModule('ArticlesModule');
-    }
-
-    /**
-     * Provide default permissions for roles, based on the value in their Type column.
-     *
-     * @param PermissionModel $sender Instance of permission model that fired the event
-     */
-    public function permissionModel_defaultPermissions_handler($sender) {
-        // Guest defaults
-        $guestDefaults = array('Articles.Articles.View' => 1);
-        $sender->addDefault(RoleModel::TYPE_GUEST, $guestDefaults);
-        $sender->addDefault(RoleModel::TYPE_GUEST, $guestDefaults, 'ArticleCategory', -1);
-
-        // Unconfirmed defaults
-        $unconfirmedDefaults = array('Articles.Articles.View' => 1);
-        $sender->addDefault(RoleModel::TYPE_UNCONFIRMED, $unconfirmedDefaults);
-        $sender->addDefault(RoleModel::TYPE_UNCONFIRMED, $unconfirmedDefaults, 'ArticleCategory', -1);
-
-        // Applicant defaults
-        $applicantDefaults = array('Articles.Articles.View' => 1);
-        $sender->addDefault(RoleModel::TYPE_APPLICANT, $applicantDefaults);
-        $sender->addDefault(RoleModel::TYPE_APPLICANT, $applicantDefaults, 'ArticleCategory', -1);
-
-        // Member defaults
-        $memberDefaults = array(
-            'Articles.Articles.View' => 1,
-            'Articles.Comments.Add' => 1
-        );
-        $sender->addDefault(RoleModel::TYPE_MEMBER, $memberDefaults);
-        $sender->addDefault(RoleModel::TYPE_MEMBER, $memberDefaults, 'ArticleCategory', -1);
-
-        // Moderator defaults
-        $moderatorDefaults = array(
-            'Articles.Articles.Add' => 1,
-            'Articles.Articles.Close' => 1,
-            'Articles.Articles.Delete' => 1,
-            'Articles.Articles.Edit' => 1,
-            'Articles.Articles.View' => 1,
-            'Articles.Comments.Add' => 1,
-            'Articles.Comments.Delete' => 1,
-            'Articles.Comments.Edit' => 1
-        );
-        $sender->addDefault(RoleModel::TYPE_MODERATOR, $moderatorDefaults);
-        $sender->addDefault(RoleModel::TYPE_MODERATOR, $moderatorDefaults, 'ArticleCategory', -1);
-
-        // Administrator defaults
-        $administratorDefaults = array(
-            'Articles.Articles.Add' => 1,
-            'Articles.Articles.Close' => 1,
-            'Articles.Articles.Delete' => 1,
-            'Articles.Articles.Edit' => 1,
-            'Articles.Articles.View' => 1,
-            'Articles.Comments.Add' => 1,
-            'Articles.Comments.Delete' => 1,
-            'Articles.Comments.Edit' => 1
-        );
-        $sender->addDefault(RoleModel::TYPE_ADMINISTRATOR, $administratorDefaults);
-        $sender->addDefault(RoleModel::TYPE_ADMINISTRATOR, $administratorDefaults, 'ArticleCategory', -1);
     }
 
     /**
