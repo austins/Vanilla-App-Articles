@@ -203,27 +203,27 @@ class ArticlesHooks extends Gdn_Plugin {
         $configModule->initialize(array(
             'Articles.ShowArticlesMenuLink' => array(
                 'LabelCode' => 'Show link to Articles page in main menu?',
-                'Control' => 'Checkbox'
+                'Control' => 'Toggle'
             ),
             'Articles.ShowCategoriesMenuLink' => array(
                 'LabelCode' => 'Show link to Article Categories page in main menu?',
-                'Control' => 'Checkbox'
+                'Control' => 'Toggle'
             ),
             'Articles.Articles.ShowAuthorInfo' => array(
                 'LabelCode' => 'Show author info (display name and bio) under articles?',
-                'Control' => 'Checkbox'
+                'Control' => 'Toggle'
             ),
             'Articles.Articles.ShowSimilarArticles' => array(
                 'LabelCode' => 'Show a list of articles readers may be interested in under articles?',
-                'Control' => 'Checkbox'
+                'Control' => 'Toggle'
             ),
             'Articles.Comments.EnableThreadedComments' => array(
                 'LabelCode' => 'Enable threaded (one level) comment replies?',
-                'Control' => 'Checkbox'
+                'Control' => 'Toggle'
             ),
             'Articles.Comments.AllowGuests' => array(
                 'LabelCode' => 'Allow guest commenting?',
-                'Control' => 'Checkbox'
+                'Control' => 'Toggle'
             ),
             'Articles.TwitterUsername' => array(
                 'LabelCode' => 'Enter a Twitter username associated with this website to be used for Twitter card meta tags (optional):',
@@ -231,7 +231,7 @@ class ArticlesHooks extends Gdn_Plugin {
             ),
             'Articles.Modules.ShowCategoriesAsDropDown' => array(
                 'LabelCode' => 'Show article categories in the panel in a drop-down menu instead of a list?',
-                'Control' => 'Checkbox'
+                'Control' => 'Toggle'
             )
         ));
 

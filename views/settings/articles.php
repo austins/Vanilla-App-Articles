@@ -3,16 +3,16 @@
 
 <?php echo $this->ConfigurationModule->toString(); ?>
 
-<br/>
+<section>
+    <h2><?php echo t('Feedback'); ?></h2>
 
-<h3><?php echo t('Feedback'); ?></h3>
+    <div class="padded clearfix">
+        <div class="pull-right"><a
+                    href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=72R6B2BUCMH46" target="_blank"><img
+                        src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" alt="" style="vertical-align: middle;"/></a>
+        </div>
 
-<div class="Box Aside" style="text-align: center; padding: 10px;"><a
-        href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=72R6B2BUCMH46" target="_blank"><img
-            src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" alt="" style="vertical-align: middle;"/></a>
-</div>
-
-<div class="Info">
-    <?php echo t('Articles.Settings.DonateInfo',
-        'If you like this application and would like to support the developer, click the donation button to the right. :)'); ?>
-</div>
+        <?php echo t('Articles.Settings.DonateInfo',
+            'If you like this application and would like to support the developer, click the donation button to the right. :)'); ?>
+    </div>
+</section>
