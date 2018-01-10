@@ -164,13 +164,8 @@ class ArticlesHooks extends Gdn_Plugin {
 
     private function updateVersion() {
         // Save version number to config.
-        $ApplicationInfo = array();
-        include(PATH_APPLICATIONS . DS . 'articles' . DS . 'settings' . DS . 'about.php');
-
-        $version = arrayValue('Version', $ApplicationInfo['Articles'], false);
-        if ($version) {
-            saveToConfig(array('Articles.Version' => $version));
-        }
+        $appInfo = json_decode(file_get_contents(PATH_APPLICATIONS . DS . 'articles' . DS . 'addon.json'), true);
+        saveToConfig('Articles.Version', val('version', $appInfo, 'Undefined'));
     }
 
     /**

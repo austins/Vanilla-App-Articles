@@ -1,0 +1,21 @@
+{
+  "key": "articles",
+  "name": "Articles",
+  "description": "Provides a way to create articles.",
+  "version": "1.2.1a1",
+  "url": "http://vanillaforums.org/addon/articles-application",
+  "license": "GNU GPL v2",
+  "authors": [
+    {
+      "name": "Austin S.",
+      "homepage": "https://github.com/austins"
+    }
+  ],
+  "icon": "articles.png",
+  "type": "addon",
+  "require": {
+    "vanilla": ">=2.5"
+  },
+  "setupController": "setup",
+  "settingsUrl": "/settings/articles"
+}
