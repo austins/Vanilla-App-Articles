@@ -22,7 +22,7 @@ $construct->table('ArticleCategory');
 $articleCategoryExists = $construct->tableExists();
 $construct->primaryKey('ArticleCategoryID')
     ->column('Name', 'varchar(255)')
-    ->column('UrlCode', 'varchar(255)', false, 'unique')
+    ->column('UrlCode', 'varchar(191)', false, 'unique')
     ->column('Description', 'varchar(500)', true)
     ->column('DateInserted', 'datetime')
     ->column('DateUpdated', 'datetime', true)
@@ -91,7 +91,7 @@ if ($articleExists && $attributionUserIDExists) {
 $construct->primaryKey('ArticleID')
     ->column('ArticleCategoryID', 'int', false, array('key', 'index.CategoryPages'))
     ->column('Name', 'varchar(100)', false, 'fulltext')
-    ->column('UrlCode', 'varchar(255)', false, 'unique')
+    ->column('UrlCode', 'varchar(191)', false, 'unique')
     ->column('Body', 'longtext', false, 'fulltext')
     ->column('Excerpt', 'text', true)
     ->column('Format', 'varchar(20)', true)
