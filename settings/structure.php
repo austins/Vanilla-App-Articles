@@ -124,7 +124,7 @@ $construct->primaryKey('ArticleCommentID')
     ->column('UpdateIPAddress', 'varchar(39)', true)
     ->column('GuestName', 'varchar(50)', true)
     ->column('GuestEmail', 'varchar(200)', true)
-    ->column('ParentArticleCommentID', 'int', true)
+    ->column('ParentArticleCommentID', 'int', true, 'index')
     ->set($explicit, $drop);
 
 // Add extra columns to user table for tracking articles and comments.
