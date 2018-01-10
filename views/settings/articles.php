@@ -3,7 +3,7 @@
 
 <?php echo $this->ConfigurationModule->toString(); ?>
 
-<section>
+<section class="padded">
     <h2><?php echo t('Feedback'); ?></h2>
 
     <div class="padded clearfix">
