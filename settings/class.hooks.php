@@ -835,7 +835,7 @@ class ArticlesHooks extends Gdn_Plugin {
 
         $permissionsAllowed = array('Articles.Articles.Add', 'Articles.Articles.Edit');
         if ($session->checkPermission($permissionsAllowed, false, 'ArticleCategory', 'any')) {
-            echo wrap(anchor(sprite('SpMyDiscussions') . ' ' . t('Articles Dashboard'), '/compose'), 'li');
+            $sender->EventArguments['Dropdown']->addLink(t('Articles Dashboard'), '/compose', 'articles.dashboard', '', ['after', 'dashboard.dashboard']);
         }
     }
 

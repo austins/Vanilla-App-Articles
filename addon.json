@@ -1,5 +1,6 @@
 {
   "key": "articles",
+  "keyRaw": "Articles",
   "name": "Articles",
   "description": "Provides a way to create articles.",
   "version": "1.2.1a1",

@@ -566,7 +566,7 @@ class ArticleModel extends Gdn_Model {
         );
 
         // Retrieve articles from DB in random order
-        $articles = $this->get(0, $numberOfSimilarArticles, $wheres, 'RAND()', '');
+        $articles = $this->get(0, $numberOfSimilarArticles, $wheres);
 
         // Try to retrieve articles from other categories instead if articles
         // retrieved in same category is less than the number to list
@@ -576,7 +576,11 @@ class ArticleModel extends Gdn_Model {
         if (($articles->numRows() < $numberOfSimilarArticles) && ($categoriesCount > 1)) {
             unset($wheres['ArticleCategoryID']);
 
-            $articles = $this->get(0, $numberOfSimilarArticles, $wheres, 'RAND()', '');
+            $articles = $this->get(0, $numberOfSimilarArticles, $wheres);
+        }
+
+        if ($articles->numRows() > 0) {
+            shuffle($articles->result());
         }
 
         return $articles;
