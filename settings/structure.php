@@ -23,7 +23,7 @@ $articleCategoryExists = $construct->tableExists();
 $construct->primaryKey('ArticleCategoryID')
     ->column('Name', 'varchar(255)')
     ->column('UrlCode', 'varchar(191)', false, 'unique')
-    ->column('Description', 'varchar(500)', true)
+    ->column('Description', 'text', true)
     ->column('DateInserted', 'datetime')
     ->column('DateUpdated', 'datetime', true)
     ->column('InsertUserID', 'int', false, 'key')
