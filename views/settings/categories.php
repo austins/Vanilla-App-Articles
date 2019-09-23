@@ -2,38 +2,39 @@
 
 $categories = $this->data('Categories')->result();
 ?>
-<h1><?php echo $this->title(); ?></h1>
-
-<div class="Info">
-    <?php echo t('Article categories are used to help organize articles.',
-        'Categories are used to help organize articles.'); ?>
-</div>
-
-<div class="FilterMenu">
-    <?php echo anchor(t('Add Category'), '/settings/articles/addcategory/', 'SmallButton'); ?>
-</div>
-
-<h1><?php echo t('Organize Categories'); ?></h1>
-<ol class="Sortable">
+<section class="padded">
     <?php
-    foreach ($categories as $category) {
-        $categoryUrl = articleCategoryUrl($category);
-
-        echo '<li id="Category_' . $category->ArticleCategoryID . '">';
-        echo '<table>
-            <tr>
-              <td>
-                 <strong>' . htmlspecialchars($category->Name) . '</strong>
-                 ' . anchor($categoryUrl, $categoryUrl) . '
-                 ' . wrap($category->Description, 'blockquote') . '
-              </td>
-              <td class="Buttons">'
-            . anchor(t('Edit'), '/settings/articles/editcategory/' . $category->ArticleCategoryID, 'SmallButton')
-            . anchor(t('Delete'), '/settings/articles/deletecategory/' . $category->ArticleCategoryID, 'SmallButton')
-            . '</td>
-            </tr>
-         </table>';
-        echo '</li>';
-    }
+    echo heading(
+        t('Manage Article Categories'),
+        [
+            ['text' => t('Add Category'), 'url' => 'settings/articles/addcategory'],
+        ]
+    );
     ?>
-</ol>
+
+    <h2>Organize Categories</h2>
+
+    <div class="padded clearfix">
+        <?php
+        foreach ($categories as $category) {
+            $categoryUrl = articleCategoryUrl($category);
+
+            echo '<div class="full-border"><div class="padded-bottom flex flex-wrap">';
+
+            // Info
+            echo '<div class="flex padded-top"><div>';
+            echo '<div class="label">' . anchor(htmlspecialchars($category->Name), $categoryUrl) . '</div>';
+            echo $category->Description;
+            echo '</div></div>';
+
+            // Options
+            echo '<div class="options padded-top flex">';
+            echo anchor(t('Edit'), '/settings/articles/editcategory/' . $category->ArticleCategoryID, 'btn btn-primary');
+            echo anchor(t('Delete'), '/settings/articles/deletecategory/' . $category->ArticleCategoryID, 'btn btn-secondary');
+            echo '</div>';
+
+            echo '</div></div>';
+        }
+        ?>
+    </div>
+</section>

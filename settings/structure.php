@@ -33,7 +33,7 @@ $construct->primaryKey('ArticleCategoryID')
     ->column('LastArticleID', 'int', null)
     ->column('CountArticleComments', 'int', 0)
     ->column('LastArticleCommentID', 'int', null)
-    ->column('Sort', 'int', true)
+    //->column('Sort', 'int', true)
     ->column('PermissionArticleCategoryID', 'int', '-1')// Default to root category
     ->set($explicit, $drop);
 
