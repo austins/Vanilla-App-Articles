@@ -98,7 +98,7 @@ jQuery(document).ready(function($) {
         });
     }
 
-    $('.UploadedImageInsert').livequery('click', function(e) {
+    $('.UploadedImageInsert').on('click', function(e) {
         e.preventDefault();
 
         var imageUrl = $(this).attr('href');

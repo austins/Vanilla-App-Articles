@@ -40,11 +40,11 @@ class ArticleController extends Gdn_Controller {
 
         // Add JS files.
         $this->addJsFile('jquery.js');
-        $this->addJsFile('jquery.livequery.js');
         $this->addJsFile('jquery.form.js');
         $this->addJsFile('jquery.popup.js');
         $this->addJsFile('jquery.gardenhandleajaxform.js');
         $this->addJsFile('jquery.autogrow.js');
+        $this->addJsFile('jquery.popup.js');
         $this->addJsFile('jquery-ui.js');
         $this->addJsFile('global.js');
         $this->addJsFile('articles.js');

@@ -1,6 +1,6 @@
-jQuery(document).ready(function($) {
+jQuery(document).ready(function ($) {
     // Map plain text category to url code
-    $("#Form_Name").keyup(function(event) {
+    $("#Form_Name").keyup(function (event) {
         if ($('#Form_UrlCodeIsDefined').val() == '0') {
             $('#UrlCode').show();
             var val = $(this).val().replace(/[ \/\\&.?;,<>'"]+/g, '-');
@@ -11,12 +11,12 @@ jQuery(document).ready(function($) {
     });
     // Make sure not to override any values set by the user.
     $('#UrlCode').find('span').text($('#UrlCode').find('input').val());
-    $("#Form_UrlCode").focus(function() {
+    $("#Form_UrlCode").focus(function () {
         $('#Form_UrlCodeIsDefined').val('1')
     });
     $('#UrlCode input, #UrlCode a.Save').hide();
     // Reveal input when "change" button is clicked
-    $('#UrlCode a, #UrlCode span').click(function() {
+    $('#UrlCode a, #UrlCode span').click(function () {
         $('#UrlCode').find('input,span,a').toggle();
         $('#UrlCode').find('span').text($('#UrlCode').find('input').val());
         $('#UrlCode').find('input').focus();
@@ -24,28 +24,45 @@ jQuery(document).ready(function($) {
     });
 
     // Enable multicomplete on selected inputs
-    $('.MultiComplete').livequery(function() {
-        $(this).autocomplete(
-            gdn.url('/dashboard/user/autocomplete/'),
-            {
-                minChars: 1,
-                multiple: false,
-                scrollHeight: 220,
-                selectFirst: true
+    $.fn.userTokenInput = function() {
+        $(this).each(function() {
+            /// Author tag token input.
+            var $author = $(this);
+
+            var author = $author.val();
+            if (author && author.length) {
+                author = author.split(",");
+                for (i = 0; i < author.length; i++) {
+                    author[i] = { id: i, name: author[i] };
+                }
+            } else {
+                author = [];
             }
-        );
-    });
+
+            $author.tokenInput(gdn.url('/user/tagsearch'), {
+                hintText: gdn.definition("TagHint", "Start to type..."),
+                tokenValue: 'name',
+                tokenLimit: 1,
+                searchingText: '', // search text gives flickery ux, don't like
+                searchDelay: 300,
+                minChars: 1,
+                zindex: 9999,
+                prePopulate: author,
+                animateDropdown: false
+            });
+        });
+    };
+
+    // Enable multicomplete on selected inputs
+    $('.MultiComplete').userTokenInput();
 
     // Auto size text boxes.
-    if ($.autogrow) {
-        $('textarea.TextBox').livequery(function() {
-            $(this).autogrow();
-        });
-    }
+    if ($.autogrow)
+        $('textarea.TextBox').autogrow();
 
     // Threaded comment replies.
     // Hide/reveal the comments when the comment link is clicked
-    $('a.ReplyLink').click(function(e) {
+    $('a.ReplyLink').click(function (e) {
         e.preventDefault();
 
         var commentBox = $('#CommentBox');
@@ -64,7 +81,7 @@ jQuery(document).ready(function($) {
 
     // If the #CommentBox form is not in the initial position due to threaded commenting
     // and all required fields are empty, then move the form block back to the initial position.
-    $(document).on('click', function(e) {
+    $(document).on('click', function (e) {
         if (!$('#Comments').next('div').is($('#CommentBox'))) {
             var commentBox = $('#CommentBox');
 
@@ -82,7 +99,7 @@ jQuery(document).ready(function($) {
 
     /* Comment Options */
     // Edit comment
-    $('a.EditComment').livequery('click', function() {
+    $(document).on('click', 'a.EditComment', function() {
         var btn = this;
         var container = $(btn).parents('li.ItemComment');
         $(container).addClass('Editing');
@@ -95,17 +112,17 @@ jQuery(document).ready(function($) {
                 url: $(btn).attr('href'),
                 data: 'DeliveryType=VIEW&DeliveryMethod=JSON',
                 dataType: 'json',
-                error: function(xhr) {
+                error: function (xhr) {
                     gdn.informError(xhr);
                 },
-                success: function(json) {
+                success: function (json) {
                     json = $.postParseJson(json);
 
                     $(msg).after(json.Data);
                     $(msg).hide();
                     $(document).trigger('EditCommentFormLoaded', [container]);
                 },
-                complete: function() {
+                complete: function () {
                     $(parent).find('span.TinyProgress').remove();
                     $(btn).closest('.Flyout').hide().closest('.ToggleFlyout').removeClass('Open');
                 }
@@ -121,7 +138,7 @@ jQuery(document).ready(function($) {
     });
 
     // Reveal the original message when cancelling an in-place edit.
-    $('.Comment .Cancel a').livequery('click', function() {
+    $(document).on('click', '.Comment .Cancel a, .Comment a.Cancel', function () {
         var btn = this;
         $(btn).parents('.Comment').find('div.Message').show();
         $(btn).parents('.CommentForm, .EditCommentForm').remove();
@@ -144,7 +161,7 @@ jQuery(document).ready(function($) {
         frm.find('textarea').val('');
         frm.find('input:hidden[name$=ArticleCommentID]').val('');
         frm.find('div.Errors').remove();
-        $('div.Information').fadeOut('fast', function() {
+        $('div.Information').fadeOut('fast', function () {
             $(this).remove();
         });
         $(sender).closest('form').trigger('clearCommentForm');
@@ -154,14 +171,14 @@ jQuery(document).ready(function($) {
     if ($.morepager) {
         $('.MorePager').morepager({
             pageContainerSelector: 'ul.Comments',
-            afterPageLoaded: function() {
+            afterPageLoaded: function () {
                 $(document).trigger('CommentPagingComplete');
             }
         });
     }
 
     // Hijack comment form button clicks.
-    $('.CommentButton, a.PreviewButton').livequery('click', function() {
+    $(document).on('click', '.CommentButton, a.PreviewButton', function() {
         var btn = this;
         var parent = $(btn).parents('div.CommentForm, div.EditCommentForm');
         var frm = $(parent).find('form');
@@ -218,10 +235,10 @@ jQuery(document).ready(function($) {
             url: action,
             data: postValues,
             dataType: 'json',
-            error: function(xhr) {
+            error: function (xhr) {
                 gdn.informError(xhr);
             },
-            success: function(json) {
+            success: function (json) {
                 json = $.postParseJson(json);
 
                 var processedTargets = false;
@@ -313,7 +330,7 @@ jQuery(document).ready(function($) {
 
                 return false;
             },
-            complete: function(XMLHttpRequest, textStatus) {
+            complete: function (XMLHttpRequest, textStatus) {
                 // Remove any spinners, and re-enable buttons.
                 $(':submit', frm).removeClass('InProgress');
                 $(frm).find(':submit').removeAttr("disabled");
@@ -326,7 +343,7 @@ jQuery(document).ready(function($) {
     });
 
     // Reveal the textarea and hide previews.
-    $('a.WriteButton, a.Cancel').livequery('click', function() {
+    $(document).on('click', 'a.WriteButton, a.Cancel', function() {
         if ($(this).hasClass('WriteButton')) {
             var frm = $(this).parents('.MessageForm').find('form');
             frm.trigger('WriteButtonClick', [frm]);
@@ -345,28 +362,30 @@ jQuery(document).ready(function($) {
     });
 
     // Delete comment
-    $('a.DeleteComment').popup({
-        confirm: true,
-        confirmHeading: gdn.definition('ConfirmDeleteCommentHeading', 'Delete Comment'),
-        confirmText: gdn.definition('ConfirmDeleteCommentText', 'Are you sure you want to delete this comment?'),
-        followConfirm: false,
-        deliveryType: 'BOOL', // DELIVERY_TYPE_BOOL
-        afterConfirm: function(json, sender) {
-            var row = $(sender).parents('li.ItemComment');
-            if (json.ErrorMessage) {
-                $.popup({}, json.ErrorMessage);
-            } else {
-                // Remove the affected row
-                $(row).slideUp('fast', function() {
-                    $(this).remove();
-                });
-                gdn.processTargets(json.Targets);
+    if ($.popup) {
+        $('a.DeleteComment').popup({
+            confirm: true,
+            confirmHeading: gdn.definition('ConfirmDeleteCommentHeading', 'Delete Comment'),
+            confirmText: gdn.definition('ConfirmDeleteCommentText', 'Are you sure you want to delete this comment?'),
+            followConfirm: false,
+            deliveryType: 'BOOL', // DELIVERY_TYPE_BOOL
+            afterConfirm: function (json, sender) {
+                var row = $(sender).parents('li.ItemComment');
+                if (json.ErrorMessage) {
+                    $.popup({}, json.ErrorMessage);
+                } else {
+                    // Remove the affected row
+                    $(row).slideUp('fast', function () {
+                        $(this).remove();
+                    });
+                    gdn.processTargets(json.Targets);
+                }
             }
-        }
-    });
+        });
+    }
 
     // ArticleCategoriesModule categories drop-down listing
-    $('#ArticleCategoriesDropDown').change(function() {
+    $('#ArticleCategoriesDropDown').change(function () {
         var isAllCategoriesSelected = ($(this).children(':selected')
             .attr('id') === "ArticleCategoriesDropDown_AllCategories");
         if (isAllCategoriesSelected) {

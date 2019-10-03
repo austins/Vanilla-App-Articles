@@ -30,7 +30,7 @@ $categories = $this->data('Categories')->result();
             // Options
             echo '<div class="options padded-top flex">';
             echo anchor(t('Edit'), '/settings/articles/editcategory/' . $category->ArticleCategoryID, 'btn btn-primary');
-            echo anchor(t('Delete'), '/settings/articles/deletecategory/' . $category->ArticleCategoryID, 'btn btn-secondary');
+            echo anchor(t('Delete'), '/settings/articles/deletecategory/' . $category->ArticleCategoryID, 'btn btn-secondary js-modal');
             echo '</div>';
 
             echo '</div></div>';

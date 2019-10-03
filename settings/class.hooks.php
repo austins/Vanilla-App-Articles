@@ -269,17 +269,14 @@ class ArticlesHooks extends Gdn_Plugin {
     }
 
     /**
-     * Add links for the setting pages to the dashboard sidebar.
+     * Add links to the settings of this application in the admin dashboard.
      *
-     * @param Gdn_Controller $sender
+     * @param DashboardNavModule $sender
      */
-    public function base_getAppSettingsMenuItems_handler($sender) {
-        $groupName = 'Articles';
-        $menu = &$sender->EventArguments['SideMenu'];
-
-        $menu->addItem($groupName, $groupName, false, array('class' => $groupName));
-        $menu->addLink($groupName, t('Settings'), '/settings/articles', 'Garden.Settings.Manage');
-        $menu->addLink($groupName, t('Categories'), '/settings/articles/categories', 'Garden.Settings.Manage');
+    public function dashboardNavModule_init_handler($sender) {
+        $sender->addGroup('Articles', 'articles');
+        $sender->addLinkIf('Garden.Settings.Manage', t('Settings'), '/settings/articles', 'articles.settings')
+            ->addLinkIf('Garden.Settings.Manage', t('Categories'), '/settings/articles/categories', 'articles.categories');
     }
 
     /**
@@ -296,6 +293,7 @@ class ArticlesHooks extends Gdn_Plugin {
         // Add assets.
         $sender->addJsFile('js/library/nestedSortable.1.3.4/jquery-ui-1.8.11.custom.min.js');
         $sender->addJsFile('js/library/nestedSortable.1.3.4/jquery.ui.nestedSortable.js');
+        $sender->addJsFile('articles.settings.js', 'articles');
 
         // Set up the article category model.
         $articleCategoryModel = new ArticleCategoryModel();
@@ -388,14 +386,7 @@ class ArticlesHooks extends Gdn_Plugin {
             // If there are no errors, then save the category.
             if ($sender->Form->errorCount() == 0) {
                 if ($sender->Form->save($formValues)) {
-                    if (!$category) {
-                        // Inserting.
-                        $sender->RedirectUrl = url('/settings/articles/categories/');
-                        $sender->informMessage(t('New article category added successfully.'));
-                    } else {
-                        // Editing.
-                        $sender->informMessage(t('The article category has been saved successfully.'));
-                    }
+                    $sender->RedirectUrl = url('/settings/articles/categories/');
                 }
             }
         }
@@ -467,25 +458,36 @@ class ArticlesHooks extends Gdn_Plugin {
             if (!$sender->Form->authenticatedPostBack()) {
                 $sender->Form->setFormValue('DeleteArticles', '1'); // Checked by default
             } else {
-                $replacementArticleCategoryID = $sender->Form->getValue('ReplacementArticleCategoryID');
-                $replacementCategory = $articleCategoryModel->getByID($replacementArticleCategoryID);
-                // Error if:
-                // 1. The category being deleted is the last remaining category.
-                if ($otherCategories->numRows() == 0) {
-                    $sender->Form->addError('You cannot remove the only remaining category.');
+                $newCategoryID = 0;
+                $contentAction = $sender->Form->getFormValue('ContentAction', false);
+
+                switch($contentAction) {
+                    case 'move':
+                        $newCategoryID = $sender->Form->getFormValue('ReplacementCategoryID');
+                        if (!$newCategoryID) {
+                            $sender->Form->addError('Replacement category is required.');
+                        }
+                        break;
+                    case 'delete':
+                        if (!$sender->Form->getFormValue('ConfirmDelete', false)) {
+                            $sender->Form->addError('You must confirm the deletion.');
+                        }
+                        break;
+                    default:
+                        $sender->Form->addError('Something went wrong.');
+                        break;
                 }
 
                 if ($sender->Form->errorCount() == 0) {
                     // Go ahead and delete the category.
                     try {
-                        $articleCategoryModel->delete($category,
-                            $sender->Form->getValue('ReplacementArticleCategoryID'));
+                        $articleCategoryModel->delete($category, $newCategoryID);
                     } catch (Exception $ex) {
                         $sender->Form->addError($ex);
                     }
 
                     if ($sender->Form->errorCount() == 0) {
-                        $sender->RedirectUrl = url('/settings/articles/categories/');
+                        $sender->setRedirectTo('settings/articles/categories');
                         $sender->informMessage(t('Deleting article category...'));
                     }
                 }
