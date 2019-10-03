@@ -291,8 +291,6 @@ class ArticlesHooks extends Gdn_Plugin {
         $sender->permission('Garden.Settings.Manage');
 
         // Add assets.
-        $sender->addJsFile('js/library/nestedSortable.1.3.4/jquery-ui-1.8.11.custom.min.js');
-        $sender->addJsFile('js/library/nestedSortable.1.3.4/jquery.ui.nestedSortable.js');
         $sender->addJsFile('articles.settings.js', 'articles');
 
         // Set up the article category model.
