@@ -21,7 +21,7 @@ $explicit = true;
 $construct->table('ArticleCategory');
 $articleCategoryExists = $construct->tableExists();
 $construct->primaryKey('ArticleCategoryID')
-    ->column('Name', 'varchar(255)')
+    ->column('Name', 'varchar(191)')
     ->column('UrlCode', 'varchar(191)', false, 'unique')
     ->column('Description', 'text', true)
     ->column('DateInserted', 'datetime')
@@ -123,7 +123,7 @@ $construct->primaryKey('ArticleCommentID')
     ->column('InsertIPAddress', 'ipaddress', true)
     ->column('UpdateIPAddress', 'ipaddress', true)
     ->column('GuestName', 'varchar(50)', true)
-    ->column('GuestEmail', 'varchar(200)', true)
+    ->column('GuestEmail', 'varchar(191)', true)
     ->column('ParentArticleCommentID', 'int', true, 'index')
     ->set($explicit, $drop);
 
@@ -137,8 +137,8 @@ $construct->table('User')
 $construct->table('ArticleMedia');
 $construct->primaryKey('ArticleMediaID')
     ->column('ArticleID', 'int(11)', true)
-    ->column('Name', 'varchar(255)')
-    ->column('Path', 'varchar(255)')
+    ->column('Name', 'varchar(191)')
+    ->column('Path', 'varchar(191)')
     ->column('Type', 'varchar(128)')
     ->column('Size', 'int(11)')
     ->column('ImageWidth', 'usmallint', null)
